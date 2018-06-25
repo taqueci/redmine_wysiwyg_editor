@@ -1,0 +1,31 @@
+.wysiwyg-editor-preview p {
+	padding: 0;
+}
+
+.wysiwyg-editor-tab {
+	margin: 1ex 0;
+}
+
+.wysiwyg-editor-tab ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.wysiwyg-editor-tab ul li {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.wysiwyg-editor-tab ul li a.active {
+	color: inherit;
+	text-decoration: none;
+}
+
+.mce-listbox button,
+.mce-btn button,
+.mce-close {
+	border-radius: 0;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
