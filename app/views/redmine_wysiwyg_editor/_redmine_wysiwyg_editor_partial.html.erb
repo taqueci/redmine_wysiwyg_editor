@@ -22,8 +22,6 @@
 	  %>
       <script>
 function initRedmineWysiwygEditor() {
-	var attachments = <%= raw attachments.to_json %>;
-
 	var previewButton = $('a[accesskey=r]');
 
 	if (previewButton.length == 0) return;
@@ -32,6 +30,16 @@ function initRedmineWysiwygEditor() {
 		.match(/submitPreview\("(.+?)",/)[1];
 
 	if (!previewUrl) return;
+
+	var allAttachments = function() {
+		var attachments = <%= raw attachments.to_json %>;
+
+		$('.attachments_fields input.filename').each(function() {
+			attachments.push($(this).val());
+		});
+
+		return attachments;
+	};
 
 	var rwe = new RedmineWysiwygEditor($(this), previewUrl);
 
@@ -43,17 +51,11 @@ function initRedmineWysiwygEditor() {
 		visual: '<%= l(:label_visual_editor) %>',
 		preview: '<%= l(:label_preview) %>'
 	});
-	rwe.setAttachments(<%= raw attachments.to_json %>);
+	rwe.setAttachments(allAttachments());
 	rwe.init();
 
 	$('.add_attachment').on('change', function(e) {
-		var files = attachments.slice();
-
-		$('.attachments_fields input.filename').each(function() {
-			files.push($(this).val());
-		});
-
-		rwe.setAttachments(files);
+		rwe.setAttachments(allAttachments());
 	});
 }
 

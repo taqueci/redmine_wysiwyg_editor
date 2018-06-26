@@ -123,23 +123,25 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 		});
 
 		editor.on('focus', function(e) {
-			// FIXME: It does not work.
 			self._updateImageButtonMenu();
 		});
 	};
 
 	var setup = function(editor) {
 		self._editor = editor;
-		self._imageButtonMenu = [];
 
-		self._attachment.forEach(function(file) {
-			self._appendImageButtonMenu(file);
-		});
+		var menu = self._imageButtonMenuItems();
+
+		self._imageButtonMenu = menu;
 
 		editor.addButton('insertimage', {
 			type: 'menubutton',
 			icon: 'image',
-			menu: self._imageButtonMenu
+			menu: menu,
+			onPostRender: function() {
+				self._imageButton = this;
+				this.disabled(menu.length == 0);
+			}
 		});
 	};
 
@@ -162,32 +164,44 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 	});
 }
 
-RedmineWysiwygEditor.prototype._appendImageButtonMenu = function(file) {
+RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
 	var self = this;
 
-	if (!file.match(/\.(jpeg|jpg|png|gif)$/i)) return;
+	return self._attachment.filter(function(file) {
+		return file.match(/\.(jpeg|jpg|png|gif)$/i);
+	}).map(function(file) {
+		var content = (self._format == 'textile') ?
+			'!' + file + '!' : '![](' + file + ')';
 
-	var content = (self._format == 'textile') ?
-		'!' + file + '!' : '![](' + file + ')';
-
-	self._imageButtonMenu.push({
-		text: file,
-		onclick: function() {
-			self._editor.insertContent(content);
-			self._setTextContent();
-			self._setVisualContent();
-		}
+		return {
+			text: file,
+			onclick: function() {
+				self._editor.insertContent(content);
+				self._setTextContent();
+				self._setVisualContent();
+			}
+		};
 	});
 }
 
 RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
 	var self = this;
+	var button = self._imageButton;
+
+	var menu = self._imageButtonMenuItems();
 
 	self._imageButtonMenu.length = 0;
-
-	self._attachment.forEach(function(file) {
-		self._appendImageButtonMenu(file);
+	menu.forEach(function(file) {
+		self._imageButtonMenu.push(file);
 	});
+
+	// Note this is unofficial solution.
+	if (button.menu) {
+		button.menu.remove();
+		button.menu = null;
+	}
+
+	button.disabled(menu.length == 0);
 }
 
 RedmineWysiwygEditor.prototype._setVisualContent = function() {
