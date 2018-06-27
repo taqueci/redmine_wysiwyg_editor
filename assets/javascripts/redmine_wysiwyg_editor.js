@@ -210,12 +210,23 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 	var previewData = function(textarea) {
 		var params = [$.param($("input[name^='attachments']"))];
 
+		var escapeTextile = function(data) {
+			return data.replace(/<code class="/g, '<code class="$$');
+		};
+
+		var escapeMarkdown = function(data) {
+			// FIXME: Code highlighting
+			return data.replace(/^~~~ +(.+)([\S\s]+?)~~~$/mg, '~~~$2~~~');
+		};
+
+		var escapeText = (self._format == 'textile') ?
+			escapeTextile : escapeMarkdown;
+
 		var data = {};
-		data[textarea[0].name] = textarea[0].value.replace(/\$/g, '$$$$')
+		data[textarea[0].name] =
+			escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
 			.replace(/\{\{/g, '{$${')
 			.replace(/\[\[/g, '[$$[')
-			.replace(/<code class="/g, '<code class="$$')
-			.replace(/^~~~\s+\S+$/mg, '~~~') // FIXME: Code highlighting
 			.replace(/attachment:/g, 'attachment$$:')
 			.replace(/commit:/g, 'commit$$:')
 			.replace(/source:/g, 'source$$:')
@@ -257,8 +268,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 RedmineWysiwygEditor.prototype._setTextContent = function() {
 	var self = this;
 
-	// var html = self._editor.get(self._id).getContent();
-	var html = tinymce.get(self._id).getContent();
+	var html = self._editor.getContent();
 
 	var text = (self._format == 'textile') ?
 		self._toTextTextile(html) :
