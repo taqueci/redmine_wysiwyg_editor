@@ -6,7 +6,7 @@ This plugin adds WYSIWYG editor mode to Redmine.
 
 The plugin is powered by:
 * [TinyMCE](https://www.tinymce.com/)
-* [to-tetile](https://github.com/cmroanirgo/to-textile)
+* [to-textile](https://github.com/cmroanirgo/to-textile)
 * [Turndown](https://github.com/domchristie/turndown)
 
 ## Warnings
