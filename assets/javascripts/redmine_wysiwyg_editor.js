@@ -215,8 +215,8 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 		};
 
 		var escapeMarkdown = function(data) {
-			// FIXME: Code highlighting
-			return data.replace(/^~~~ +(.+)([\S\s]+?)~~~$/mg, '~~~$2~~~');
+			return data.replace(/^~~~ *(\w+)([\S\s]+?)~~~$/mg,
+								'~~~\n$1+-*/!?$2~~~');
 		};
 
 		var escapeText = (self._format == 'textile') ?
@@ -248,7 +248,20 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 	}
 
 	var htmlContent = function(data) {
-		return data
+		var unescapeHtmlTextile = function(data) {
+			return data;
+		}
+
+		var unescapeHtmlMarkdown = function(data) {
+			return data.replace(/<pre>(\w+)\+\-\*\/\!\?([\S\s]+?)<\/pre>/g,
+								'<pre data-code="$1">$2</pre>');
+		}
+
+		var unescapeHtml = (self._format == 'textile') ?
+			unescapeHtmlTextile : unescapeHtmlMarkdown;
+
+		// FIXME: Lost if exists in PRE.
+		return unescapeHtml(data)
 			.replace(/\$(.)/g, '$1')
 			.replace(/<legend>.+<\/legend>/g, '')
 			.replace(/<a name=.+?><\/a>/g, '')
@@ -390,8 +403,11 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 
 	turndownService.addRule('pre', {
 		filter: 'pre',
-		replacement: function(content) {
-			return '~~~\n' + content + '~~~\n';
+		replacement: function(content, node) {
+			var code = node.dataset.code;
+			var s = code ? ' ' + code : '';
+
+			return '~~~' + s + '\n' + content + '~~~\n\n';
 		}
 	});
 
