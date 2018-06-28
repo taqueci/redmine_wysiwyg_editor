@@ -379,7 +379,7 @@ RedmineWysiwygEditor.prototype._toTextMarkdown = function(content) {
 	if (!self._markdown) self._markdown = self._initMarkdown();
 
 	// FIXME: How can I suppress backslash escapes?
-	return self._markdown.turndown(content).replace(/\\/g, '');
+	return self._markdown.turndown(content).replace(/\\(.)/g, '$1');
 }
 
 RedmineWysiwygEditor.prototype._initMarkdown = function() {
