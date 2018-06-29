@@ -47,13 +47,7 @@ RedmineWysiwygEditor.prototype.init = function() {
 	self._jstElements = container.find('.jstElements');
 	self._jstEditorTextArea = self._jstEditor.find('textarea');
 
-	var date = new Date();
-	self._id = 'wysiwyg-editor-' + self._jstEditorTextArea.attr('id') +
-		'-' + date.getTime();
-
-	var editorHtml = '<div class="wysiwyg-editor">' +
-		'<textarea id="' + self._id + '" class="wysiwyg-editor-textarea">' +
-		'</div>';
+	var editorHtml = '<div class="wysiwyg-editor"><div></div></div>';
 
 	self._jstEditor.after(editorHtml);
 
@@ -174,7 +168,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 	};
 
 	tinymce.init({
-		selector: '#' + self._id,
+		target: self._visualEditor.find('div')[0],
 		language: self._language,
 		height: self._jstEditorTextArea.height(),
 		branding: false,
