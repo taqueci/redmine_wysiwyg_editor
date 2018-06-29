@@ -11,6 +11,8 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
 		preview: 'Preview'
 	};
 	this._attachments = [];
+
+	this._defaultModeKey = 'redmine-wysiwyg-editor-mode';
 }
 
 RedmineWysiwygEditor.prototype.setFormat = function(format) {
@@ -42,9 +44,10 @@ RedmineWysiwygEditor.prototype.init = function() {
 
 	if (container.find('.wysiwyg-editor').length > 0) return;
 
-	var date = new Date();
-
+	self._jstElements = container.find('.jstElements');
 	self._jstEditorTextArea = self._jstEditor.find('textarea');
+
+	var date = new Date();
 	self._id = 'wysiwyg-editor-' + self._jstEditorTextArea.attr('id') +
 		'-' + date.getTime();
 
@@ -54,13 +57,12 @@ RedmineWysiwygEditor.prototype.init = function() {
 
 	self._jstEditor.after(editorHtml);
 
-	var visualEditor = container.find('.wysiwyg-editor');
-
-	visualEditor.hide();
+	self._visualEditor = container.find('.wysiwyg-editor');
+	self._visualEditor.hide();
 
 	var previewHtml = '<div class="wysiwyg-editor-preview wiki"></div>';
 
-	visualEditor.after(previewHtml);
+	self._visualEditor.after(previewHtml);
 
 	self._preview = container.find('.wysiwyg-editor-preview');
 	self._preview.hide();
@@ -76,42 +78,66 @@ RedmineWysiwygEditor.prototype.init = function() {
 
 	self._preview.after(editorTabHtml);
 
-	self._initTinymce();
-
-	var jstElements = container.find('.jstElements');
-
-	container.find('.wysiwyg-editor-tab').on('click', 'li a', function(e) {
+	self._editorTab = container.find('.wysiwyg-editor-tab');
+	self._editorTab.on('click', 'li a', function(e) {
 		e.preventDefault();
-		$(this).parent().siblings().children().removeClass('active');
-		$(this).addClass('active');
-
-		switch ($(this).data('type')) {
-		case 'text':
-			// Note text content is set by blur event.
-			jstElements.show();
-			self._jstEditor.show();
-
-			visualEditor.hide();
-			self._preview.hide();
-			break;
-		case 'visual':
-			self._setVisualContent();
-			visualEditor.show();
-
-			jstElements.hide();
-			self._jstEditor.hide();
-			self._preview.hide();
-			break;
-		case 'preview':
-			self._setPreview();
-			self._preview.show();
-
-			jstElements.hide();
-			self._jstEditor.hide();
-			visualEditor.hide();
-			break;
-		}
+		self.changeMode($(this).data('type'));
 	});
+
+	self._defaultMode =
+		(('localStorage' in window) && (window.localStorage !== null)) ? {
+			get: function() {
+				return localStorage.getItem(self._defaultModeKey) || 'text';
+			},
+			set: function(mode) {
+				localStorage.setItem(self._defaultModeKey, mode);
+			}
+		} : {
+			get: function() {return 'text'},
+			set: function() {}
+		};
+
+	self._initTinymce();
+}
+
+RedmineWysiwygEditor.prototype.changeMode = function(mode) {
+	var self = this;
+
+	self._editorTab.find('li a').each(function() {
+		if ($(this).data('type') === mode) $(this).addClass('active');
+		else $(this).removeClass('active');
+	});
+
+	switch (mode) {
+	case 'visual':
+		self._setVisualContent();
+		self._visualEditor.show();
+
+		self._jstElements.hide();
+		self._jstEditor.hide();
+		self._preview.hide();
+
+		self._defaultMode.set('visual');
+		break;
+	case 'preview':
+		self._setPreview();
+		self._preview.show();
+
+		self._jstElements.hide();
+		self._jstEditor.hide();
+		self._visualEditor.hide();
+		break;
+	default:
+		// Note text content is set by blur event.
+		self._jstElements.show();
+		self._jstEditor.show();
+
+		self._visualEditor.hide();
+		self._preview.hide();
+
+		self._defaultMode.set('text');
+		break;
+	}
 }
 
 RedmineWysiwygEditor.prototype._initTinymce = function() {
@@ -141,6 +167,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 			onPostRender: function() {
 				self._imageButton = this;
 				this.disabled(menu.length == 0);
+
+				self.changeMode(self._defaultMode.get());
 			}
 		});
 	};
