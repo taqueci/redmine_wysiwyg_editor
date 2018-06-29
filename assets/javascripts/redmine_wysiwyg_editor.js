@@ -332,7 +332,10 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				var path = src.match(/\/attachments\/download\//) ?
 					src.replace(/^.+\//, '') : src;
 
-				return '!' + path + '!';
+				var style = node.style.cssText;
+				var attr = style ? '{' + style + '}' : '';
+
+				return '!' + attr + path + '!';
 			}
 		}]
 	});
