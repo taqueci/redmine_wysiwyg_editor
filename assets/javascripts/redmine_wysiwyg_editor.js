@@ -343,9 +343,18 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return self._tableTextile(content) + "\n\n";
 			}
 		}, {
+			filter: 'code',
+			replacement: function(content, node) {
+				var klass = node.className;
+
+				return klass ?
+					'<code class="' + klass + '">\n' + content + '\n</code>' :
+					'<code>' + content + '</code>';
+			}
+		}, {
 			filter: 'pre',
 			replacement: function(content) {
-				return '<pre>' + content + '</pre>';
+				return '<pre>' + content + '</pre>\n';
 			}
 		}, {
 			filter: 'img',
