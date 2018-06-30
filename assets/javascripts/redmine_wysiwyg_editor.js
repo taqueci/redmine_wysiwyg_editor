@@ -314,16 +314,16 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	return toTextile(content, {
 		converters: [{
 			filter: function(node) {
-				return node.nodeName === 'SPAN' &&
-					node.style.textDecoration === 'underline';
+				return (node.nodeName === 'SPAN') &&
+					(node.style.textDecoration === 'underline');
 			},
 			replacement: function(content) {
 				return '+' + content + '+';
 			}
 		}, {
 			filter: function(node) {
-				return node.nodeName === 'SPAN' &&
-					node.style.textDecoration === 'line-through';
+				return (node.nodeName === 'SPAN') &&
+					(node.style.textDecoration === 'line-through');
 			},
 			replacement: function(content) {
 				return '-' + content + '-';
@@ -334,14 +334,37 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return '*' + content + '*';
 			}
 		}, {
+			filter: function(node) {
+				return (node.nodeName === 'A') &&
+					((node.href === node.textContent) ||
+					 (node.href === node.textContent + '/') ||
+					 (node.href === 'mailto:' + node.textContent));
+			},
+			replacement: function(content) {
+				return content;
+			}
+		}, {
+			filter: 'img',
+			replacement: function(content, node) {
+				var src = node.src;
+				var path = src.match(/\/attachments\/download\//) ?
+					src.replace(/^.+\//, '') : src;
+
+				var style = node.style.cssText;
+				var opt = style ? '{' + style + '}' : '';
+				var alt = node.alt ? '(' + node.alt + ')' : '';
+
+				return '!' + opt + path + alt + '!';
+			}
+		} , {
+			filter: 'abbr',
+			replacement: function(content, node) {
+				return content + '(' + node.title + ')';
+			}
+		}, {
 			filter: 'hr',
 			replacement: function(content) {
 				return '---';
-			}
-		}, {
-			filter: 'table',
-			replacement: function(content) {
-				return self._tableTextile(content) + "\n\n";
 			}
 		}, {
 			filter: 'code',
@@ -359,21 +382,9 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return '<pre>' + content + '</pre>\n';
 			}
 		}, {
-			filter: 'img',
-			replacement: function(content, node) {
-				var src = node.src;
-				var path = src.match(/\/attachments\/download\//) ?
-					src.replace(/^.+\//, '') : src;
-
-				var style = node.style.cssText;
-				var attr = style ? '{' + style + '}' : '';
-
-				return '!' + attr + path + '!';
-			}
-		} , {
-			filter: 'abbr',
-			replacement: function(content, node) {
-				return content + '(' + node.title + ')';
+			filter: 'table',
+			replacement: function(content) {
+				return self._tableTextile(content) + "\n\n";
 			}
 		}]
 	});
