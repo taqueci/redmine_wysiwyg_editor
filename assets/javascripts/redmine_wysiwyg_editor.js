@@ -350,7 +350,8 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 
 				return klass ?
 					'<code class="' + klass + '">\n' + content + '\n</code>' :
-					'@' + content + '@';
+					content.match(/\n/) ?
+					'<code>\n' + content + '\n</code>' : '@' + content + '@';
 			}
 		}, {
 			filter: 'pre',
