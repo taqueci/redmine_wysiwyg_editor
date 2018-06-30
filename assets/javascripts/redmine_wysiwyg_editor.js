@@ -42,26 +42,13 @@ RedmineWysiwygEditor.prototype.init = function() {
 
 	var container = self._jstEditor.parent();
 
-	if (container.find('.wysiwyg-editor').length > 0) return;
-
-	self._jstElements = container.find('.jstElements');
-	self._jstEditorTextArea = self._jstEditor.find('textarea');
+	if (container.find('.wysiwyg-editor').length > 0) return false;
 
 	var editorHtml = '<div class="wysiwyg-editor"><div></div></div>';
 
-	self._jstEditor.after(editorHtml);
-
-	self._visualEditor = container.find('.wysiwyg-editor');
-	self._visualEditor.hide();
-
 	var previewHtml = '<div class="wysiwyg-editor-preview wiki"></div>';
 
-	self._visualEditor.after(previewHtml);
-
-	self._preview = container.find('.wysiwyg-editor-preview');
-	self._preview.hide();
-
-	var editorTabHtml = '<div class="wysiwyg-editor-tab"><ul>' +
+	var modeTabHtml = '<div class="wysiwyg-editor-tab"><ul>' +
 		'<li><a href="#" data-type="text" class="active">' +
 		self._i18n[self._format] + '</a></li>' +
 		'<li><a href="#" data-type="visual">' +
@@ -70,10 +57,15 @@ RedmineWysiwygEditor.prototype.init = function() {
 		self._i18n.preview + '</a></li>' +
 		'</ul></div>';
 
-	self._preview.after(editorTabHtml);
+	self._jstEditor.after(editorHtml + previewHtml + modeTabHtml);
 
-	self._editorTab = container.find('.wysiwyg-editor-tab');
-	self._editorTab.on('click', 'li a', function(e) {
+	self._jstElements = container.find('.jstElements');
+	self._jstEditorTextArea = self._jstEditor.find('textarea');
+	self._visualEditor = container.find('.wysiwyg-editor').hide();
+	self._preview = container.find('.wysiwyg-editor-preview').hide();
+	self._modeTab = container.find('.wysiwyg-editor-tab');
+
+	self._modeTab.on('click', 'li a', function(e) {
 		e.preventDefault();
 		self.changeMode($(this).data('type'));
 	});
@@ -92,12 +84,16 @@ RedmineWysiwygEditor.prototype.init = function() {
 		};
 
 	self._initTinymce();
+
+	return true;
 }
 
 RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 	var self = this;
 
-	self._editorTab.find('li a').each(function() {
+	if (!self._editor) return false;
+
+	self._modeTab.find('li a').each(function() {
 		if ($(this).data('type') === mode) $(this).addClass('active');
 		else $(this).removeClass('active');
 	});
@@ -132,6 +128,8 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 		self._defaultMode.set('text');
 		break;
 	}
+
+	return true;
 }
 
 RedmineWysiwygEditor.prototype._initTinymce = function() {
@@ -140,9 +138,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var callback = function(editor) {
 		editor.on('blur', function(e) {
 			self._setTextContent();
-		});
-
-		editor.on('focus', function(e) {
+		}).on('focus', function(e) {
 			self._updateImageButtonMenu();
 		});
 	};
@@ -150,9 +146,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var setup = function(editor) {
 		self._editor = editor;
 
-		var menu = self._imageButtonMenuItems();
-
-		self._imageButtonMenu = menu;
+		var menu = self._imageButtonMenu = self._imageButtonMenuItems();
 
 		editor.addButton('insertimage', {
 			type: 'menubutton',
@@ -160,7 +154,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 			menu: menu,
 			onPostRender: function() {
 				self._imageButton = this;
-				this.disabled(menu.length == 0);
+				this.disabled(menu.length === 0);
 
 				self.changeMode(self._defaultMode.get());
 			}
@@ -192,7 +186,7 @@ RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
 	return self._attachment.filter(function(file) {
 		return file.match(/\.(jpeg|jpg|png|gif)$/i);
 	}).map(function(file) {
-		var content = (self._format == 'textile') ?
+		var content = (self._format === 'textile') ?
 			'!' + file + '!' : '![](' + file + ')';
 
 		return {
@@ -223,7 +217,7 @@ RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
 		button.menu = null;
 	}
 
-	button.disabled(menu.length == 0);
+	button.disabled(menu.length === 0);
 }
 
 RedmineWysiwygEditor.prototype._setVisualContent = function() {
@@ -241,7 +235,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 								'~~~\n$1+-*/!?$2~~~');
 		};
 
-		var escapeText = (self._format == 'textile') ?
+		var escapeText = (self._format === 'textile') ?
 			escapeTextile : escapeMarkdown;
 
 		var data = {};
@@ -281,7 +275,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 								'<pre data-code="$1">$2</pre>');
 		}
 
-		var unescapeHtml = (self._format == 'textile') ?
+		var unescapeHtml = (self._format === 'textile') ?
 			unescapeHtmlTextile : unescapeHtmlMarkdown;
 
 		// FIXME: Lost if exists in PRE.
@@ -307,7 +301,7 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 
 	var html = self._editor.getContent();
 
-	var text = (self._format == 'textile') ?
+	var text = (self._format === 'textile') ?
 		self._toTextTextile(html) :
 		self._toTextMarkdown(html);
 
@@ -320,16 +314,16 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	return toTextile(content, {
 		converters: [{
 			filter: function(node) {
-				return node.nodeName == 'SPAN' &&
-					node.style.textDecoration == 'underline';
+				return node.nodeName === 'SPAN' &&
+					node.style.textDecoration === 'underline';
 			},
 			replacement: function(content) {
 				return '+' + content + '+';
 			}
 		}, {
 			filter: function(node) {
-				return node.nodeName == 'SPAN' &&
-					node.style.textDecoration == 'line-through';
+				return node.nodeName === 'SPAN' &&
+					node.style.textDecoration === 'line-through';
 			},
 			replacement: function(content) {
 				return '-' + content + '-';
@@ -397,10 +391,10 @@ RedmineWysiwygEditor.prototype._tableTextile = function(content) {
 		for (var j = 0; j < col.length; j++) {
 			var cell = col[j];
 
-			var style = (cell.nodeName == 'TH') ? '_.'
-				: (cell.style.textAlign == 'center') ? '=.'
-				: (cell.style.textAlign == 'right')  ? '>.'
-				: (cell.style.textAlign == 'left')   ? '<.'
+			var style = (cell.nodeName === 'TH') ? '_.'
+				: (cell.style.textAlign === 'center') ? '=.'
+				: (cell.style.textAlign === 'right')  ? '>.'
+				: (cell.style.textAlign === 'left')   ? '<.'
 				: '';
 
 			val.push(style + ' ' + cell.innerText + ' ');
