@@ -396,14 +396,23 @@ RedmineWysiwygEditor.prototype._tableTextile = function(content) {
 
 		for (var j = 0; j < col.length; j++) {
 			var cell = col[j];
+			var attr = [];
 
-			var style = (cell.nodeName === 'TH') ? '_.'
-				: (cell.style.textAlign === 'center') ? '=.'
-				: (cell.style.textAlign === 'right')  ? '>.'
-				: (cell.style.textAlign === 'left')   ? '<.'
-				: '';
+			if (cell.colSpan > 1) attr.push('\\' + cell.colSpan);
+			if (cell.rowSpan > 1) attr.push('/' + cell.rowSpan);
 
-			val.push(style + ' ' + cell.innerText + ' ');
+			if (cell.nodeName === 'TH') attr.push('_');
+
+			if (cell.style.textAlign === 'center') attr.push('=');
+			if (cell.style.textAlign === 'right') attr.push('>');
+			if (cell.style.textAlign === 'left') attr.push('<');
+
+			if (cell.style.verticalAlign === 'top') attr.push('^');
+			if (cell.style.verticalAlign === 'bottom') attr.push('~');
+
+			var opt = (attr.length > 0) ? attr.join('') + '.' : '';
+
+			val.push(opt + ' ' + cell.innerText + ' ');
 		}
 
 		output.push('|' + val.join('|') + '|');
