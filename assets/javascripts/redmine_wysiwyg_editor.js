@@ -329,6 +329,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return '-' + content + '-';
 			}
 		}, {
+			filter: 'strong',
+			replacement: function(content) {
+				return '*' + content + '*';
+			}
+		}, {
 			filter: 'hr',
 			replacement: function(content) {
 				return '---';
