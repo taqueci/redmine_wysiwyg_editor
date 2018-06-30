@@ -251,14 +251,16 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 			.replace(/\[\[/g, '[$$[')
 			.replace(/attachment:/g, 'attachment$$:')
 			.replace(/commit:/g, 'commit$$:')
-			.replace(/source:/g, 'source$$:')
+			.replace(/document:/g, 'document$$:')
+			.replace(/export:/g, 'export$$:')
 			.replace(/forum:/g, 'forum$$:')
+			.replace(/message:/g, 'message$$:')
 			.replace(/news:/g, 'news$$:')
 			.replace(/project:/g, 'project$$:')
+			.replace(/sandbox:/g, 'sandbox$$:')
+			.replace(/source:/g, 'source$$:')
 			.replace(/user:/g, 'user$$:')
-			.replace(/document:/g, 'document$$:')
 			.replace(/version:/g, 'versioin$$:')
-			.replace(/export:/g, 'export$$:')
 			.replace(/#([1-9][0-9]*)/g, '#$$$1')
 			.replace(/r([1-9][0-9]*)/g, 'r$$$1')
 			.replace(/^>/mg, '$$>')
@@ -349,7 +351,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 
 				return klass ?
 					'<code class="' + klass + '">\n' + content + '\n</code>' :
-					'<code>' + content + '</code>';
+					'@' + content + '@';
 			}
 		}, {
 			filter: 'pre',
@@ -367,6 +369,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				var attr = style ? '{' + style + '}' : '';
 
 				return '!' + attr + path + '!';
+			}
+		} , {
+			filter: 'abbr',
+			replacement: function(content, node) {
+				return content + '(' + node.title + ')';
 			}
 		}]
 	});
