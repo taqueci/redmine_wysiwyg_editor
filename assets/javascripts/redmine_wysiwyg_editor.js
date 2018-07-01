@@ -395,7 +395,8 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return self._tableTextile(content) + "\n\n";
 			}
 		}]
-	});
+	}).replace(/(\d)\\\. /g, '$1. ');
+	// FIXME: Unescaping for index.js:238 of to-textile.
 }
 
 RedmineWysiwygEditor.prototype._tableTextile = function(content) {
