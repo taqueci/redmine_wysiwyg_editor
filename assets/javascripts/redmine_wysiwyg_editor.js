@@ -316,6 +316,18 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	var self = this;
 
+	var img = function(node) {
+		var src = node.src;
+		var path = src.match(/\/attachments\/download\//) ?
+			src.replace(/^.+\//, '') : src;
+
+		var style = node.style.cssText;
+		var opt = style ? '{' + style + '}' : '';
+		var alt = node.alt ? '(' + node.alt + ')' : '';
+
+		return '!' + opt + path + alt + '!';
+	}
+
 	return toTextile(content, {
 		converters: [{
 			filter: function(node) {
@@ -361,15 +373,15 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		}, {
 			filter: 'img',
 			replacement: function(content, node) {
-				var src = node.src;
-				var path = src.match(/\/attachments\/download\//) ?
-					src.replace(/^.+\//, '') : src;
-
-				var style = node.style.cssText;
-				var opt = style ? '{' + style + '}' : '';
-				var alt = node.alt ? '(' + node.alt + ')' : '';
-
-				return '!' + opt + path + alt + '!';
+				return img(node);
+			}
+		}, {
+			filter: function(node) {
+				return (node.nodeName === 'A') &&
+					(node.firstChild.nodeName === 'IMG');
+			},
+			replacement: function(content, node) {
+				return img(node.firstChild) + ':' + node.href;
 			}
 		} , {
 			filter: 'abbr',
