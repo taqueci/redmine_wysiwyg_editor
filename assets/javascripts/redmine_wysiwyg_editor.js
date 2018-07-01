@@ -227,7 +227,12 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 		var params = [$.param($("input[name^='attachments']"))];
 
 		var escapeTextile = function(data) {
-			return data.replace(/<code class="/g, '<code class="$$');
+			return data
+				.replace(/<pre>\s*<code\s+class="(\w+)">([\S\s]+?)<\/code>\s*<\/pre>/g,
+						 '<$$pre data-code="$1">$2</$$pre>')
+				.replace(/<notextile>/g,
+						 '<$$span data-type="notextile"><notextile>')
+				.replace(/<\/notextile>/g, '</notextile></$$span>');
 		};
 
 		var escapeMarkdown = function(data) {
@@ -315,6 +320,14 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		converters: [{
 			filter: function(node) {
 				return (node.nodeName === 'SPAN') &&
+					(node.dataset.type === 'notextile');
+			},
+			replacement: function(content) {
+				return '<notextile>' + content + '</notextile>';
+			}
+		}, {
+			filter: function(node) {
+				return (node.nodeName === 'SPAN') &&
 					(node.style.textDecoration === 'underline');
 			},
 			replacement: function(content) {
@@ -335,10 +348,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			}
 		}, {
 			filter: function(node) {
+				var c = node.textContent;
+
 				return (node.nodeName === 'A') &&
-					((node.href === node.textContent) ||
-					 (node.href === node.textContent + '/') ||
-					 (node.href === 'mailto:' + node.textContent));
+					((node.href === 'mailto:' + c) ||
+					 (node.href.match(/^(http|https|ftp|ftps):/) &&
+					  ((node.href === c) || (node.href === c + '/'))));
 			},
 			replacement: function(content) {
 				return content;
@@ -367,19 +382,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return '---';
 			}
 		}, {
-			filter: 'code',
-			replacement: function(content, node) {
-				var klass = node.className;
-
-				return klass ?
-					'<code class="' + klass + '">\n' + content + '\n</code>' :
-					content.match(/\n/) ?
-					'<code>\n' + content + '\n</code>' : '@' + content + '@';
-			}
-		}, {
 			filter: 'pre',
-			replacement: function(content) {
-				return '<pre>' + content + '</pre>\n';
+			replacement: function(content, node) {
+				return node.dataset.code ?
+					'<pre><code class="' + node.dataset.code + '">\n' +
+					content.trim() + '\n</code></pre>\n' :
+					'<pre>' + content + '</pre>\n';
 			}
 		}, {
 			filter: 'table',
