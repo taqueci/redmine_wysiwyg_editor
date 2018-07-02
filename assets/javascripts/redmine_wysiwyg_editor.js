@@ -346,97 +346,98 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		return (attr.length > 0) ? attr.join('') + '.' : '';
 	}
 
-	return toTextile(content, {
-		converters: [{
-			filter: function(node) {
-				return (node.nodeName === 'SPAN') &&
-					(node.dataset.type === 'notextile');
-			},
-			replacement: function(content) {
-				return '<notextile>' + content + '</notextile>';
-			}
-		}, {
-			filter: function(node) {
-				return (node.nodeName === 'SPAN') &&
-					(node.style.textDecoration === 'underline');
-			},
-			replacement: function(content) {
-				return '+' + content + '+';
-			}
-		}, {
-			filter: function(node) {
-				return (node.nodeName === 'SPAN') &&
-					(node.style.textDecoration === 'line-through');
-			},
-			replacement: function(content) {
-				return '-' + content + '-';
-			}
-		}, {
-			filter: 'strong',
-			replacement: function(content) {
-				return '*' + content + '*';
-			}
-		}, {
-			filter: function(node) {
-				var c = node.textContent;
+	var converters = [{
+		filter: function(node) {
+			return (node.nodeName === 'SPAN') &&
+				(node.dataset.type === 'notextile');
+		},
+		replacement: function(content) {
+			return '<notextile>' + content + '</notextile>';
+		}
+	}, {
+		filter: function(node) {
+			return (node.nodeName === 'SPAN') &&
+				(node.style.textDecoration === 'underline');
+		},
+		replacement: function(content) {
+			return '+' + content + '+';
+		}
+	}, {
+		filter: function(node) {
+			return (node.nodeName === 'SPAN') &&
+				(node.style.textDecoration === 'line-through');
+		},
+		replacement: function(content) {
+			return '-' + content + '-';
+		}
+	}, {
+		filter: 'strong',
+		replacement: function(content) {
+			return '*' + content + '*';
+		}
+	}, {
+		filter: function(node) {
+			var c = node.textContent;
 
-				return (node.nodeName === 'A') &&
-					((node.href === 'mailto:' + c) ||
-					 (node.href.match(/^(http|https|ftp|ftps):/) &&
-					  ((node.href === c) || (node.href === c + '/'))));
-			},
-			replacement: function(content) {
-				return content;
-			}
-		}, {
-			filter: 'img',
-			replacement: function(content, node) {
-				return img(node);
-			}
-		}, {
-			filter: function(node) {
-				return (node.nodeName === 'A') &&
-					(node.firstChild.nodeName === 'IMG');
-			},
-			replacement: function(content, node) {
-				return img(node.firstChild) + ':' + node.href;
-			}
-		} , {
-			filter: 'abbr',
-			replacement: function(content, node) {
-				return content + '(' + node.title + ')';
-			}
-		}, {
-			filter: 'hr',
-			replacement: function(content) {
-				return '---';
-			}
-		}, {
-			filter: 'pre',
-			replacement: function(content, node) {
-				return node.dataset.code ?
-					'<pre><code class="' + node.dataset.code + '">\n' +
-					content.trim() + '\n</code></pre>\n' :
-					'<pre>' + content + '</pre>\n';
-			}
-		}, {
-			filter: ['table', 'tbody'],
-			replacement: function(content) {
-				return content;
-			}
-		}, {
-			filter: 'tr',
-			replacement: function(content) {
-				return '|' + content + '\n';
-			}
-		}, {
-			filter: ['th', 'td'],
-			replacement: function(content, node) {
-				return tableCellOption(node) + ' ' + content + ' |';
-			}
-		}]
-	}).replace(/(\d)\\\. /g, '$1. ');
-	// FIXME: Unescaping for index.js:238 of to-textile.
+			return (node.nodeName === 'A') &&
+				((node.href === 'mailto:' + c) ||
+				 (node.href.match(/^(http|https|ftp|ftps):/) &&
+				  ((node.href === c) || (node.href === c + '/'))));
+		},
+		replacement: function(content) {
+			return content;
+		}
+	}, {
+		filter: 'img',
+		replacement: function(content, node) {
+			return img(node);
+		}
+	}, {
+		filter: function(node) {
+			return (node.nodeName === 'A') &&
+				(node.firstChild.nodeName === 'IMG');
+		},
+		replacement: function(content, node) {
+			return img(node.firstChild) + ':' + node.href;
+		}
+	} , {
+		filter: 'abbr',
+		replacement: function(content, node) {
+			return content + '(' + node.title + ')';
+		}
+	}, {
+		filter: 'hr',
+		replacement: function(content) {
+			return '---';
+		}
+	}, {
+		filter: 'pre',
+		replacement: function(content, node) {
+			return node.dataset.code ?
+				'<pre><code class="' + node.dataset.code + '">\n' +
+				content.trim() + '\n</code></pre>\n' :
+				'<pre>' + content + '</pre>\n';
+		}
+	}, {
+		filter: ['table', 'tbody'],
+		replacement: function(content) {
+			return content;
+		}
+	}, {
+		filter: 'tr',
+		replacement: function(content) {
+			return '|' + content + '\n';
+		}
+	}, {
+		filter: ['th', 'td'],
+		replacement: function(content, node) {
+			return tableCellOption(node) + ' ' + content + ' |';
+		}
+	}];
+
+	// FIXME: Unescaping due to index.js:238 of to-textile.
+	return toTextile(content, { converters: converters })
+		.replace(/(\d)\\\. /g, '$1. ');
 }
 
 RedmineWysiwygEditor.prototype._toTextMarkdown = function(content) {
@@ -458,16 +459,12 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 		replacement: function(content) {
 			return '~~' + content + '~~';
 		}
-	});
-
-	turndownService.addRule('table', {
+	}).addRule('table', {
 		filter: 'table',
 		replacement: function(content) {
 			return content;
 		}
-	});
-
-	turndownService.addRule('pre', {
+	}).addRule('pre', {
 		filter: 'pre',
 		replacement: function(content, node) {
 			var code = node.dataset.code;
@@ -475,9 +472,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 
 			return '~~~' + s + '\n' + content + '~~~\n\n';
 		}
-	});
-
-	turndownService.addRule('img', {
+	}).addRule('img', {
 		filter: 'img',
 		replacement: function(content, node) {
 			var src = node.src;
