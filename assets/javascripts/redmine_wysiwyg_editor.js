@@ -227,6 +227,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 		var params = [$.param($("input[name^='attachments']"))];
 
 		var escapeTextile = function(data) {
+			// FIXME: Could not unescape NOTEXTILE in PRE.
 			return data
 				.replace(/<pre>\s*<code\s+class="(\w+)">([\S\s]+?)<\/code>\s*<\/pre>/g,
 						 '<$$pre data-code="$1">$2</$$pre>')
@@ -337,11 +338,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (node.nodeName === 'TH') attr.push('_');
 
 		if (node.style.textAlign === 'center') attr.push('=');
-		if (node.style.textAlign === 'right') attr.push('>');
-		if (node.style.textAlign === 'left') attr.push('<');
+		else if (node.style.textAlign === 'right') attr.push('>');
+		else if (node.style.textAlign === 'left') attr.push('<');
 
 		if (node.style.verticalAlign === 'top') attr.push('^');
-		if (node.style.verticalAlign === 'bottom') attr.push('~');
+		else if (node.style.verticalAlign === 'bottom') attr.push('~');
 
 		return (attr.length > 0) ? attr.join('') + '.' : '';
 	}
@@ -416,7 +417,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			return node.dataset.code ?
 				'<pre><code class="' + node.dataset.code + '">\n' +
 				content.trim() + '\n</code></pre>\n' :
-				'<pre>' + content + '</pre>\n';
+				'<pre>' + content.trim() + '</pre>\n';
 		}
 	}, {
 		filter: ['table', 'tbody'],
