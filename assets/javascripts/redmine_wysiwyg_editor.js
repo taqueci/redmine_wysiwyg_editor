@@ -328,6 +328,24 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		return '!' + opt + path + alt + '!';
 	}
 
+	var tableCellOption = function(node) {
+		var attr = [];
+
+		if (node.colSpan > 1) attr.push('\\' + node.colSpan);
+		if (node.rowSpan > 1) attr.push('/' + node.rowSpan);
+
+		if (node.nodeName === 'TH') attr.push('_');
+
+		if (node.style.textAlign === 'center') attr.push('=');
+		if (node.style.textAlign === 'right') attr.push('>');
+		if (node.style.textAlign === 'left') attr.push('<');
+
+		if (node.style.verticalAlign === 'top') attr.push('^');
+		if (node.style.verticalAlign === 'bottom') attr.push('~');
+
+		return (attr.length > 0) ? attr.join('') + '.' : '';
+	}
+
 	return toTextile(content, {
 		converters: [{
 			filter: function(node) {
@@ -402,57 +420,23 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 					'<pre>' + content + '</pre>\n';
 			}
 		}, {
-			filter: 'table',
+			filter: ['table', 'tbody'],
 			replacement: function(content) {
-				return self._tableTextile(content) + "\n\n";
+				return content;
+			}
+		}, {
+			filter: 'tr',
+			replacement: function(content) {
+				return '|' + content + '\n';
+			}
+		}, {
+			filter: ['th', 'td'],
+			replacement: function(content, node) {
+				return tableCellOption(node) + ' ' + content + ' |';
 			}
 		}]
 	}).replace(/(\d)\\\. /g, '$1. ');
 	// FIXME: Unescaping for index.js:238 of to-textile.
-}
-
-RedmineWysiwygEditor.prototype._tableTextile = function(content) {
-	var output = [];
-
-	var table = document.createElement('table');
-	table.style.display = 'none';
-	table.innerHTML = content.replace(/[\r\n\t]/g, '');
-
-	document.body.appendChild(table);
-
-	var row = table.getElementsByTagName('tr');
-
-	for (var i = 0; i < row.length; i++) {
-		var val = [];
-		var col = row[i].children;
-
-		for (var j = 0; j < col.length; j++) {
-			var cell = col[j];
-			var attr = [];
-
-			if (cell.colSpan > 1) attr.push('\\' + cell.colSpan);
-			if (cell.rowSpan > 1) attr.push('/' + cell.rowSpan);
-
-			if (cell.nodeName === 'TH') attr.push('_');
-
-			if (cell.style.textAlign === 'center') attr.push('=');
-			if (cell.style.textAlign === 'right') attr.push('>');
-			if (cell.style.textAlign === 'left') attr.push('<');
-
-			if (cell.style.verticalAlign === 'top') attr.push('^');
-			if (cell.style.verticalAlign === 'bottom') attr.push('~');
-
-			var opt = (attr.length > 0) ? attr.join('') + '.' : '';
-
-			val.push(opt + ' ' + cell.innerText + ' ');
-		}
-
-		output.push('|' + val.join('|') + '|');
-	}
-
-	document.body.removeChild(table);
-
-	return output.join("\n");
 }
 
 RedmineWysiwygEditor.prototype._toTextMarkdown = function(content) {
