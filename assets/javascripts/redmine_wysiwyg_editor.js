@@ -450,7 +450,9 @@ RedmineWysiwygEditor.prototype._toTextMarkdown = function(content) {
 }
 
 RedmineWysiwygEditor.prototype._initMarkdown = function() {
-	var turndownService = new TurndownService();
+	var turndownService = new TurndownService({
+		headingStyle: 'atx'
+	});
 
 	// Overrides the method to disable escaping.
 	turndownService.escape = function(string) {
@@ -459,7 +461,21 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 
 	turndownService.use(turndownPluginGfm.tables);
 
-	turndownService.addRule('strikethrough', {
+	turndownService.addRule('br', {
+		// Suppress appending two spaces at the end of the line.
+		filter: 'br',
+		replacement: function(content) {
+			return '\n';
+		}
+	}).addRule('strikethrough', {
+		filter: function(node) {
+			return (node.nodeName === 'SPAN') &&
+				(node.style.textDecoration === 'line-through');
+		},
+		replacement: function(content) {
+			return '~~' + content + '~~';
+		}
+	}).addRule('del', {
 		filter: 'del',
 		replacement: function(content) {
 			return '~~' + content + '~~';
@@ -473,9 +489,9 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 		filter: 'pre',
 		replacement: function(content, node) {
 			var code = node.dataset.code;
-			var s = code ? ' ' + code : '';
+			var opt = code ? ' ' + code : '';
 
-			return '~~~' + s + '\n' + content + '~~~\n\n';
+			return '~~~' + opt + '\n' + content + '~~~\n\n';
 		}
 	}).addRule('img', {
 		filter: 'img',
