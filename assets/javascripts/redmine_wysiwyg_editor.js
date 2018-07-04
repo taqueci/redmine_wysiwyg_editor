@@ -480,6 +480,18 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 		replacement: function(content) {
 			return '~~' + content + '~~';
 		}
+	}).addRule('a', {
+		filter: function(node) {
+			var c = node.textContent;
+
+			return (node.nodeName === 'A') &&
+				((node.href === 'mailto:' + c) ||
+				 (node.href.match(/^(http|https|ftp|ftps):/) &&
+				  ((node.href === c) || (node.href === c + '/'))));
+		},
+		replacement: function(content) {
+			return content;
+		}
 	}).addRule('table', {
 		filter: 'table',
 		replacement: function(content) {
