@@ -135,6 +135,9 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var self = this;
 
+	var style = 'pre { padding: .5em 1em; background: #f8f9fa; border: 1px solid #e7e7e7; border-radius: 3px; }' +
+		'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }';
+
 	var callback = function(editor) {
 		editor.on('blur', function(e) {
 			self._setTextContent();
@@ -164,6 +167,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 	tinymce.init({
 		target: self._visualEditor.find('div')[0],
 		language: self._language,
+		content_style: style,
 		height: self._jstEditorTextArea.height(),
 		branding: false,
 		plugins: 'link lists hr table',
