@@ -136,7 +136,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var self = this;
 
 	var style = 'pre { padding: .5em 1em; background: #f8f9fa; border: 1px solid #e7e7e7; border-radius: 3px; }' +
-		'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }';
+		'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
+		'pre code { padding: 0; background: none; }';
 
 	var callback = function(editor) {
 		editor.on('blur', function(e) {
@@ -233,8 +234,8 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 		var escapeTextile = function(data) {
 			// FIXME: Could not unescape NOTEXTILE in PRE.
 			return data
-				.replace(/<pre>\s*<code\s+class="(\w+)">([\S\s]+?)<\/code>\s*<\/pre>/g,
-						 '<$$pre data-code="$1">$2</$$pre>')
+				.replace(/<code>\n?/g, '<code>')
+				.replace(/<code\s+class="(\w+)">\n?/g, '<code class="$$$1">')
 				.replace(/<notextile>/g,
 						 '<$$span data-type="notextile"><notextile>')
 				.replace(/<\/notextile>/g, '</notextile></$$span>');
@@ -418,10 +419,16 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}, {
 		filter: 'pre',
 		replacement: function(content, node) {
-			return node.dataset.code ?
-				'<pre><code class="' + node.dataset.code + '">\n' +
-				content.trim() + '\n</code></pre>\n' :
-				'<pre>' + content.trim() + '</pre>\n';
+			if (node.firstChild.nodeName === 'CODE') {
+				var code = node.firstChild.className;
+				var attr = code ? ' class="' + code + '"' : '';
+
+				return '\n\n<pre><code' + attr + '>\n' + node.textContent +
+					'</code></pre>\n\n';
+			}
+			else {
+				return '\n\n<pre>\n' + node.textContent + '</pre>\n\n';
+			}
 		}
 	}, {
 		filter: ['table', 'tbody'],
