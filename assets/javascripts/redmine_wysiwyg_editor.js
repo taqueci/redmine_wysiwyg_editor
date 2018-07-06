@@ -135,9 +135,10 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var self = this;
 
-	var style = 'pre { padding: .5em 1em; background: #f8f9fa; border: 1px solid #e7e7e7; border-radius: 3px; }' +
+	var style = 'pre { padding: .5em 1em; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 3px; width: auto; white-space: pre-wrap; }' +
 		'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
-		'pre code { padding: 0; background: none; }';
+		'pre code { padding: 0; background: none; }' +
+		'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }';
 
 	var callback = function(editor) {
 		editor.on('blur', function(e) {
