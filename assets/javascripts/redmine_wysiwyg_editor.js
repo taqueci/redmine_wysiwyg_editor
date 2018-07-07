@@ -269,7 +269,6 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 			.replace(/version:/g, 'versioin$$:')
 			.replace(/#([1-9][0-9]*)/g, '#$$$1')
 			.replace(/r([1-9][0-9]*)/g, 'r$$$1')
-			.replace(/^>/mg, '$$>')
 			+ ' ';
 
 		params.push($.param(data));
@@ -432,6 +431,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			}
 		}
 	}, {
+		filter: 'blockquote',
+		replacement: function(content) {
+			return content.trim().replace(/\n\n\n+/g, '\n\n')
+				.replace(/^/mg, '> ');
+		}
+	}, {
 		filter: ['table', 'tbody'],
 		replacement: function(content) {
 			return content;
@@ -516,6 +521,12 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 			var opt = code ? ' ' + code : '';
 
 			return '~~~' + opt + '\n' + content + '~~~\n\n';
+		}
+	}).addRule('blockquote', {
+		filter: 'blockquote',
+		replacement: function(content) {
+			return content.trim().replace(/\n\n\n+/g, '\n\n')
+				.replace(/^/mg, '> ');
 		}
 	}).addRule('img', {
 		filter: 'img',
