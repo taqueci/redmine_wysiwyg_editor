@@ -26,6 +26,8 @@
 	text-decoration: none;
 }
 
+/* FIXME: Tool bar style may be broken under certain Redmine themes. */
+
 .mce-tinymce,
 .mce-top-part::before {
 	-webkit-box-shadow: none !important;

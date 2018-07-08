@@ -57,25 +57,24 @@ function initRedmineWysiwygEditor() {
 	$('.add_attachment').on('change', function(e) {
 		rwe.setAttachments(allAttachments());
 	});
-}
 
-// Overrides default one in application.js
-function replaceIssueFormWith(html){
-  var replacement = $(html);
-  $('#all_attributes input, #all_attributes textarea, #all_attributes select').each(function(){
-    var object_id = $(this).attr('id');
-    if (object_id && $(this).data('valuebeforeupdate')!=$(this).val()) {
-      replacement.find('#'+object_id).val($(this).val());
-    }
-  });
-  $('#all_attributes').empty();
-  $('#all_attributes').prepend(replacement);
-
-  $('.jstEditor').each(initRedmineWysiwygEditor);
+	$(document).ajaxSuccess(function(event, xhr, settings) {
+		if (settings.url.match(/\/quoted(\?.+)?$/)) {
+			// Set comment content with quoted text.
+			rwe.updateVisualContent();
+		}
+	});
 }
 
 $(function() {
 	$('.jstEditor').each(initRedmineWysiwygEditor);
+
+	$(document).ajaxSuccess(function(event, xhr, settings) {
+		if (settings.url.match(/\/(edit\.js|new\.js|edit)$/)) {
+			// New instance for editing comment and changing tracker or status
+			$('.jstEditor').each(initRedmineWysiwygEditor);
+		}
+	});
 });
       </script>
     <% end

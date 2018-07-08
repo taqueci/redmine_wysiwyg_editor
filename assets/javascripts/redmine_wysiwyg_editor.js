@@ -132,6 +132,16 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 	return true;
 }
 
+RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
+	var self = this;
+
+	if (!self._editor) return false;
+
+	self._setVisualContent();
+
+	return true;
+}
+
 RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var self = this;
 
