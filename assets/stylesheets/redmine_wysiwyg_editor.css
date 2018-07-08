@@ -47,3 +47,12 @@
 	-moz-box-shadow: none;
 	box-shadow: none;
 }
+
+.mce-btn button .mce-ico,
+.mce-btn button .mce-caret,
+.mce-container .mce-resizehandle .mce-ico {
+	padding: 0;
+	background-color: transparent;
+	font-size: 16px;
+	color: #595959;
+}
