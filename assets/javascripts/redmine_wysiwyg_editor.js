@@ -451,7 +451,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				.replace(/^/mg, '> ');
 		}
 	}, {
-		filter: ['table', 'thead', 'tbody', 'tfoot'],
+		filter: ['table'],
+		replacement: function(content) {
+			return content + '\n';
+		}
+	}, {
+		filter: ['thead', 'tbody', 'tfoot'],
 		replacement: function(content) {
 			return content;
 		}
