@@ -350,7 +350,8 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (node.colSpan > 1) attr.push('\\' + node.colSpan);
 		if (node.rowSpan > 1) attr.push('/' + node.rowSpan);
 
-		if (node.nodeName === 'TH') attr.push('_');
+		if ((node.nodeName === 'TH') ||
+			(node.parentNode.parentNode.nodeName === 'THEAD')) attr.push('_');
 
 		if (node.style.textAlign === 'center') attr.push('=');
 		else if (node.style.textAlign === 'right') attr.push('>');
@@ -359,7 +360,10 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (node.style.verticalAlign === 'top') attr.push('^');
 		else if (node.style.verticalAlign === 'bottom') attr.push('~');
 
-		return (attr.length > 0) ? attr.join('') + '.' : '';
+		var style = node.style.cssText;
+		var opt = style ? '{' + style + '}' : '';
+
+		return (attr.length > 0) ? attr.join('') + opt + '.' : '';
 	}
 
 	var converters = [{
@@ -447,7 +451,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				.replace(/^/mg, '> ');
 		}
 	}, {
-		filter: ['table', 'tbody'],
+		filter: ['table', 'thead', 'tbody', 'tfoot'],
 		replacement: function(content) {
 			return content;
 		}
@@ -459,7 +463,8 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}, {
 		filter: ['th', 'td'],
 		replacement: function(content, node) {
-			return tableCellOption(node) + ' ' + content + ' |';
+			return tableCellOption(node) + ' ' +
+				content.replace(/\n\n+/g, '\n') + ' |';
 		}
 	}];
 
