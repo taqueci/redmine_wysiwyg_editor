@@ -184,7 +184,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 		branding: false,
 		plugins: 'link lists hr table',
 		menubar: false,
-		toolbar: 'formatselect | bold italic underline strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo',
+		toolbar: 'formatselect | bold italic underline strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo',
 		table_appearance_options: false,
 		toolbar_items_size: 'small',
 		table_advtab: false,
@@ -192,6 +192,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 		table_row_advtab: false,
 		init_instance_callback: callback,
 		setup: setup,
+		indentation : '1em',
 		invalid_elements: 'fieldset'
 	});
 }
