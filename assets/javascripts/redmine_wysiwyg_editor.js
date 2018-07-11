@@ -361,10 +361,14 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (node.style.verticalAlign === 'top') attr.push('^');
 		else if (node.style.verticalAlign === 'bottom') attr.push('~');
 
-		var style = node.style.cssText;
-		var opt = style ? '{' + style + '}' : '';
+		var style = node.style.cssText
+			.replace(/\s*text-align:\s*\w+\s*;?\s*/, '')
+			.replace(/\s*vertical-align:\s*\w+\s*;?\s*/, '')
+			.trim();
 
-		return (attr.length > 0) ? attr.join('') + opt + '.' : '';
+		if (style.length) attr.push('{' + style + '}');
+
+		return (attr.length > 0) ? attr.join('') + '.' : '';
 	}
 
 	var converters = [{
