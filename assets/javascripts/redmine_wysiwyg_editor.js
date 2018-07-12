@@ -372,6 +372,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}
 
 	var converters = [{
+		filter: 'br',
+		replacement: function(content) {
+			return content + '\n';
+		}
+	}, {
 		filter: function(node) {
 			return (node.nodeName === 'SPAN') &&
 				(node.dataset.type === 'notextile');
