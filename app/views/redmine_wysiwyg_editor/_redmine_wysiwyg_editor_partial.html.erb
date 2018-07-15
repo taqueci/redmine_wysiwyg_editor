@@ -59,7 +59,7 @@ function initRedmineWysiwygEditor() {
 	});
 
 	$(document).ajaxSuccess(function(event, xhr, settings) {
-		if (settings.url.match(/\/quoted(\?.+)?$/)) {
+		if (settings.url.match(/\/(quoted(\?.+)?|issue_templates\/load(\?.+)?)$/)) {
 			// Set comment content with quoted text.
 			rwe.updateVisualContent();
 		}
