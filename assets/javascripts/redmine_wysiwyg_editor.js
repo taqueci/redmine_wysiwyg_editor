@@ -245,13 +245,11 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 		var params = [$.param($("input[name^='attachments']"))];
 
 		var escapeTextile = function(data) {
-			// FIXME: Could not unescape NOTEXTILE in PRE.
 			return data
 				.replace(/<code>\n?/g, '<code>')
 				.replace(/<code\s+class="(\w+)">\n?/g, '<code class="$$$1">')
-				.replace(/<notextile>/g,
-						 '<$$span data-type="notextile"><notextile>')
-				.replace(/<\/notextile>/g, '</notextile></$$span>');
+				.replace(/<notextile>/g, '<notextile><$$notextile>')
+				.replace(/<\/notextile>/g, '</$$notextile></notextile>');
 		};
 
 		var escapeMarkdown = function(data) {
@@ -290,7 +288,12 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 
 	var htmlContent = function(data) {
 		var unescapeHtmlTextile = function(data) {
-			return data;
+			// FIXME: Ad hoc solution for nested NOTEXTILE
+			return data
+				.replace(/&lt;notextile&gt;&lt;\$notextile&gt;/g,
+						 '&lt;$$notextile&gt;')
+				.replace(/&lt;\/\$notextile&gt;&lt;\/notextile&gt;/g,
+						 '&lt;/$$notextile&gt;');
 		}
 
 		var unescapeHtmlMarkdown = function(data) {
@@ -376,14 +379,6 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		filter: 'br',
 		replacement: function(content) {
 			return content + '\n';
-		}
-	}, {
-		filter: function(node) {
-			return (node.nodeName === 'SPAN') &&
-				(node.dataset.type === 'notextile');
-		},
-		replacement: function(content) {
-			return '<notextile>' + content + '</notextile>';
 		}
 	}, {
 		filter: function(node) {
