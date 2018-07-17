@@ -337,16 +337,21 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	var self = this;
 
+	var styleAttr = function(node) {
+		// FIXME: Depends on the browser
+		var style = node.style.cssText;
+
+		return (style.length > 0) ? '{' + style + '}' : '';
+	}
+
 	var img = function(node) {
 		var src = node.src;
 		var path = src.match(/\/attachments\/download\//) ?
 			src.replace(/^.+\//, '') : src;
 
-		var style = node.style.cssText;
-		var opt = style ? '{' + style + '}' : '';
 		var alt = node.alt ? '(' + node.alt + ')' : '';
 
-		return '!' + opt + path + alt + '!';
+		return '!' + styleAttr(node) + path + alt + '!';
 	}
 
 	var tableCellOption = function(node) {
@@ -370,7 +375,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			.replace(/\s*vertical-align:\s*\w+\s*;?\s*/, '')
 			.trim();
 
-		if (style.length) attr.push('{' + style + '}');
+		if (style.length > 0) attr.push('{' + style + '}');
 
 		return (attr.length > 0) ? attr.join('') + '.' : '';
 	}
@@ -385,21 +390,21 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			return (node.nodeName === 'SPAN') &&
 				(node.style.textDecoration === 'underline');
 		},
-		replacement: function(content) {
-			return '+' + content + '+';
+		replacement: function(content, node) {
+			return '+' + styleAttr(node) + content + '+';
 		}
 	}, {
 		filter: function(node) {
 			return (node.nodeName === 'SPAN') &&
 				(node.style.textDecoration === 'line-through');
 		},
-		replacement: function(content) {
-			return '-' + content + '-';
+		replacement: function(content, node) {
+			return '-' + styleAttr(node) + content + '-';
 		}
 	}, {
 		filter: 'strong',
-		replacement: function(content) {
-			return '*' + content + '*';
+		replacement: function(content, node) {
+			return '*' + styleAttr(node) + content + '*';
 		}
 	}, {
 		filter: function(node) {
