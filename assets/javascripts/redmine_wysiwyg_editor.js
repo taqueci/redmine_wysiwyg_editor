@@ -482,8 +482,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		}
 	}, {
 		filter: ['table'],
-		replacement: function(content) {
-			return content + '\n';
+		replacement: function(content, node) {
+			var style = styleAttr(node);
+			var attr = (style.length > 0) ? 'table' + style + '.\n' : '';
+
+			return attr + content + '\n';
 		}
 	}, {
 		filter: ['thead', 'tbody', 'tfoot'],
@@ -492,8 +495,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		}
 	}, {
 		filter: 'tr',
-		replacement: function(content) {
-			return '|' + content + '\n';
+		replacement: function(content, node) {
+			var style = styleAttr(node);
+			var attr = (style.length > 0) ? style + '. ' : '';
+
+			return attr + '|' + content + '\n';
 		}
 	}, {
 		filter: ['th', 'td'],
