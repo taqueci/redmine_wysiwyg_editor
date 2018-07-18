@@ -246,6 +246,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 
 		var escapeTextile = function(data) {
 			return data
+				.replace(/&#([1-9][0-9]*);/g, '&$$#$1;')
 				.replace(/<code>\n?/g, '<code>')
 				.replace(/<code\s+class="(\w+)">\n?/g, '<code class="$$$1">')
 				.replace(/<notextile>/g, '<notextile><$$notextile>')
@@ -279,7 +280,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 			.replace(/source:/g, 'source$$:')
 			.replace(/user:/g, 'user$$:')
 			.replace(/version:/g, 'versioin$$:')
-			.replace(/#([1-9][0-9]*)/g, '#$$$1')
+			.replace(/#([1-9][0-9]*[^;])/g, '#$$$1')
 			.replace(/r([1-9][0-9]*)/g, 'r$$$1')
 			+ ' ';
 
