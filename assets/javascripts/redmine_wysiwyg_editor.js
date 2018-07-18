@@ -360,11 +360,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	var tableCellOption = function(node) {
 		var attr = [];
 
-		if (node.colSpan > 1) attr.push('\\' + node.colSpan);
-		if (node.rowSpan > 1) attr.push('/' + node.rowSpan);
-
 		if ((node.nodeName === 'TH') ||
 			(node.parentNode.parentNode.nodeName === 'THEAD')) attr.push('_');
+
+		if (node.colSpan > 1) attr.push('\\' + node.colSpan);
+		if (node.rowSpan > 1) attr.push('/' + node.rowSpan);
 
 		if (node.style.textAlign === 'center') attr.push('=');
 		else if (node.style.textAlign === 'right') attr.push('>');
