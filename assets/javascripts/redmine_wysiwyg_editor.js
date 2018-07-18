@@ -340,9 +340,18 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	var self = this;
 
+	var colorRgbToHex = function(str) {
+		return str
+			.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/g, function(s, r, g, b) {
+				return '#' + [r, g, b].map(function(x) {
+					return ('0' + parseInt(x).toString(16)).slice(-2);
+				}).join('');
+			});
+	}
+
 	var styleAttr = function(node) {
 		// FIXME: Depends on the browser
-		var style = node.style.cssText;
+		var style = colorRgbToHex(node.style.cssText);
 
 		return (style.length > 0) ? '{' + style + '}' : '';
 	}
@@ -373,10 +382,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (node.style.verticalAlign === 'top') attr.push('^');
 		else if (node.style.verticalAlign === 'bottom') attr.push('~');
 
-		var style = node.style.cssText
+		var s = node.style.cssText
 			.replace(/\s*text-align:\s*\w+\s*;?\s*/, '')
 			.replace(/\s*vertical-align:\s*\w+\s*;?\s*/, '')
 			.trim();
+
+		var style = colorRgbToHex(s);
 
 		if (style.length > 0) attr.push('{' + style + '}');
 
@@ -403,6 +414,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		},
 		replacement: function(content, node) {
 			return '-' + styleAttr(node) + content + '-';
+		}
+	}, {
+		filter: 'span',
+		replacement: function(content, node) {
+			return '%' + styleAttr(node) + content + '%';
 		}
 	}, {
 		filter: 'strong',
