@@ -418,7 +418,8 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}, {
 		filter: 'span',
 		replacement: function(content, node) {
-			return '%' + styleAttr(node) + content + '%';
+			// Remove percentage value because RedCloth3 can not parse correctly.
+			return '%' + styleAttr(node).replace(/\s*\d+%/g, '') + content + '%';
 		}
 	}, {
 		filter: 'strong',
