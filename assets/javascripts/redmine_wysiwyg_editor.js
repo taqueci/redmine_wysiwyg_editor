@@ -341,12 +341,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	var self = this;
 
 	var colorRgbToHex = function(str) {
-		return str
-			.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/g, function(s, r, g, b) {
-				return '#' + [r, g, b].map(function(x) {
-					return ('0' + parseInt(x).toString(16)).slice(-2);
-				}).join('');
-			});
+		// RedCloth does not allow CSS function.
+		return str.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/g, function(s, r, g, b) {
+			return '#' + [r, g, b].map(function(x) {
+				return ('0' + parseInt(x).toString(16)).slice(-2);
+			}).join('');
+		});
 	}
 
 	var styleAttr = function(node) {
