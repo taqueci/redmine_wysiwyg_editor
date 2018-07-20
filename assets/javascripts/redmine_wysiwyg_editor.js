@@ -17,7 +17,7 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
 
 RedmineWysiwygEditor.prototype.setFormat = function(format) {
 	this._format = format;
-}
+};
 
 RedmineWysiwygEditor.prototype.setLanguage = function(lang) {
 	var option = ['af_ZA', 'ar', 'be', 'bg_BG', 'bn_BD', 'ca', 'cs', 'cs_CZ', 'cy', 'da', 'de', 'de_AT', 'dv', 'el', 'en_CA', 'en_GB', 'es', 'es_MX', 'et', 'eu', 'fa_IR', 'fi', 'fr_FR', 'ga', 'gl', 'he_IL', 'hr', 'hu_HU', 'id', 'it', 'ja', 'ka_GE', 'kab', 'kk', 'km_KH', 'ko_KR', 'lt', 'lv', 'nb_NO', 'nl', 'pl', 'pt_BR', 'pt_PT', 'ro', 'ru', 'sk', 'sl_SI', 'sr', 'sv_SE', 'ta', 'ta_IN', 'th_TH', 'tr', 'tr_TR', 'ug', 'uk', 'uk_UA', 'uz', 'vi_VN', 'zh_CN', 'zh_TW'];
@@ -27,15 +27,15 @@ RedmineWysiwygEditor.prototype.setLanguage = function(lang) {
 	});
 
 	this._language = (option.indexOf(language) >= 0) ? language : 'en';
-}
+};
 
 RedmineWysiwygEditor.prototype.setI18n = function(data) {
 	this._i18n = data;
-}
+};
 
 RedmineWysiwygEditor.prototype.setAttachments = function(files) {
 	this._attachment = files;
-}
+};
 
 RedmineWysiwygEditor.prototype.init = function() {
 	var self = this;
@@ -86,7 +86,7 @@ RedmineWysiwygEditor.prototype.init = function() {
 	self._initTinymce();
 
 	return true;
-}
+};
 
 RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 	var self = this;
@@ -130,7 +130,7 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
 	}
 
 	return true;
-}
+};
 
 RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
 	var self = this;
@@ -140,7 +140,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
 	self._setVisualContent();
 
 	return true;
-}
+};
 
 RedmineWysiwygEditor.prototype._initTinymce = function() {
 	var self = this;
@@ -196,7 +196,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 		indentation : '1em',
 		invalid_elements: 'fieldset'
 	});
-}
+};
 
 RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
 	var self = this;
@@ -216,7 +216,7 @@ RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
 			}
 		};
 	});
-}
+};
 
 RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
 	var self = this;
@@ -236,7 +236,7 @@ RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
 	}
 
 	button.disabled(menu.length === 0);
-}
+};
 
 RedmineWysiwygEditor.prototype._setVisualContent = function() {
 	var self = this;
@@ -297,12 +297,12 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 						 '&lt;$$notextile&gt;')
 				.replace(/&lt;\/\$notextile&gt;&lt;\/notextile&gt;/g,
 						 '&lt;/$$notextile&gt;');
-		}
+		};
 
 		var unescapeHtmlMarkdown = function(data) {
 			return data.replace(/<pre>(\w+)\+\-\*\/\!\?([\S\s]+?)<\/pre>/g,
 								'<pre data-code="$1">$2</pre>');
-		}
+		};
 
 		var unescapeHtml = (self._format === 'textile') ?
 			unescapeHtmlTextile : unescapeHtmlMarkdown;
@@ -323,7 +323,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 			self._editor.setContent(htmlContent(data));
 		}
     });
-}
+};
 
 RedmineWysiwygEditor.prototype._setTextContent = function() {
 	var self = this;
@@ -335,7 +335,7 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 		self._toTextMarkdown(html);
 
 	self._jstEditorTextArea.val(text);
-}
+};
 
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	var self = this;
@@ -347,7 +347,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return ('0' + parseInt(x).toString(16)).slice(-2);
 			}).join('');
 		});
-	}
+	};
 
 	var styleAttr = function(node) {
 		// Defined in redcloth3.rb
@@ -363,7 +363,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			}).join(' ');
 
 		return (style.length > 0) ? '{' + style + '}' : '';
-	}
+	};
 
 	var img = function(node) {
 		var src = node.src;
@@ -373,7 +373,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		var alt = node.alt ? '(' + node.alt + ')' : '';
 
 		return '!' + styleAttr(node) + path + alt + '!';
-	}
+	};
 
 	var tableCellOption = function(node) {
 		var attr = [];
@@ -396,7 +396,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (style.length > 0) attr.push(style);
 
 		return (attr.length > 0) ? attr.join('') + '.' : '';
-	}
+	};
 
 	var converters = [{
 		filter: 'br',
@@ -517,7 +517,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	// FIXME: Unescaping due to index.js:238 of to-textile.
 	return toTextile(content, { converters: converters })
 		.replace(/(\d)\\\. /g, '$1. ');
-}
+};
 
 RedmineWysiwygEditor.prototype._toTextMarkdown = function(content) {
 	var self = this;
@@ -525,7 +525,7 @@ RedmineWysiwygEditor.prototype._toTextMarkdown = function(content) {
 	if (!self._markdown) self._markdown = self._initMarkdown();
 
 	return self._markdown.turndown(content);
-}
+};
 
 RedmineWysiwygEditor.prototype._initMarkdown = function() {
 	var turndownService = new TurndownService({
@@ -601,7 +601,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
 	});
 
 	return turndownService;
-}
+};
 
 RedmineWysiwygEditor.prototype._setPreview = function() {
 	var self = this;
@@ -615,7 +615,7 @@ RedmineWysiwygEditor.prototype._setPreview = function() {
 		params.push($.param(data));
 
 		return params.join('&');
-	}
+	};
 
 	$.ajax({
 		type: 'POST',
@@ -625,4 +625,4 @@ RedmineWysiwygEditor.prototype._setPreview = function() {
 			self._preview.html(data);
 		}
     });
-}
+};
