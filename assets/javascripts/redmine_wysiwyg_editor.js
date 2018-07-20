@@ -350,8 +350,17 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}
 
 	var styleAttr = function(node) {
-		// FIXME: Depends on the browser
-		var style = colorRgbToHex(node.style.cssText);
+		// Defined in redcloth3.rb
+		var STYLES_RE = /^(color|width|height|border|background|padding|margin|font|float)(-[a-z]+)*:\s*((\d+%?|\d+px|\d+(\.\d+)?em|#[0-9a-f]+|[a-z]+)\s*)+$/i;
+
+		// FIXME: Property cssText depends on the browser.
+		var style = colorRgbToHex(node.style.cssText)
+			.split(/\s*;\s*/)
+			.filter(function(value) {
+				return STYLES_RE.test(value);
+			}).map(function(str) {
+				return str + ';'
+			}).join(' ');
 
 		return (style.length > 0) ? '{' + style + '}' : '';
 	}
@@ -382,14 +391,9 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		if (node.style.verticalAlign === 'top') attr.push('^');
 		else if (node.style.verticalAlign === 'bottom') attr.push('~');
 
-		var s = node.style.cssText
-			.replace(/\s*text-align:\s*\w+\s*;?\s*/, '')
-			.replace(/\s*vertical-align:\s*\w+\s*;?\s*/, '')
-			.trim();
+		var style = styleAttr(node);
 
-		var style = colorRgbToHex(s);
-
-		if (style.length > 0) attr.push('{' + style + '}');
+		if (style.length > 0) attr.push(style);
 
 		return (attr.length > 0) ? attr.join('') + '.' : '';
 	}
