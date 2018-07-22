@@ -342,11 +342,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 
 	var colorRgbToHex = function(str) {
 		// RedCloth does not allow CSS function.
-		return str.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/g, function(s, r, g, b) {
-			return '#' + [r, g, b].map(function(x) {
-				return ('0' + parseInt(x).toString(16)).slice(-2);
-			}).join('');
-		});
+		return str
+			.replace(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/g, function(s, r, g, b) {
+				return '#' + [r, g, b].map(function(x) {
+					return ('0' + parseInt(x).toString(16)).slice(-2);
+				}).join('');
+			});
 	};
 
 	var styleAttr = function(node) {
@@ -422,8 +423,9 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}, {
 		filter: 'span',
 		replacement: function(content, node) {
-			// Remove percentage value because RedCloth3 can not parse correctly.
-			return '%' + styleAttr(node).replace(/\s*\d+%/g, '') + content + '%';
+			// Remove percentage value because RedCloth3 can't parse correctly.
+			return '%' + styleAttr(node).replace(/\s*\d+%/g, '') +
+				content + '%';
 		}
 	}, {
 		filter: 'strong',
