@@ -13,7 +13,7 @@ suite('Redmine WYSIWYG Editor', function() {
 
 		test('Underline with style attribute', function() {
 			var content = '<span style="text-decoration: underline; color: white; background-color: #dc3545; opacity: 0.5; width: 100%;">Hello, world</span>';
-			var expected = '+{color: white; background-color: #dc3545; width: 100%;}Hello, world+';
+			var expected = '+{background-color: #dc3545; color: white; width: 100%;}Hello, world+';
 
 			assert.equal(x._toTextTextile(content), expected);
 		});
@@ -34,7 +34,7 @@ suite('Redmine WYSIWYG Editor', function() {
 
 		test('Span with style attribute', function() {
 			var content = '<span style="color: rgb(255, 255, 255); background-color: #dc3545"; opacity: 0.5; width: 100%">Hello, world</span>';
-			var expected = '%{color: #ffffff; background-color: #dc3545;}Hello, world%';
+			var expected = '%{background-color: #dc3545; color: #ffffff;}Hello, world%';
 
 			assert.equal(x._toTextTextile(content), expected);
 		});

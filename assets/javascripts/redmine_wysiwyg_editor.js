@@ -361,7 +361,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 				return STYLES_RE.test(value);
 			}).map(function(str) {
 				return str + ';'
-			}).join(' ');
+			}).sort().join(' ');
 
 		return (style.length > 0) ? '{' + style + '}' : '';
 	};
