@@ -110,7 +110,7 @@ suite('Redmine WYSIWYG Editor', function() {
 		});
 
 		test('Code block', function() {
-			var content = '<pre><code class="c">#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>';
+			var content = '<pre><code class="c">#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
 			var expected = '<pre><code class="c">\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
 
 			assert.equal(x._toTextTextile(content), expected);
