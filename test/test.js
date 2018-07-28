@@ -46,6 +46,13 @@ suite('Redmine WYSIWYG Editor', function() {
 			assert.equal(x._toTextTextile(content), expected);
 		});
 
+		test('Italic', function() {
+			var content = '<em style="color: rgb(12, 34, 56);">Hello, world</em>';
+			var expected = '_{color: #0c2238;}Hello, world_';
+
+			assert.equal(x._toTextTextile(content), expected);
+		});
+
 		test('Auto link (mailto)', function() {
 			var content = '<a href="mailto:foo@example.com">foo@example.com</a>';
 			var expected = 'foo@example.com';

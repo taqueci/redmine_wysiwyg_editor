@@ -433,6 +433,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 			return '*' + styleAttr(node) + content + '*';
 		}
 	}, {
+		filter: 'em',
+		replacement: function(content, node) {
+			return '_' + styleAttr(node) + content + '_';
+		}
+	}, {
 		filter: function(node) {
 			var c = node.textContent;
 
