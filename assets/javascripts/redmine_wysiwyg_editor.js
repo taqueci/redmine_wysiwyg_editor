@@ -451,11 +451,18 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 		}
 	}, {
 		filter: function(node) {
-			return (node.nodeName === 'A') &&
+			return (node.nodeName === 'A') && node.firstChild &&
 				(node.firstChild.nodeName === 'IMG');
 		},
 		replacement: function(content, node) {
 			return img(node.firstChild) + ':' + node.href;
+		}
+	}, {
+		filter: function(node) {
+			return (node.nodeName === 'A') && (node.textContent.length === 0);
+		},
+		replacement: function(content) {
+			return '';
 		}
 	} , {
 		filter: 'abbr',
@@ -470,7 +477,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 	}, {
 		filter: 'pre',
 		replacement: function(content, node) {
-			if (node.firstChild.nodeName === 'CODE') {
+			if (node.firstChild && (node.firstChild.nodeName === 'CODE')) {
 				var code = node.firstChild.className;
 				var attr = code ? ' class="' + code + '"' : '';
 
