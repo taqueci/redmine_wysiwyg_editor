@@ -136,6 +136,13 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(x._toTextTextile(content), expected);
     });
+
+    test('Paragraph with style attribute', function() {
+      var content = '<p style="color: rgb(255, 255, 255); background-color: #dc3545"; opacity: 0.5; width: 100%">Hello, world</p>';
+      var expected = 'p{color: #ffffff; background-color: #dc3545;}. Hello, world';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
   });
 
   suite('Markdown', function() {
