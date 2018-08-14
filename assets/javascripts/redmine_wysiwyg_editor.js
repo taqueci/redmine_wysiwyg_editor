@@ -176,15 +176,19 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
     });
   };
 
+  var toolbar = (self._format === 'textile') ?
+      'formatselect | bold italic underline strikethrough forecolor | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
+      'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo';
+
   tinymce.init({
     target: self._visualEditor.find('div')[0],
     language: self._language,
     content_style: style,
     height: self._jstEditorTextArea.height(),
     branding: false,
-    plugins: 'link lists hr table',
+    plugins: 'link lists hr table textcolor',
     menubar: false,
-    toolbar: 'formatselect | bold italic underline strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo',
+    toolbar: toolbar,
     toolbar_items_size: 'small',
     table_appearance_options: false,
     table_advtab: false,
