@@ -1,82 +1,81 @@
 <%
-  if content_for(:header_tags).present? && content_for(:header_tags).include?('/jstoolbar/')
-    content_for :header_tags do %>
-      <%= javascript_include_tag('tinymce/tinymce.min.js', plugin: 'redmine_wysiwyg_editor') %>
-      <%
-        formatting = Setting.text_formatting
-		if formatting == 'textile' %>
+if content_for(:header_tags).present? && content_for(:header_tags).include?('/jstoolbar/')
+  content_for :header_tags do %>
+    <%= javascript_include_tag('tinymce/tinymce.min.js', plugin: 'redmine_wysiwyg_editor') %>
+    <%
+    formatting = Setting.text_formatting
+    if formatting == 'textile' %>
       <%= javascript_include_tag('to-textile.min.js', plugin: 'redmine_wysiwyg_editor') %>
-      <% elsif formatting == 'markdown' %>
+    <% elsif formatting == 'markdown' %>
       <%= javascript_include_tag('turndown.js', plugin: 'redmine_wysiwyg_editor') %>
       <%= javascript_include_tag('turndown-plugin-gfm.js', plugin: 'redmine_wysiwyg_editor') %>
-      <% end %>
-      <%= javascript_include_tag('redmine_wysiwyg_editor.js', plugin: 'redmine_wysiwyg_editor') %>
-      <%= stylesheet_link_tag('redmine_wysiwyg_editor.css', plugin: 'redmine_wysiwyg_editor') %>
-      <%
-        attachments = @issue ? @issue.attachments.map {|a| a.filename } :
-          @page ? @page.attachments.map {|a| a.filename } :
-          @news ? @news.attachments.map {|a| a.filename } :
-          @document ? @document.attachments.map {|a| a.filename } :
-          @topic ? @topic.attachments.map {|a| a.filename } :
-          []
-	  %>
-      <script>
+    <% end %>
+    <%= javascript_include_tag('redmine_wysiwyg_editor.js', plugin: 'redmine_wysiwyg_editor') %>
+    <%= stylesheet_link_tag('redmine_wysiwyg_editor.css', plugin: 'redmine_wysiwyg_editor') %>
+    <%
+    attachments = @issue ? @issue.attachments.map {|a| a.filename } :
+        @page ? @page.attachments.map {|a| a.filename } :
+        @news ? @news.attachments.map {|a| a.filename } :
+        @document ? @document.attachments.map {|a| a.filename } :
+        @topic ? @topic.attachments.map {|a| a.filename } :
+        []
+    %>
+    <script>
 function initRedmineWysiwygEditor() {
-	var previewButton = $('a[accesskey=r]');
+  var previewButton = $('a[accesskey=r]');
 
-	if (previewButton.length == 0) return;
+  if (previewButton.length == 0) return;
 
-	var previewUrl = previewButton.attr('onclick')
-		.match(/submitPreview\("(.+?)",/)[1];
+  var previewUrl = previewButton.attr('onclick')
+      .match(/submitPreview\("(.+?)",/)[1];
 
-	if (!previewUrl) return;
+  if (!previewUrl) return;
 
-	var allAttachments = function() {
-		var attachments = <%= raw attachments.to_json %>;
+  var allAttachments = function() {
+    var attachments = <%= raw attachments.to_json %>;
 
-		$('.attachments_fields input.filename').each(function() {
-			attachments.push($(this).val());
-		});
+    $('.attachments_fields input.filename').each(function() {
+      attachments.push($(this).val());
+    });
 
-		return attachments;
-	};
+    return attachments;
+  };
 
-	var rwe = new RedmineWysiwygEditor($(this), previewUrl);
+  var rwe = new RedmineWysiwygEditor($(this), previewUrl);
 
-	rwe.setFormat('<%= formatting %>');
-	rwe.setLanguage('<%= current_language %>');
-	rwe.setI18n({
-		textile: 'Textile',
-		markdown: 'Markdown',
-		visual: '<%= l(:label_visual_editor) %>',
-		preview: '<%= l(:label_preview) %>'
-	});
-	rwe.setAttachments(allAttachments());
-	rwe.init();
+  rwe.setFormat('<%= formatting %>');
+  rwe.setLanguage('<%= current_language %>');
+  rwe.setI18n({
+    textile: 'Textile',
+    markdown: 'Markdown',
+    visual: '<%= l(:label_visual_editor) %>',
+    preview: '<%= l(:label_preview) %>'
+  });
+  rwe.setAttachments(allAttachments());
+  rwe.init();
 
-	$('.add_attachment').on('change', function(e) {
-		rwe.setAttachments(allAttachments());
-	});
+  $('.add_attachment').on('change', function(e) {
+    rwe.setAttachments(allAttachments());
+  });
 
-	$(document).ajaxSuccess(function(event, xhr, settings) {
-		if (settings.url.match(/\/(quoted(\?.+)?|issue_templates\/load(\?.+)?)$/)) {
-			// Set comment content with quoted text.
-			rwe.updateVisualContent();
-		}
-	});
+  $(document).ajaxSuccess(function(event, xhr, settings) {
+    if (settings.url.match(/\/(quoted(\?.+)?|issue_templates\/load(\?.+)?)$/)) {
+      // Set comment content with quoted text.
+      rwe.updateVisualContent();
+    }
+  });
 }
 
 $(function() {
-	$('.jstEditor').each(initRedmineWysiwygEditor);
+  $('.jstEditor').each(initRedmineWysiwygEditor);
 
-	$(document).ajaxSuccess(function(event, xhr, settings) {
-		if (settings.url.match(/\/(edit\.js|new\.js|edit)$/)) {
-			// New instance for editing comment and changing tracker or status
-			$('.jstEditor').each(initRedmineWysiwygEditor);
-		}
-	});
+  $(document).ajaxSuccess(function(event, xhr, settings) {
+    if (settings.url.match(/\/(edit\.js|new\.js|edit)$/)) {
+      // New instance for editing comment and changing tracker or status
+      $('.jstEditor').each(initRedmineWysiwygEditor);
+    }
+  });
 });
-      </script>
-    <% end
-  end
-%>
+    </script>
+  <% end
+end %>
