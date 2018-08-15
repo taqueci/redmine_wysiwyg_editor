@@ -143,6 +143,13 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(x._toTextTextile(content), expected);
     });
+
+    test('Decoration partially in a word', function() {
+      var content = '<p><span style="text-decoration: underline">W</span>e <span style="text-decoration: underline">ar</span>e t<span style="text-decoration: underline">h</span>e <span style="text-decoration: underline">champions</span> of t<span style="text-decoration: underline">he</span> wor<span style="text-decoration: underline">ld</span></p><p><span style="text-decoration: line-through">W</span>e <span style="text-decoration: line-through">ar</span>e t<span style="text-decoration: line-through">h</span>e <span style="text-decoration: line-through">champions</span> of t<span style="text-decoration: line-through">he</span> wor<span style="text-decoration: line-through">ld</span></p><p><strong>W</strong>e <strong>ar</strong>e t<strong>h</strong>e <strong>champions</strong> of t<strong>he</strong> wor<strong>ld</strong></p><p><em>W</em>e <em>ar</em>e t<em>h</em>e <em>champions</em> of t<em>he</em> wor<em>ld</em></p>';
+      var expected = '+W+<notextile></notextile>e +ar+<notextile></notextile>e t<notextile></notextile>+h+<notextile></notextile>e +champions+ of t<notextile></notextile>+he+ wor<notextile></notextile>+ld+\n\n-W-<notextile></notextile>e -ar-<notextile></notextile>e t<notextile></notextile>-h-<notextile></notextile>e -champions- of t<notextile></notextile>-he- wor<notextile></notextile>-ld-\n\n*W*<notextile></notextile>e *ar*<notextile></notextile>e t<notextile></notextile>*h*<notextile></notextile>e *champions* of t<notextile></notextile>*he* wor<notextile></notextile>*ld*\n\n_W_<notextile></notextile>e _ar_<notextile></notextile>e t<notextile></notextile>_h_<notextile></notextile>e _champions_ of t<notextile></notextile>_he_ wor<notextile></notextile>_ld_';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
   });
 
   suite('Markdown', function() {

@@ -198,6 +198,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
     init_instance_callback: callback,
     setup: setup,
     indentation : '1em',
+    protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset'
   });
 };
@@ -253,8 +254,6 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
         .replace(/&#([1-9][0-9]*);/g, '&$$#$1;')
         .replace(/<code>\n?/g, '<code>')
         .replace(/<code\s+class="(\w+)">\n?/g, '<code class="$$$1">')
-        .replace(/<notextile>/g, '<notextile><$$notextile>')
-        .replace(/<\/notextile>/g, '</$$notextile></notextile>')
         .replace(/\[(\d+)\]/g, '[$$$1]')
         .replace(/^fn(\d+)\.\s/mg, 'fn$$$1. ');
     };
@@ -295,12 +294,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
 
   var htmlContent = function(data) {
     var unescapeHtmlTextile = function(data) {
-      // FIXME: Ad hoc solution for nested NOTEXTILE
-      return data
-        .replace(/&lt;notextile&gt;&lt;\$notextile&gt;/g,
-                 '&lt;$$notextile&gt;')
-        .replace(/&lt;\/\$notextile&gt;&lt;\/notextile&gt;/g,
-                 '&lt;/$$notextile&gt;');
+      return data;
     };
 
     var unescapeHtmlMarkdown = function(data) {
@@ -403,6 +397,26 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     return (attr.length > 0) ? attr.join('') + '.' : '';
   };
 
+  var textContent = function(node, text) {
+    var NOTEXTILE = '<notextile></notextile>';
+    var TEXT_NODE = 3;
+
+    var content = [];
+
+    var prev = node.previousSibling;
+    var next = node.nextSibling;
+
+    if (prev && (prev.nodeType === TEXT_NODE) && prev.nodeValue.match(/\S$/))
+      content.push(NOTEXTILE);
+
+    content.push(text);
+
+    if (next && (next.nodeType === TEXT_NODE) && next.nodeValue.match(/^\S/))
+      content.push(NOTEXTILE);
+
+    return content.join('');
+  };
+
   var converters = [{
     filter: 'br',
     replacement: function(content) {
@@ -414,7 +428,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         (node.style.textDecoration === 'underline');
     },
     replacement: function(content, node) {
-      return '+' + styleAttr(node) + content + '+';
+      return textContent(node, '+' + styleAttr(node) + content + '+');
     }
   }, {
     filter: function(node) {
@@ -422,23 +436,24 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         (node.style.textDecoration === 'line-through');
     },
     replacement: function(content, node) {
-      return '-' + styleAttr(node) + content + '-';
+      return textContent(node, '-' + styleAttr(node) + content + '-');
     }
   }, {
     filter: 'span',
     replacement: function(content, node) {
       // Remove percentage value because RedCloth3 can't parse correctly.
-      return '%' + styleAttr(node).replace(/\s*\d+%/g, '') + content + '%';
+      return textContent(node, '%' + styleAttr(node).replace(/\s*\d+%/g, '') +
+                         content + '%');
     }
   }, {
     filter: 'strong',
     replacement: function(content, node) {
-      return '*' + styleAttr(node) + content + '*';
+      return textContent(node, '*' + styleAttr(node) + content + '*');
     }
   }, {
     filter: 'em',
     replacement: function(content, node) {
-      return '_' + styleAttr(node) + content + '_';
+      return textContent(node, '_' + styleAttr(node) + content + '_');
     }
   }, {
     filter: function(node) {
