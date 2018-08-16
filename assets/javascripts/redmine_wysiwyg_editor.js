@@ -401,19 +401,23 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 
   var textContent = function(node, text) {
     var NOTEXTILE = '<notextile></notextile>';
+
+    var ELEMENT_NODE = 1;
     var TEXT_NODE = 3;
 
     var content = [];
 
-    var prev = node.previousSibling;
-    var next = node.nextSibling;
+    var p = node.previousSibling;
+    var n = node.nextSibling;
 
-    if (prev && (prev.nodeType === TEXT_NODE) && prev.nodeValue.match(/\S$/))
+    if (p && (((p.nodeType === TEXT_NODE) && p.nodeValue.match(/\S$/)) ||
+              (p.nodeType === ELEMENT_NODE)))
       content.push(NOTEXTILE);
 
     content.push(text);
 
-    if (next && (next.nodeType === TEXT_NODE) && next.nodeValue.match(/^\S/))
+    if (n && (((n.nodeType === TEXT_NODE) && n.nodeValue.match(/^\S/)) ||
+              (n.nodeType === ELEMENT_NODE)))
       content.push(NOTEXTILE);
 
     return content.join('');

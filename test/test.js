@@ -150,6 +150,13 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(x._toTextTextile(content), expected);
     });
+
+    test('Decorations not separated by space', function() {
+      var content = 'normal<strong>bold</strong><em>italic</em><span style="text-decoration: underline">underline</span><span style="text-decoration: line-through">strikethrough</span>normal';
+      var expected = 'normal<notextile></notextile>*bold*<notextile></notextile><notextile></notextile>_italic_<notextile></notextile><notextile></notextile>+underline+<notextile></notextile><notextile></notextile>-strikethrough-<notextile></notextile>normal';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
   });
 
   suite('Markdown', function() {
