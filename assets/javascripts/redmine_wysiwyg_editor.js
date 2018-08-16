@@ -254,6 +254,8 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
         .replace(/&#([1-9][0-9]*);/g, '&$$#$1;')
         .replace(/<code>\n?/g, '<code>')
         .replace(/<code\s+class="(\w+)">\n?/g, '<code class="$$$1">')
+        .replace(/<notextile>/g, '<notextile><$$notextile>')
+        .replace(/<\/notextile>/g, '</$$notextile></notextile>')
         .replace(/\[(\d+)\]/g, '[$$$1]')
         .replace(/^fn(\d+)\.\s/mg, 'fn$$$1. ');
     };
