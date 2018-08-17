@@ -152,8 +152,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Decorations not separated by space', function() {
-      var content = 'normal<strong>bold</strong><em>italic</em><span style="text-decoration: underline">underline</span><span style="text-decoration: line-through">strikethrough</span>normal';
-      var expected = 'normal<notextile></notextile>*bold*<notextile></notextile><notextile></notextile>_italic_<notextile></notextile><notextile></notextile>+underline+<notextile></notextile><notextile></notextile>-strikethrough-<notextile></notextile>normal';
+      var content = 'normal<strong>bold</strong><em>italic</em><span style="text-decoration: underline">underline</span><span style="text-decoration: line-through">strikethrough</span>normal<br><strong>bold</strong><br><em>italic</em><br><span style="text-decoration: underline">underline</span><br><span style="text-decoration: line-through">strikethrough</span><br>normal';
+      var expected = 'normal<notextile></notextile>*bold*<notextile></notextile><notextile></notextile>_italic_<notextile></notextile><notextile></notextile>+underline+<notextile></notextile><notextile></notextile>-strikethrough-<notextile></notextile>normal\n*bold*\n_italic_\n+underline+\n-strikethrough-\nnormal';
 
       assert.equal(x._toTextTextile(content), expected);
     });

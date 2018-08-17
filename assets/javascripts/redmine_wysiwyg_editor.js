@@ -411,13 +411,13 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     var n = node.nextSibling;
 
     if (p && (((p.nodeType === TEXT_NODE) && p.nodeValue.match(/\S$/)) ||
-              (p.nodeType === ELEMENT_NODE)))
+              ((p.nodeType === ELEMENT_NODE) && p.nodeName !== 'BR')))
       content.push(NOTEXTILE);
 
     content.push(text);
 
     if (n && (((n.nodeType === TEXT_NODE) && n.nodeValue.match(/^\S/)) ||
-              (n.nodeType === ELEMENT_NODE)))
+              ((n.nodeType === ELEMENT_NODE) && n.nodeName !== 'BR')))
       content.push(NOTEXTILE);
 
     return content.join('');
