@@ -204,6 +204,13 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextMarkdown(content), expected);
     });
 
+    test('Table without TH', function() {
+      var content = '<table><tbody><tr><td>Name</td><td>Role</td></tr><tr><td> Axl Rose</td><td>Vocal</td></tr><tr><td>Slash</td><td>Guitar</td></tr></tbody></table>';
+      var expected = '| Name | Role |\n| --- | --- |\n| Axl Rose | Vocal |\n| Slash | Guitar |';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
     test('Preformatted', function() {
       var content = '<pre>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>';
       var expected = '~~~\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~';
