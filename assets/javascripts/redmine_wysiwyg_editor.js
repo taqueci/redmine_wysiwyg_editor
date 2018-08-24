@@ -190,7 +190,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
-    relative_urls: false,
+    convert_urls: false,
     table_appearance_options: false,
     table_advtab: false,
     table_cell_advtab: false,
