@@ -4,6 +4,8 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Textile', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
+    x.setAttachments(['foo.png']);
+
     test('Underline', function() {
       var content = '<span style="text-decoration: underline">Hello, world</span>';
       var expected = '+Hello, world+';
@@ -162,6 +164,8 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Markdown', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
+    x.setAttachments(['foo.png']);
+
     test('Line-through', function() {
       var content = '<span style="text-decoration: line-through">Hello, world</span>';
       var expected = '~~Hello, world~~';
@@ -198,8 +202,15 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Table', function() {
-      var content = '<table><tbody><tr><th>Name</th><th>Role</th></tr><tr><td> Axl Rose</td><td>Vocal</td></tr><tr><td>Slash</td><td>Guitar</td></tr></tbody></table>';
-      var expected = '| Name | Role |\n| --- | --- |\n| Axl Rose | Vocal |\n| Slash | Guitar |';
+      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;">Origin</th></tr><tr><td>Axl Rose</td><td>Vocal</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td>Jul 23, 1965</td><td>LA</td></tr></tbody></table>';
+      var expected = '| Name | Role | Born | Origin |\n| --- | :-- | :-: | --: |\n| Axl Rose | Vocal | Feb 6, 1962 | LA |\n| Slash | Guitar | Jul 23, 1965 | LA |';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Table without TH', function() {
+      var content = '<table><tbody><tr><td>Name</td><td style="text-align: left;">Role</td><td style="text-align: center;">Born</td><td style="text-align: right;">Origin</td></tr><tr><td>Axl Rose</td><td>Vocal</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td>Jul 23, 1965</td><td>LA</td></tr></tbody></table>';
+      var expected = '| Name | Role | Born | Origin |\n| --- | :-- | :-: | --: |\n| Axl Rose | Vocal | Feb 6, 1962 | LA |\n| Slash | Guitar | Jul 23, 1965 | LA |';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });

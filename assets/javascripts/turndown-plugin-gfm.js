@@ -57,7 +57,8 @@ rules.tableRow = {
       for (var i = 0; i < node.childNodes.length; i++) {
         var border = '---';
         var align = (
-          node.childNodes[i].getAttribute('align') || ''
+          node.childNodes[i].getAttribute('align') ||
+            node.childNodes[i].style.textAlign || ''
         ).toLowerCase();
 
         if (align) border = alignMap[align] || border;
@@ -94,15 +95,13 @@ rules.tableSection = {
 // - the parent is a THEAD
 // - or if its the first child of the TABLE or the first TBODY (possibly
 //   following a blank THEAD)
-// - and every cell is a TH
 function isHeadingRow (tr) {
   var parentNode = tr.parentNode;
   return (
     parentNode.nodeName === 'THEAD' ||
     (
       parentNode.firstChild === tr &&
-      (parentNode.nodeName === 'TABLE' || isFirstTbody(parentNode)) &&
-      every.call(tr.childNodes, function (n) { return n.nodeName === 'TH' })
+      (parentNode.nodeName === 'TABLE' || isFirstTbody(parentNode))
     )
   )
 }
