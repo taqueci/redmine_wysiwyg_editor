@@ -4,6 +4,8 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Textile', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
+    x.setAttachments(['foo.png']);
+
     test('Underline', function() {
       var content = '<span style="text-decoration: underline">Hello, world</span>';
       var expected = '+Hello, world+';
@@ -161,6 +163,8 @@ suite('Redmine WYSIWYG Editor', function() {
 
   suite('Markdown', function() {
     var x = new RedmineWysiwygEditor(null, null);
+
+    x.setAttachments(['foo.png']);
 
     test('Line-through', function() {
       var content = '<span style="text-decoration: line-through">Hello, world</span>';
