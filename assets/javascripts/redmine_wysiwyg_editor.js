@@ -262,8 +262,9 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     };
 
     var escapeMarkdown = function(data) {
-      return data.replace(/^~~~ *(\w+)([\S\s]+?)~~~$/mg,
-                          '~~~\n$1+-*/!?$2~~~');
+      return data
+        .replace(/^~~~ *(\w+)([\S\s]+?)~~~$/mg, '~~~\n$1+-*/!?$2~~~')
+        .replace(/^``` *(\w+)([\S\s]+?)```$/mg, '~~~\n$1+-*/!?$2~~~');
     };
 
     var escapeText = (self._format === 'textile') ?
