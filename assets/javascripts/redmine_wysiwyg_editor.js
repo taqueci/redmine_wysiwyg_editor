@@ -629,7 +629,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       var code = node.dataset.code;
       var opt = code ? ' ' + code : '';
 
-      return '~~~' + opt + '\n' + content + '~~~\n\n';
+      return '~~~' + opt + '\n' + content.replace(/\n?$/, '\n') + '~~~\n\n';
     }
   }).addRule('blockquote', {
     filter: 'blockquote',

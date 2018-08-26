@@ -216,8 +216,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Preformatted', function() {
-      var content = '<pre>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>';
-      var expected = '~~~\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~';
+      var content = '<pre>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>\n\n<pre>No newline at the end of the content</pre>';
+      var expected = '~~~\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~\n\n~~~\nNo newline at the end of the content\n~~~';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
