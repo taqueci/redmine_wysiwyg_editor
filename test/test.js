@@ -216,8 +216,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Preformatted', function() {
-      var content = '<pre>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>';
-      var expected = '~~~\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~';
+      var content = '<pre>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>\n\n<pre>No newline at the end of the content</pre>';
+      var expected = '~~~\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~\n\n~~~\nNo newline at the end of the content\n~~~';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
@@ -245,6 +245,41 @@ suite('Redmine WYSIWYG Editor', function() {
     test('Image (attachment)', function() {
       var content = '<img src="/attachments/download/1/foo.png" alt="Foo">';
       var expected = '![Foo](foo.png)';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('HTML tag (DIV)', function() {
+      var content = '<div style="padding-left: 1em;">\nleft ident 1em\n</div>\n\n<div style="padding-left: 2em;">\nleft ident 2em\nas well as for following lines\n</div>\n\n<div style="text-align: right;">\nright aligned\n</div>\n\n<div style="padding-right: 3em;text-align: right;">\nright ident 3em\n</div>\n\n<div style="text-align: center;">\nThis is centered paragraph.\n</div>';
+      var expected = '<div style="padding-left: 1em;">\nleft ident 1em\n</div>\n<div style="padding-left: 2em;">\nleft ident 2em as well as for following lines\n</div>\n<div style="text-align: right;">\nright aligned\n</div>\n<div style="padding-right: 3em; text-align: right;">\nright ident 3em\n</div>\n<div style="text-align: center;">\nThis is centered paragraph.\n</div>';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('HTML tag (P)', function() {
+      var content = '<p style="padding-left: 1em;">left ident 1em</p>\n<p style="padding-left: 2em;">left ident 2em\nas well as for following lines</p>\n<p style="text-align: right;">right aligned</p>\n<p style="padding-right: 3em;text-align: right;">right ident 3em</p>\n<p style="text-align: center;">This is centered paragraph.</p>';
+      var expected = '<p style="padding-left: 1em;">left ident 1em</p>\n<p style="padding-left: 2em;">left ident 2em as well as for following lines</p>\n<p style="text-align: right;">right aligned</p>\n<p style="padding-right: 3em; text-align: right;">right ident 3em</p>\n<p style="text-align: center;">This is centered paragraph.</p>';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('HTML tag (SPAN)', function() {
+      var content = '<span style="color:red">red</span> <span style="color:green">green</span> <span style="color:yellow">yellow</span> <span style="color:#82B6E1">blue ish</span><br>\n<span style="color:red">red</span><span style="color:green">green</span><span style="color:yellow">yellow</span><span style="color:#82B6E1">blue ish</span><br>\n<span style="background-color:lightgreen">Lightgreen Background</span> <span style="background-color:yellow">Yellow Background</span><br>\n<span style="background-color:lightgreen">Lightgreen Background</span><span style="background-color:yellow">Yellow Background</span>';
+      var expected = '<span style="color: red;">red</span> <span style="color: green;">green</span> <span style="color: yellow;">yellow</span> <span style="color: rgb(130, 182, 225);">blue ish</span>\n<span style="color: red;">red</span><span style="color: green;">green</span><span style="color: yellow;">yellow</span><span style="color: rgb(130, 182, 225);">blue ish</span>\n<span style="background-color: lightgreen;">Lightgreen Background</span> <span style="background-color: yellow;">Yellow Background</span>\n<span style="background-color: lightgreen;">Lightgreen Background</span><span style="background-color: yellow;">Yellow Background</span>';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Underline', function() {
+      var content = '<span style="text-decoration: underline">Hello, world</span>';
+      var expected = '<ins>Hello, world</ins>';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Font styles', function() {
+      var content = 'Under<ins>line</ins><br>Plain<sup>superscript</sup><br>Plain<sub>subscript</sub>';
+      var expected = 'Under<ins>line</ins>\nPlain<sup>superscript</sup>\nPlain<sub>subscript</sub>';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });

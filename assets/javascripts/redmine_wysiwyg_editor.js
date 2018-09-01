@@ -178,7 +178,9 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 
   var toolbar = (self._format === 'textile') ?
       'formatselect | bold italic underline strikethrough forecolor | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
-      'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo';
+      self._isAllowedToUseMarkdownHtmlTag() ?
+      'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
+      'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | hr | table | undo redo';
 
   tinymce.init({
     target: self._visualEditor.find('div')[0],
@@ -244,6 +246,32 @@ RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
   button.disabled(menu.length === 0);
 };
 
+// FIXME: Move to controller.
+RedmineWysiwygEditor.prototype._isAllowedToUseMarkdownHtmlTag = function() {
+  var self = this;
+
+  var previewData = function(textarea) {
+    var data = {};
+    data[textarea[0].name] = '<div></div>';
+
+    return $.param(data);
+  };
+
+  var isAllowed = false;
+
+  $.ajax({
+    async: false,
+    type: 'POST',
+    url: self._previewUrl,
+    data: previewData(self._jstEditorTextArea),
+    success: function(data) {
+      isAllowed = /<div><\/div>/.test(data);
+    }
+  });
+
+  return isAllowed;
+};
+
 RedmineWysiwygEditor.prototype._setVisualContent = function() {
   var self = this;
 
@@ -262,8 +290,9 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     };
 
     var escapeMarkdown = function(data) {
-      return data.replace(/^~~~ *(\w+)([\S\s]+?)~~~$/mg,
-                          '~~~\n$1+-*/!?$2~~~');
+      return data
+        .replace(/^~~~ *(\w+)([\S\s]+?)~~~$/mg, '~~~\n$1+-*/!?$2~~~')
+        .replace(/^``` *(\w+)([\S\s]+?)```$/mg, '~~~\n$1+-*/!?$2~~~');
     };
 
     var escapeText = (self._format === 'textile') ?
@@ -592,6 +621,37 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     replacement: function(content) {
       return '\n';
     }
+  }).addRule('div', {
+    filter: function(node) {
+      return (node.nodeName === 'DIV') && node.style.cssText.length;
+    },
+    replacement: function(content, node) {
+      return '<div style="' + node.style.cssText + '">\n' + content +
+        '\n</div>\n';
+    }
+  }).addRule('p', {
+    filter: function(node) {
+      return (node.nodeName === 'P') && node.style.cssText.length;
+    },
+    replacement: function(content, node) {
+      return '<p style="' + node.style.cssText + '">' + content + '</p>\n';
+    }
+  }).addRule('span', {
+    filter: function(node) {
+      return (node.nodeName === 'SPAN') && node.style.cssText.length;
+    },
+    replacement: function(content, node) {
+      return '<span style="' + node.style.cssText + '">' + content +
+        '</span>';
+    }
+  }).addRule('underline', {
+    filter: function(node) {
+      return (node.nodeName === 'SPAN') &&
+        (node.style.textDecoration === 'underline');
+    },
+    replacement: function(content, node) {
+      return '<ins>' + content + '</ins>';
+    }
   }).addRule('strikethrough', {
     filter: function(node) {
       return (node.nodeName === 'SPAN') &&
@@ -604,6 +664,13 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     filter: 'del',
     replacement: function(content) {
       return '~~' + content + '~~';
+    }
+  }).addRule('font', {
+    filter: ['ins', 'sup', 'sub'],
+    replacement: function(content, node) {
+      var name = node.tagName.toLowerCase();
+
+      return '<' + name + '>' + content + '</' + name + '>';
     }
   }).addRule('a', {
     filter: function(node) {
@@ -628,7 +695,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       var code = node.dataset.code;
       var opt = code ? ' ' + code : '';
 
-      return '~~~' + opt + '\n' + content + '~~~\n\n';
+      return '~~~' + opt + '\n' + content.replace(/\n?$/, '\n') + '~~~\n\n';
     }
   }).addRule('blockquote', {
     filter: 'blockquote',
