@@ -67,7 +67,7 @@ function initRedmineWysiwygEditor() {
     if (settings.url.match(/\/(quoted(\?.+)?|issue_templates\/load(\?.+)?)$/)) {
       // Set comment content with quoted text or issue template.
       rwe.updateVisualContent();
-    } else if (/\/uploads\.js\?.+?$/.test(settings.url)) {
+    } else if (/\/uploads\.js\?.+$/.test(settings.url)) {
       rwe.setAttachments(allAttachments());
       rwe.updateVisualContent();
     }
