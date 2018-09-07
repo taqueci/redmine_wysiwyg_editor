@@ -11,6 +11,7 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
     preview: 'Preview'
   };
   this._attachments = [];
+  this._attachmentUploader = function(file) { return false };
 
   this._defaultModeKey = 'redmine-wysiwyg-editor-mode';
 }
@@ -35,6 +36,12 @@ RedmineWysiwygEditor.prototype.setI18n = function(data) {
 
 RedmineWysiwygEditor.prototype.setAttachments = function(files) {
   this._attachment = files;
+};
+
+RedmineWysiwygEditor.prototype.setAttachmentUploader = function(handler) {
+  var self = this;
+
+  self._attachmentUploader = handler;
 };
 
 RedmineWysiwygEditor.prototype.init = function() {
@@ -137,6 +144,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
 
   if (!self._editor) return false;
 
+  self._updateImageButtonMenu();
   self._setVisualContent();
 
   return true;
@@ -155,6 +163,13 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
       self._setTextContent();
     }).on('focus', function(e) {
       self._updateImageButtonMenu();
+    }).on('paste', function(e) {
+      self._pasteEventHandler(e);
+    }).on('dragover', function(e) {
+      e.preventDefault();
+    }).on('drop', function(e) {
+      // Supress data URI by file drop
+      e.preventDefault();
     });
   };
 
@@ -212,14 +227,10 @@ RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
   return self._attachment.filter(function(file) {
     return file.match(/\.(jpeg|jpg|png|gif)$/i);
   }).map(function(file) {
-    var content = (self._format === 'textile') ?
-        '!' + file + '!' : '![](' + file + ')';
-
     return {
       text: file,
       onclick: function() {
-        self._editor.insertContent(content);
-        self._setTextContent();
+        self._insertImage(file);
         self._setVisualContent();
       }
     };
@@ -270,6 +281,47 @@ RedmineWysiwygEditor.prototype._isAllowedToUseMarkdownHtmlTag = function() {
   });
 
   return isAllowed;
+};
+
+RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
+  var self = this;
+
+  var data = e.clipboardData;
+
+  // FIXME: Please tell me how to detect image or not in Safari and IE...
+  var isImage = data ?
+      (data.items && (data.items[0].type.indexOf('image') >= 0)) :
+      (window.clipboardData.getData('Text') === null);
+
+  if (!isImage) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  // Skip if Edge, IE and Safari because:
+  // - File constructor is not available in Edge and IE.
+  // - DataTransfer.items is not available in Safari and IE.
+  if (/(msie|trident|edge)/i.test(window.navigator.userAgent)) return;
+
+  var date = new Date();
+  var name =
+      date.getFullYear() +
+      ('0' + (date.getMonth() + 1)).slice(-2) +
+      ('0' + date.getDate()).slice(-2) +
+      '-' +
+      ('0' + date.getHours()).slice(-2) +
+      ('0' + date.getMinutes()).slice(-2) +
+      ('0' + date.getSeconds()).slice(-2) +
+      '-' +
+      ('00' + date.getMilliseconds()).slice(-3) +
+      '.png';
+
+  var file = data.items[0].getAsFile();
+
+  // Creates a new File object in order to set file name.
+  var image = new File([file], name, { type: file.type });
+
+  if (self._attachmentUploader(image)) self._insertImage(name);
 };
 
 RedmineWysiwygEditor.prototype._setVisualContent = function() {
@@ -353,6 +405,18 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       self._editor.setContent(htmlContent(data));
     }
   });
+};
+
+RedmineWysiwygEditor.prototype._insertImage = function(path) {
+  var self = this;
+
+  if (!self._editor) return false;
+
+  var content = (self._format === 'textile') ?
+      '!' + path + '!' : '![](' + path + ')';
+
+  self._editor.insertContent('<br>' + content + '<br>');
+  self._setTextContent();
 };
 
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {

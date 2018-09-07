@@ -41,6 +41,13 @@ function initRedmineWysiwygEditor() {
     return attachments;
   };
 
+  var uploader = function(file) {
+    var sizeExceeded =
+        uploadAndAttachFiles([file], $('input:file.filedrop').first());
+
+    return !sizeExceeded;
+  };
+
   var rwe = new RedmineWysiwygEditor($(this), previewUrl);
 
   rwe.setFormat('<%= formatting %>');
@@ -52,15 +59,16 @@ function initRedmineWysiwygEditor() {
     preview: '<%= l(:label_preview) %>'
   });
   rwe.setAttachments(allAttachments());
-  rwe.init();
+  rwe.setAttachmentUploader(uploader);
 
-  $('.add_attachment').on('change', function(e) {
-    rwe.setAttachments(allAttachments());
-  });
+  rwe.init();
 
   $(document).ajaxSuccess(function(event, xhr, settings) {
     if (settings.url.match(/\/(quoted(\?.+)?|issue_templates\/load(\?.+)?)$/)) {
-      // Set comment content with quoted text.
+      // Set comment content with quoted text or issue template.
+      rwe.updateVisualContent();
+    } else if (/\/uploads\.js\?.+?$/.test(settings.url)) {
+      rwe.setAttachments(allAttachments());
       rwe.updateVisualContent();
     }
   });
