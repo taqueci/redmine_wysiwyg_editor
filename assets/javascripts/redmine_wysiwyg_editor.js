@@ -286,22 +286,38 @@ RedmineWysiwygEditor.prototype._isAllowedToUseMarkdownHtmlTag = function() {
 RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
   var self = this;
 
+  var blockEventPropagation = function(event) {
+    event.stopPropagation();
+    event.preventDefault();
+  };
+
   var data = e.clipboardData;
 
-  // FIXME: Please tell me how to detect image or not in Safari and IE...
-  var isImage = data ?
-      (data.items && (data.items[0].type.indexOf('image') >= 0)) :
-      (window.clipboardData.getData('Text') === null);
+  if (data) {
+    var isImage = (data.types.length === 1) && (data.types[0] === 'Files') &&
+        data.items && (data.items[0].type.indexOf('image') >= 0);
 
-  if (!isImage) return;
+    if (isImage) {
+      blockEventPropagation(e);
+      self._pasteImage(data.items[0]);
+    } else if (data.types.length === 0) {
+      // Do nothing if file is pasted.
+      blockEventPropagation(e);
+    }
+  }
+  else {
+    // FIXME: Please tell me how to detect image or not in IE...
+    var isImage = (window.clipboardData.getData('Text') === null);
 
-  e.preventDefault();
-  e.stopPropagation();
+    if (isImage) {
+      // Can not do anything against IE.
+      blockEventPropagation(e);
+    }
+  }
+}
 
-  // Skip if Edge, IE and Safari because:
-  // - File constructor is not available in Edge and IE.
-  // - DataTransfer.items is not available in Safari and IE.
-  if (/(msie|trident|edge)/i.test(window.navigator.userAgent)) return;
+RedmineWysiwygEditor.prototype._pasteImage = function(dataTransferItem) {
+  var self = this;
 
   var date = new Date();
   var name =
@@ -316,10 +332,19 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
       ('00' + date.getMilliseconds()).slice(-3) +
       '.png';
 
-  var file = data.items[0].getAsFile();
+  var image;
 
-  // Creates a new File object in order to set file name.
-  var image = new File([file], name, { type: file.type });
+  // Note:
+  // - DataTransfer.items is not available in Safari and IE.
+  // - File constructor is not available in Edge and IE.
+  try {
+    var file = dataTransferItem.getAsFile();
+
+    // Creates a new File object in order to set file name.
+    image = new File([file], name, { type: file.type });
+  } catch (e) {
+    return;
+  }
 
   if (self._attachmentUploader(image)) self._insertImage(name);
 };
