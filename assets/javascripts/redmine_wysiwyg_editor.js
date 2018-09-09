@@ -13,6 +13,8 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
   this._attachments = [];
   this._attachmentUploader = function(file) { return false };
 
+  this._htmlTagAllowed = false;
+
   this._defaultModeKey = 'redmine-wysiwyg-editor-mode';
 }
 
@@ -39,9 +41,11 @@ RedmineWysiwygEditor.prototype.setAttachments = function(files) {
 };
 
 RedmineWysiwygEditor.prototype.setAttachmentUploader = function(handler) {
-  var self = this;
+  this._attachmentUploader = handler;
+};
 
-  self._attachmentUploader = handler;
+RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
+  this._htmlTagAllowed = isAllowed;
 };
 
 RedmineWysiwygEditor.prototype.init = function() {
@@ -193,7 +197,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
 
   var toolbar = (self._format === 'textile') ?
       'formatselect | bold italic underline strikethrough forecolor | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
-      self._isAllowedToUseMarkdownHtmlTag() ?
+      self._htmlTagAllowed ?
       'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
       'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | hr | table | undo redo';
 
@@ -255,32 +259,6 @@ RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
   }
 
   button.disabled(menu.length === 0);
-};
-
-// FIXME: Move to controller.
-RedmineWysiwygEditor.prototype._isAllowedToUseMarkdownHtmlTag = function() {
-  var self = this;
-
-  var previewData = function(textarea) {
-    var data = {};
-    data[textarea[0].name] = '<div></div>';
-
-    return $.param(data);
-  };
-
-  var isAllowed = false;
-
-  $.ajax({
-    async: false,
-    type: 'POST',
-    url: self._previewUrl,
-    data: previewData(self._jstEditorTextArea),
-    success: function(data) {
-      isAllowed = /<div><\/div>/.test(data);
-    }
-  });
-
-  return isAllowed;
 };
 
 RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
