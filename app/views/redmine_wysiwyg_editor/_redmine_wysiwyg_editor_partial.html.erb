@@ -20,7 +20,7 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
         @topic ? @topic.attachments.map {|a| a.filename } :
         []
     %>
-    <% html_tag_allowed = textilizable('<div></div>').match(/<div><\/div>/) %>
+    <% html_tag_allowed = textilizable('<div></div>').include?('<div></div>') %>
     <script>
 function initRedmineWysiwygEditor() {
   var previewButton = $('a[accesskey=r]');
