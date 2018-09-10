@@ -193,13 +193,22 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
         self.changeMode(self._defaultMode.get());
       }
     });
+
+    editor.addButton('code', {
+      type: 'button',
+      icon: 'code',
+      tooltip: 'Code',
+      onclick: function() {
+        editor.execCommand('mceToggleFormat', false, 'code');
+      }
+    });
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough forecolor | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
+      'formatselect | bold italic underline strikethrough code forecolor | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
-      'formatselect | bold italic strikethrough | link insertimage | bullist numlist blockquote | hr | table | undo redo';
+      'formatselect | bold italic strikethrough code | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
+      'formatselect | bold italic strikethrough code | link insertimage | bullist numlist blockquote | hr | table | undo redo';
 
   tinymce.init({
     target: self._visualEditor.find('div')[0],
@@ -502,28 +511,28 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     return (attr.length > 0) ? attr.join('') + '.' : '';
   };
 
-  var textContent = function(node, text) {
-    var NOTEXTILE = '<notextile></notextile>';
+  var NT = '<notextile></notextile>';
 
+  var gluableContent = function(content, node, glue) {
     var ELEMENT_NODE = 1;
     var TEXT_NODE = 3;
 
-    var content = [];
+    var c = [];
 
     var p = node.previousSibling;
     var n = node.nextSibling;
 
     if (p && (((p.nodeType === TEXT_NODE) && p.nodeValue.match(/\S$/)) ||
               ((p.nodeType === ELEMENT_NODE) && p.nodeName !== 'BR')))
-      content.push(NOTEXTILE);
+      c.push(glue);
 
-    content.push(text);
+    c.push(content);
 
     if (n && (((n.nodeType === TEXT_NODE) && n.nodeValue.match(/^\S/)) ||
               ((n.nodeType === ELEMENT_NODE) && n.nodeName !== 'BR')))
-      content.push(NOTEXTILE);
+      c.push(glue);
 
-    return content.join('');
+    return c.join('');
   };
 
   var converters = [{
@@ -537,7 +546,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         (node.style.textDecoration === 'underline');
     },
     replacement: function(content, node) {
-      return textContent(node, '+' + styleAttr(node) + content + '+');
+      return gluableContent('+' + styleAttr(node) + content + '+', node, NT);
     }
   }, {
     filter: function(node) {
@@ -545,24 +554,35 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         (node.style.textDecoration === 'line-through');
     },
     replacement: function(content, node) {
-      return textContent(node, '-' + styleAttr(node) + content + '-');
+      return gluableContent('-' + styleAttr(node) + content + '-', node, NT);
     }
   }, {
     filter: 'span',
     replacement: function(content, node) {
       // Remove percentage value because RedCloth3 can't parse correctly.
-      return textContent(node, '%' + styleAttr(node).replace(/\s*\d+%/g, '') +
-                         content + '%');
+      var c = '%' + styleAttr(node).replace(/\s*\d+%/g, '') + content + '%';
+
+      return gluableContent(c, node, NT);
     }
   }, {
     filter: 'strong',
     replacement: function(content, node) {
-      return textContent(node, '*' + styleAttr(node) + content + '*');
+      return gluableContent('*' + styleAttr(node) + content + '*', node, NT);
     }
   }, {
     filter: 'em',
     replacement: function(content, node) {
-      return textContent(node, '_' + styleAttr(node) + content + '_');
+      return gluableContent('_' + styleAttr(node) + content + '_', node, NT);
+    }
+  }, {
+    filter: function(node) {
+      var hasSiblings = node.previousSibling || node.nextSibling;
+      var isCodeBlock = (node.parentNode.nodeName === 'PRE') && !hasSiblings;
+
+      return (node.nodeName === 'CODE') && !isCodeBlock;
+    },
+    replacement: function(content, node) {
+      return gluableContent('@' + content + '@', node, ' ');
     }
   }, {
     filter: function(node) {
