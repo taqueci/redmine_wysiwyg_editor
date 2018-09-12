@@ -441,6 +441,28 @@ RedmineWysiwygEditor.prototype._imageUrl = function(url) {
           (self._attachment.indexOf(base) >= 0)) ? base : url;
 }
 
+RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
+  var ELEMENT_NODE = 1;
+  var TEXT_NODE = 3;
+
+  var c = [];
+
+  var p = node.previousSibling;
+  var n = node.nextSibling;
+
+  if (p && (((p.nodeType === TEXT_NODE) && /\S$/.test(p.nodeValue)) ||
+            ((p.nodeType === ELEMENT_NODE) && (p.nodeName !== 'BR'))))
+    c.push(glue);
+
+  c.push(content);
+
+  if (n && (((n.nodeType === TEXT_NODE) && /^\S/.test(n.nodeValue)) ||
+            ((n.nodeType === ELEMENT_NODE) && (n.nodeName !== 'BR'))))
+      c.push(glue);
+
+  return c.join('');
+};
+
 RedmineWysiwygEditor.prototype._setTextContent = function() {
   var self = this;
 
@@ -511,29 +533,9 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     return (attr.length > 0) ? attr.join('') + '.' : '';
   };
 
+  var gluableContent = self._gluableContent;
+
   var NT = '<notextile></notextile>';
-
-  var gluableContent = function(content, node, glue) {
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-
-    var c = [];
-
-    var p = node.previousSibling;
-    var n = node.nextSibling;
-
-    if (p && (((p.nodeType === TEXT_NODE) && p.nodeValue.match(/\S$/)) ||
-              ((p.nodeType === ELEMENT_NODE) && p.nodeName !== 'BR')))
-      c.push(glue);
-
-    c.push(content);
-
-    if (n && (((n.nodeType === TEXT_NODE) && n.nodeValue.match(/^\S/)) ||
-              ((n.nodeType === ELEMENT_NODE) && n.nodeName !== 'BR')))
-      c.push(glue);
-
-    return c.join('');
-  };
 
   var converters = [{
     filter: 'br',
@@ -585,18 +587,6 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return gluableContent('@' + content + '@', node, ' ');
     }
   }, {
-    filter: function(node) {
-      var c = node.textContent;
-
-      return (node.nodeName === 'A') &&
-        ((node.href === 'mailto:' + c) ||
-         (node.href.match(/^(http|https|ftp|ftps):/) &&
-          ((node.href === c) || (node.href === c + '/'))));
-    },
-    replacement: function(content) {
-      return content;
-    }
-  }, {
     filter: 'img',
     replacement: function(content, node) {
       return img(node);
@@ -607,7 +597,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         (node.firstChild.nodeName === 'IMG');
     },
     replacement: function(content, node) {
-      return img(node.firstChild) + ':' + node.href;
+      return gluableContent(img(node.firstChild) + ':' + node.href, node, ' ');
     }
   }, {
     filter: function(node) {
@@ -615,6 +605,27 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     },
     replacement: function(content) {
       return '';
+    }
+  }, {
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.getAttribute('href');
+    },
+    replacement: function(content, node) {
+      var href = node.getAttribute('href');
+
+      var isAutoLink = href &&
+          ((href === 'mailto:' + content) ||
+           (/^(http|https|ftp|ftps):/.test(href) &&
+            ((href === content) || (href === content + '/'))));
+
+      if (isAutoLink && !node.title) {
+        return gluableContent(content, node, ' ');
+      } else {
+        var titlePart = node.title ? ' (' + node.title + ')' : '';
+        var c = '\"' + content +  titlePart + '\":' + href;
+
+        return gluableContent(c, node, NT);
+      }
     }
   } , {
     filter: 'abbr',
@@ -761,15 +772,16 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     }
   }).addRule('a', {
     filter: function(node) {
-      var c = node.textContent;
+      var content = node.textContent;
+      var href = node.getAttribute('href');
 
-      return (node.nodeName === 'A') &&
-        ((node.href === 'mailto:' + c) ||
-         (node.href.match(/^(http|https|ftp|ftps):/) &&
-          ((node.href === c) || (node.href === c + '/'))));
+      return (node.nodeName === 'A') && href &&
+        ((href === 'mailto:' + content) ||
+         (/^(http|https|ftp|ftps):/.test(href) &&
+          ((href === content) || (href === content + '/'))));
     },
-    replacement: function(content) {
-      return content;
+    replacement: function(content, node) {
+      return self._gluableContent(content, node, ' ');
     }
   }).addRule('table', {
     filter: 'table',
