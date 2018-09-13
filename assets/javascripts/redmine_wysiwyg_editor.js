@@ -254,6 +254,9 @@ RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
   var self = this;
   var button = self._imageButton;
 
+  // If not rendered, discontinue for default issue template.
+  if (!button) return;
+
   var menu = self._imageButtonMenuItems();
 
   self._imageButtonMenu.length = 0;
