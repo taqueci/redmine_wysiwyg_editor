@@ -43,10 +43,18 @@ function initRedmineWysiwygEditor() {
   };
 
   var uploader = function(file) {
-    var sizeExceeded =
-        uploadAndAttachFiles([file], $('input:file.filedrop').first());
+    var input = $('input:file.filedrop').first();
 
-    return !sizeExceeded;
+    if (input.length > 0) {
+      var sizeExceeded = uploadAndAttachFiles([file], input);
+
+      return !sizeExceeded;
+    } else {
+      // For Redmine 3.3
+      uploadAndAttachFiles([file], $('input:file.file_selector'));
+
+      return true;
+    }
   };
 
   var rwe = new RedmineWysiwygEditor($(this), previewUrl);
