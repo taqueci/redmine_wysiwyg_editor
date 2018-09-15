@@ -20,6 +20,7 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
         @topic ? @topic.attachments.map {|a| a.filename } :
         []
     %>
+    <% html_tag_allowed = textilizable('<div></div>').include?('<div></div>') %>
     <script>
 function initRedmineWysiwygEditor() {
   var previewButton = $('a[accesskey=r]');
@@ -38,17 +39,47 @@ function initRedmineWysiwygEditor() {
       attachments.push($(this).val());
     });
 
+    // For Redmine 3.3
+    $('#attachments_fields input.filename').each(function() {
+      attachments.push($(this).val());
+    });
+
     return attachments;
   };
 
   var uploader = function(file) {
-    var sizeExceeded =
-        uploadAndAttachFiles([file], $('input:file.filedrop').first());
+    var input = $('input:file.filedrop').first();
 
-    return !sizeExceeded;
+    if (input.length > 0) {
+      var sizeExceeded = uploadAndAttachFiles([file], input);
+
+      return !sizeExceeded;
+    } else {
+      // For Redmine 3.3
+      uploadAndAttachFiles([file], $('input:file.file_selector'));
+
+      return true;
+    }
+  };
+
+  var postInit = function (rwe) {
+    $(document).ajaxSuccess(function(event, xhr, settings) {
+      var url = settings.url;
+
+      if (/\/quoted(\?.+)?$/.test(url) ||
+          /\/issue_templates\/load(\?.+)?$/.test(url)) {
+        // Set comment content with quoted text or issue template.
+        rwe.updateVisualContent();
+      } else if (/\/uploads\.js\?.+$/.test(url)) {
+        rwe.setAttachments(allAttachments());
+        rwe.updateVisualContent();
+      }
+    });
   };
 
   var rwe = new RedmineWysiwygEditor($(this), previewUrl);
+
+  rwe.setPostInitCallback(function() { postInit(rwe) });
 
   rwe.setFormat('<%= formatting %>');
   rwe.setLanguage('<%= current_language %>');
@@ -61,17 +92,9 @@ function initRedmineWysiwygEditor() {
   rwe.setAttachments(allAttachments());
   rwe.setAttachmentUploader(uploader);
 
-  rwe.init();
+  rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>)
 
-  $(document).ajaxSuccess(function(event, xhr, settings) {
-    if (settings.url.match(/\/(quoted(\?.+)?|issue_templates\/load(\?.+)?)$/)) {
-      // Set comment content with quoted text or issue template.
-      rwe.updateVisualContent();
-    } else if (/\/uploads\.js\?.+$/.test(settings.url)) {
-      rwe.setAttachments(allAttachments());
-      rwe.updateVisualContent();
-    }
-  });
+  rwe.init();
 }
 
 $(function() {
