@@ -125,8 +125,15 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextTextile(content), expected);
     });
 
+    test('Preformatted', function() {
+      var content = '<pre>#include &lt;stdio.h&gt;<br><br>int main(int argc, char *argv[])<br>{<br>    printf("Hello, world<br>");<br><br>    return 0;<br>}<br></pre><br><br><pre>No newline at the end of the content</pre>';
+      var expected = '<pre>\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>\n\n<pre>\nNo newline at the end of the content</pre>';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
     test('Code block', function() {
-      var content = '<pre><code class="c">#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
+      var content = '<pre><code class="c">#include &lt;stdio.h&gt;<br><br>int main(int argc, char *argv[])<br>{<br>    printf("Hello, world<br>");<br><br>    return 0;<br>}<br></code></pre>';
       var expected = '<pre><code class="c">\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
 
       assert.equal(x._toTextTextile(content), expected);
