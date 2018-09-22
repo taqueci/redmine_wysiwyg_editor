@@ -585,16 +585,6 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return gluableContent('_' + styleAttr(node) + content + '_', node, NT);
     }
   }, {
-    filter: function(node) {
-      var hasSiblings = node.previousSibling || node.nextSibling;
-      var isCodeBlock = (node.parentNode.nodeName === 'PRE') && !hasSiblings;
-
-      return (node.nodeName === 'CODE') && !isCodeBlock;
-    },
-    replacement: function(content, node) {
-      return gluableContent('@' + content + '@', node, ' ');
-    }
-  }, {
     filter: 'img',
     replacement: function(content, node) {
       return img(node);
@@ -646,17 +636,23 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return '---';
     }
   }, {
+    filter: 'code',
+    replacement: function(content, node) {
+      return (node.parentNode.nodeName === 'PRE') ?
+        content : gluableContent('@' + content + '@', node, ' ');
+    }
+  }, {
     filter: 'pre',
     replacement: function(content, node) {
       if (node.firstChild && (node.firstChild.nodeName === 'CODE')) {
         var code = node.firstChild.className;
         var attr = code ? ' class="' + code + '"' : '';
 
-        return '\n\n<pre><code' + attr + '>\n' + node.textContent +
-          '</code></pre>\n\n';
+        return '\n\n<pre><code' + attr + '>\n' +
+          content.replace(/\s?$/, '\n') + '</code></pre>\n\n';
       }
       else {
-        return '\n\n<pre>\n' + node.textContent + '</pre>\n\n';
+        return '\n\n<pre>\n' + content + '</pre>\n\n';
       }
     }
   }, {
