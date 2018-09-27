@@ -496,18 +496,39 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       });
   };
 
-  var styleAttr = function(node) {
+  var styles = function(node) {
+    var attr = {};
+
     // Defined in redcloth3.rb
     var STYLES_RE = /^(color|width|height|border|background|padding|margin|font|float)(-[a-z]+)*:\s*((\d+%?|\d+px|\d+(\.\d+)?em|#[0-9a-f]+|[a-z]+)\s*)+$/i;
 
     // FIXME: Property cssText depends on the browser.
-    var style = colorRgbToHex(node.style.cssText)
-        .split(/\s*;\s*/)
-        .filter(function(value) {
-          return STYLES_RE.test(value);
-        }).map(function(str) {
-          return str + ';'
-        }).sort().join(' ');
+    colorRgbToHex(node.style.cssText)
+      .split(/\s*;\s*/)
+      .filter(function(value) {
+        return STYLES_RE.test(value);
+      }).forEach(function(str) {
+        var val = str.split(/\s*:\s*/);
+
+        attr[val[0]] = val[1];
+      });
+
+    return attr;
+  };
+
+  var styleAttr = function(node) {
+    var attr = styles(node);
+
+    // For image resizing
+    ['width', 'height'].forEach(function(name) {
+      var val = node.getAttribute(name);
+
+      if (val) attr[name] = val + 'px';
+    });
+
+    var style = Object.keys(attr).map(function(key) {
+      return key + ': ' + attr[key] + ';';
+    }).sort().join(' ');
 
     return (style.length > 0) ? '{' + style + '}' : '';
   };

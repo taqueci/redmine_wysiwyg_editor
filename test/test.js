@@ -98,15 +98,15 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image with style attribute', function() {
-      var content = '<img src="http://example.com/foo.png" alt="Foo" style="width: 100%">';
-      var expected = '!{width: 100%;}http://example.com/foo.png(Foo)!';
+      var content = '<img src="http://example.com/foo.png" alt="Foo" style="width: 100%"><br><img src="http://example.com/foo.png" alt="Foo" width="640" height="480">';
+      var expected = '!{width: 100%;}http://example.com/foo.png(Foo)!\n!{height: 480px; width: 640px;}http://example.com/foo.png(Foo)!';
 
       assert.equal(x._toTextTextile(content), expected);
     });
 
     test('Image link', function() {
-      var content = '<a href="http://example.com/foo/"><img src="http://example.com/foo.png"></a>';
-      var expected = '!http://example.com/foo.png!:http://example.com/foo/';
+      var content = '<a href="http://example.com/foo/"><img src="http://example.com/foo.png"></a><br><a href="http://example.com/foo/"><img src="http://example.com/foo.png" width="640" height="480"></a>';
+      var expected = '!http://example.com/foo.png!:http://example.com/foo/\n!{height: 480px; width: 640px;}http://example.com/foo.png!:http://example.com/foo/';
 
       assert.equal(x._toTextTextile(content), expected);
     });
