@@ -62,6 +62,10 @@ function initRedmineWysiwygEditor() {
     }
   };
 
+  var isAttachmentUploadable = function(jstEditor) {
+    return jstEditor.closest('div.box.filedroplistner').length > 0;
+  }
+
   var postInit = function (rwe) {
     $(document).ajaxSuccess(function(event, xhr, settings) {
       var url = settings.url;
@@ -90,7 +94,7 @@ function initRedmineWysiwygEditor() {
     preview: '<%= l(:label_preview) %>'
   });
   rwe.setAttachments(allAttachments());
-  rwe.setAttachmentUploader(uploader);
+  if (isAttachmentUploadable($(this))) rwe.setAttachmentUploader(uploader);
 
   rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>)
 
