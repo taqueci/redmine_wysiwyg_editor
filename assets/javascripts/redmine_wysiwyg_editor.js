@@ -54,7 +54,7 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
-RedmineWysiwygEditor.prototype.init = function() {
+RedmineWysiwygEditor.prototype.init = function(editorSetting) {
   var self = this;
 
   var container = self._jstEditor.parent();
@@ -100,7 +100,7 @@ RedmineWysiwygEditor.prototype.init = function() {
       set: function() {}
     };
 
-  self._initTinymce();
+  self._initTinymce(editorSetting);
 
   return true;
 };
@@ -160,7 +160,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
   return true;
 };
 
-RedmineWysiwygEditor.prototype._initTinymce = function() {
+RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var self = this;
 
   var style = 'pre { padding: .5em 1em; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 3px; width: auto; white-space: pre-wrap; }' +
@@ -218,8 +218,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
       'formatselect | bold italic strikethrough code | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
       'formatselect | bold italic strikethrough code | link insertimage | bullist numlist blockquote | hr | table | undo redo';
 
-  tinymce.init({
-    target: self._visualEditor.find('div')[0],
+  tinymce.init($.extend({
+    // Configurable parameters
     language: self._language,
     content_style: style,
     height: self._jstEditorTextArea.height(),
@@ -233,13 +233,16 @@ RedmineWysiwygEditor.prototype._initTinymce = function() {
     table_advtab: false,
     table_cell_advtab: false,
     table_row_advtab: false,
-    table_default_styles: {},
+    table_default_styles: {}
+  }, setting, {
+    // Mandatory parameters
+    target: self._visualEditor.find('div')[0],
     init_instance_callback: callback,
     setup: setup,
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset'
-  });
+  }));
 };
 
 RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
@@ -496,18 +499,39 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       });
   };
 
-  var styleAttr = function(node) {
+  var styles = function(node) {
+    var attr = {};
+
     // Defined in redcloth3.rb
     var STYLES_RE = /^(color|width|height|border|background|padding|margin|font|float)(-[a-z]+)*:\s*((\d+%?|\d+px|\d+(\.\d+)?em|#[0-9a-f]+|[a-z]+)\s*)+$/i;
 
     // FIXME: Property cssText depends on the browser.
-    var style = colorRgbToHex(node.style.cssText)
-        .split(/\s*;\s*/)
-        .filter(function(value) {
-          return STYLES_RE.test(value);
-        }).map(function(str) {
-          return str + ';'
-        }).sort().join(' ');
+    colorRgbToHex(node.style.cssText)
+      .split(/\s*;\s*/)
+      .filter(function(value) {
+        return STYLES_RE.test(value);
+      }).forEach(function(str) {
+        var val = str.split(/\s*:\s*/);
+
+        attr[val[0]] = val[1];
+      });
+
+    return attr;
+  };
+
+  var styleAttr = function(node) {
+    var attr = styles(node);
+
+    // For image resizing
+    ['width', 'height'].forEach(function(name) {
+      var val = node.getAttribute(name);
+
+      if (val) attr[name] = val + 'px';
+    });
+
+    var style = Object.keys(attr).map(function(key) {
+      return key + ': ' + attr[key] + ';';
+    }).sort().join(' ');
 
     return (style.length > 0) ? '{' + style + '}' : '';
   };
