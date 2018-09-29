@@ -98,10 +98,10 @@ function initRedmineWysiwygEditor() {
 
   rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>)
 
-  var config = (typeof WYSIWYG_EDITOR_CONFIG !== 'undefined') ?
-      WYSIWYG_EDITOR_CONFIG : {}
+  var setting = (typeof WYSIWYG_EDITOR_SETTING !== 'undefined') ?
+      WYSIWYG_EDITOR_SETTING : {}
 
-  rwe.init(config);
+  rwe.init(setting);
 }
 
 $(function() {

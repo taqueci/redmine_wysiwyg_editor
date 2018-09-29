@@ -54,7 +54,7 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
-RedmineWysiwygEditor.prototype.init = function(editorConfig) {
+RedmineWysiwygEditor.prototype.init = function(editorSetting) {
   var self = this;
 
   var container = self._jstEditor.parent();
@@ -100,7 +100,7 @@ RedmineWysiwygEditor.prototype.init = function(editorConfig) {
       set: function() {}
     };
 
-  self._initTinymce(editorConfig);
+  self._initTinymce(editorSetting);
 
   return true;
 };
@@ -160,7 +160,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
   return true;
 };
 
-RedmineWysiwygEditor.prototype._initTinymce = function(config) {
+RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var self = this;
 
   var style = 'pre { padding: .5em 1em; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 3px; width: auto; white-space: pre-wrap; }' +
@@ -234,7 +234,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(config) {
     table_cell_advtab: false,
     table_row_advtab: false,
     table_default_styles: {}
-  }, config, {
+  }, setting, {
     // Mandatory parameters
     target: self._visualEditor.find('div')[0],
     init_instance_callback: callback,
