@@ -1,38 +1,38 @@
 .wysiwyg-editor {
-	padding-right: 2px;
+  padding-right: 2px;
 }
 
 .wysiwyg-editor-preview p {
-	padding: 0;
+  padding: 0;
 }
 
 .wysiwyg-editor-tab {
-	margin: 1ex 0;
+  margin: 1ex 0;
 }
 
 .wysiwyg-editor-tab ul {
-	list-style: none;
-	padding: 0;
-	margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .wysiwyg-editor-tab ul li {
-	display: inline-block;
-	margin-right: 1em;
+  display: inline-block;
+  margin-right: 1em;
 }
 
 .wysiwyg-editor-tab ul li a.active {
-	color: inherit;
-	text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* FIXME: Tool bar style may be broken under certain Redmine themes. */
 
 .mce-tinymce,
 .mce-top-part::before {
-	-webkit-box-shadow: none !important;
-	-moz-box-shadow: none !important;
-	box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  box-shadow: none !important;
 }
 
 .mce-listbox button,
@@ -41,18 +41,18 @@
 .mce-btn:hover button,
 .mce-close,
 .mce-close:hover {
-	border: none;
-	border-radius: 0;
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
+  border: none;
+  border-radius: 0;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 }
 
 .mce-btn button .mce-ico,
 .mce-btn button .mce-caret,
 .mce-container .mce-resizehandle .mce-ico {
-	padding: 0;
-	background-color: transparent;
-	font-size: 16px;
-	color: #595959;
+  padding: 0;
+  background-color: transparent;
+  font-size: 16px;
+  color: #595959;
 }
