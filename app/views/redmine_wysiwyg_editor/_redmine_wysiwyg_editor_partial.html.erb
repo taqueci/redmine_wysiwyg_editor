@@ -63,7 +63,7 @@ function initRedmineWysiwygEditor() {
   };
 
   var isAttachmentUploadable = function(jstEditor) {
-    return jstEditor.closest('div.box.filedroplistner').length > 0;
+    return jstEditor.closest('.journal').length === 0;
   }
 
   var postInit = function (rwe) {
