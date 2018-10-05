@@ -575,22 +575,29 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return content + '\n';
     }
   }, {
+    // Underline
     filter: function(node) {
-      return (node.nodeName === 'SPAN') &&
-        (node.style.textDecoration === 'underline');
+      var name = node.nodeName;
+
+      return (name === 'U') ||
+        ((name === 'SPAN') && (node.style.textDecoration === 'underline'));
     },
     replacement: function(content, node) {
       return gluableContent('+' + styleAttr(node) + content + '+', node, NT);
     }
   }, {
+    // Strike-through
     filter: function(node) {
-      return (node.nodeName === 'SPAN') &&
-        (node.style.textDecoration === 'line-through');
+      var name = node.nodeName;
+
+      return (name === 'S') ||
+        ((name === 'SPAN') && (node.style.textDecoration === 'line-through'));
     },
     replacement: function(content, node) {
       return gluableContent('-' + styleAttr(node) + content + '-', node, NT);
     }
   }, {
+    // Span
     filter: 'span',
     replacement: function(content, node) {
       // Remove percentage value because RedCloth3 can't parse correctly.
@@ -599,21 +606,25 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return gluableContent(c, node, NT);
     }
   }, {
-    filter: 'strong',
+    // Bold
+    filter: ['strong', 'b', 'mark'],
     replacement: function(content, node) {
       return gluableContent('*' + styleAttr(node) + content + '*', node, NT);
     }
   }, {
-    filter: 'em',
+    // Italic
+    filter: ['em', 'q'],
     replacement: function(content, node) {
       return gluableContent('_' + styleAttr(node) + content + '_', node, NT);
     }
   }, {
+    // Image
     filter: 'img',
     replacement: function(content, node) {
       return img(node);
     }
   }, {
+    // Image link
     filter: function(node) {
       return (node.nodeName === 'A') && node.firstChild &&
         (node.firstChild.nodeName === 'IMG');
@@ -622,6 +633,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return gluableContent(img(node.firstChild) + ':' + node.href, node, ' ');
     }
   }, {
+    // Anchor
     filter: function(node) {
       return (node.nodeName === 'A') && (node.textContent.length === 0);
     },
@@ -629,6 +641,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return '';
     }
   }, {
+    // Link
     filter: function(node) {
       return (node.nodeName === 'A') && node.getAttribute('href');
     },
@@ -650,22 +663,26 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       }
     }
   } , {
+    // Abbrev
     filter: 'abbr',
     replacement: function(content, node) {
       return content + '(' + node.title + ')';
     }
   }, {
+    // Line
     filter: 'hr',
     replacement: function(content) {
       return '---';
     }
   }, {
-    filter: 'code',
+    // Code
+    filter: ['code', 'kbd', 'samp', 'tt', 'var'],
     replacement: function(content, node) {
       return (node.parentNode.nodeName === 'PRE') ?
         content : gluableContent('@' + content + '@', node, ' ');
     }
   }, {
+    // Preformatted
     filter: 'pre',
     replacement: function(content, node) {
       if (node.firstChild && (node.firstChild.nodeName === 'CODE')) {
@@ -680,11 +697,13 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       }
     }
   }, {
+    // Quote
     filter: 'blockquote',
     replacement: function(content) {
       return content.trim().replace(/\n\n\n+/g, '\n\n').replace(/^/mg, '> ');
     }
   }, {
+    // Table
     filter: ['table'],
     replacement: function(content, node) {
       var style = styleAttr(node);
@@ -693,11 +712,13 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return attr + content + '\n';
     }
   }, {
+    // Table
     filter: ['thead', 'tbody', 'tfoot'],
     replacement: function(content) {
       return content;
     }
   }, {
+    // Table
     filter: 'tr',
     replacement: function(content, node) {
       var style = styleAttr(node);
@@ -706,10 +727,41 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       return attr + '|' + content + '\n';
     }
   }, {
+    // Table
     filter: ['th', 'td'],
     replacement: function(content, node) {
       return tableCellOption(node) + ' ' +
         content.replace(/\n\n+/g, '\n') + ' |';
+    }
+  }, {
+    // Block
+    filter: [
+      'div', 'address', 'article', 'aside', 'footer', 'header', 'nav',
+      'section', 'dl', 'dt', 'figcaption', 'figure', 'label', 'legend',
+      'option', 'progress', 'textarea', 'dialog', 'summary', 'center'
+    ],
+    replacement: function(content) {
+      return content + '\n\n';
+    }
+  }, {
+    // Content
+    filter: [
+      'hgroup', 'dd', 'main', 'bdi', 'bdo', 'cite', 'data', 'dfn',
+      'ruby', 'small', 'time', 'audio', 'track', 'video', 'picture', 'caption',
+      'button', 'datalist', 'fieldset', 'form', 'meter', 'optgroup', 'select',
+      'details', 'big'
+    ],
+    replacement: function(content, node) {
+      return content;
+    }
+  }, {
+    // None
+    filter: [
+      'rp', 'rt', 'rtc', 'wbr', 'area', 'map', 'embed', 'object', 'param',
+      'source', 'canvas', 'noscript', 'script', 'input', 'output'
+    ],
+    replacement: function(content, node) {
+      return '';
     }
   }];
 
@@ -767,21 +819,34 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       return (node.nodeName === 'SPAN') && node.style.cssText.length;
     },
     replacement: function(content, node) {
-      return '<span style="' + node.style.cssText + '">' + content +
-        '</span>';
+      return '<span style="' + node.style.cssText + '">' + content + '</span>';
+    }
+  }).addRule('bold', {
+    filter: 'mark',
+    replacement: function(content, node) {
+      return '**' + content + '**';
+    }
+  }).addRule('italic', {
+    filter: 'q',
+    replacement: function(content) {
+      return '_' + content + '_';
     }
   }).addRule('underline', {
     filter: function(node) {
-      return (node.nodeName === 'SPAN') &&
-        (node.style.textDecoration === 'underline');
+      var name = node.nodeName;
+
+      return (name === 'U') || (name === 'INS') ||
+        ((name === 'SPAN') && (node.style.textDecoration === 'underline'));
     },
     replacement: function(content, node) {
       return '<ins>' + content + '</ins>';
     }
   }).addRule('strikethrough', {
     filter: function(node) {
-      return (node.nodeName === 'SPAN') &&
-        (node.style.textDecoration === 'line-through');
+      var name = node.nodeName;
+
+      return (name === 'S') || (name === 'DEL') ||
+        ((name === 'SPAN') && (node.style.textDecoration === 'line-through'));
     },
     replacement: function(content) {
       return '~~' + content + '~~';
@@ -791,12 +856,10 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     replacement: function(content) {
       return '~~' + content + '~~';
     }
-  }).addRule('font', {
-    filter: ['ins', 'sup', 'sub'],
-    replacement: function(content, node) {
-      var name = node.tagName.toLowerCase();
-
-      return '<' + name + '>' + content + '</' + name + '>';
+  }).addRule('code', {
+    filter: ['kbd', 'samp', 'tt', 'var'],
+    replacement: function(content) {
+      return gluableContent('`' + content + '`', node, ' ');
     }
   }).addRule('a', {
     filter: function(node) {
@@ -834,7 +897,34 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     replacement: function(content, node) {
       return '![' + node.alt + '](' + self._imageUrl(node.src) + ')';
     }
-  });
+  }).addRule('block', {
+    filter: [
+      'address', 'article', 'aside', 'footer', 'header', 'nav',
+      'section', 'dl', 'dt', 'figcaption', 'figure', 'label', 'legend',
+      'option', 'progress', 'textarea', 'dialog', 'summary', 'center'
+    ],
+    replacement: function(content) {
+      return content + '\n\n';
+    }
+  }).addRule('content', {
+    filter: [
+      'hgroup', 'dd', 'main', 'bdi', 'bdo', 'cite', 'data', 'dfn',
+      'ruby', 'small', 'time', 'audio', 'track', 'video', 'picture', 'caption',
+      'button', 'datalist', 'fieldset', 'form', 'meter', 'optgroup', 'select',
+      'details', 'big', 'abbr'
+    ],
+    replacement: function(content, node) {
+      return content;
+    }
+  }).addRule('none', {
+    filter: [
+      'rp', 'rt', 'rtc', 'wbr', 'area', 'map', 'embed', 'object', 'param',
+      'source', 'canvas', 'noscript', 'script', 'input', 'output'
+    ],
+    replacement: function(content, node) {
+      return '';
+    }
+  }).keep(['sup', 'sub']);
 
   return turndownService;
 };
