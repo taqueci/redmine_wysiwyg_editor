@@ -63,7 +63,9 @@ function initRedmineWysiwygEditor() {
   };
 
   var isAttachmentUploadable = function(jstEditor) {
-    return jstEditor.closest('.journal').length === 0;
+    // Disables uploading in editing note and adding news comment.
+    return (jstEditor.closest('.journal').length === 0) &&
+      (jstEditor.closest('#add_comment_form').length === 0);
   }
 
   var postInit = function (rwe) {
