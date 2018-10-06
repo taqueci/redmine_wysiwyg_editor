@@ -155,7 +155,7 @@ suite('Redmine WYSIWYG Editor', function() {
 
     test('Paragraph with style attribute', function() {
       var content = '<p style="color: rgb(255, 255, 255); background-color: #dc3545"; opacity: 0.5; width: 100%">Hello, world</p>';
-      var expected = 'p{color: #ffffff; background-color: #dc3545;}. Hello, world';
+      var expected = 'p{background-color: #dc3545; color: #ffffff;}. Hello, world';
 
       assert.equal(x._toTextTextile(content), expected);
     });
@@ -170,6 +170,13 @@ suite('Redmine WYSIWYG Editor', function() {
     test('Decorations not separated by space', function() {
       var content = 'normal<strong>bold</strong><em>italic</em><span style="text-decoration: underline">underline</span><span style="text-decoration: line-through">strikethrough</span>normal<br><strong>bold</strong><br><em>italic</em><br><span style="text-decoration: underline">underline</span><br><span style="text-decoration: line-through">strikethrough</span><br><code>code</code><br>normal';
       var expected = 'normal<notextile></notextile>*bold*<notextile></notextile><notextile></notextile>_italic_<notextile></notextile><notextile></notextile>+underline+<notextile></notextile><notextile></notextile>-strikethrough-<notextile></notextile>normal\n*bold*\n_italic_\n+underline+\n-strikethrough-\n@code@\nnormal';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Pasting as HTML', function() {
+      var content = '<div><h1 style="box-sizing: border-box; font-size: 2em; margin-top: 0px !important; margin-right: 0px; margin-bottom: 16px; margin-left: 0px; font-weight: 600; line-height: 1.25; padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236, 239); color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial;">Redmine WYSIWYG Editor plugin</h1><p style="box-sizing: border-box; margin-top: 0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial;">This plugin adds WYSIWYG editor mode to Redmine.</p></div>';
+      var expected = 'h1{background-color: #ffffff; border-bottom: 1px solid #eaecef; color: #24292e; font-size: 2em; font-style: normal; font-variant-caps: normal; font-variant-ligatures: normal; font-weight: 600; margin-bottom: 16px; margin-left: 0px; margin-right: 0px; padding-bottom: 0.3em;}. Redmine WYSIWYG Editor plugin\n\np{background-color: #ffffff; color: #24292e; font-size: 16px; font-style: normal; font-variant-caps: normal; font-variant-ligatures: normal; font-weight: 400; margin-bottom: 16px; margin-top: 0px;}. This plugin adds WYSIWYG editor mode to Redmine.';
 
       assert.equal(x._toTextTextile(content), expected);
     });
