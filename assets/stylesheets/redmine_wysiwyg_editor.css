@@ -1,3 +1,12 @@
+.jstElements {
+  display: none;
+}
+
+.jstEditor {
+  /* Not "display:none" but this to get the height of the original textarea */
+  visibility: hidden;
+}
+
 .wysiwyg-editor {
   padding-right: 2px;
 }
