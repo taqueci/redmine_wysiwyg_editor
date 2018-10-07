@@ -1,9 +1,7 @@
-.jstElements {
-  display: none;
-}
-
+.jstTabs,
+.jstElements,
 .jstEditor {
-  /* Not "display:none" but this to get the height of the original textarea */
+  /* To avoid flickering of the original editor. */
   visibility: hidden;
 }
 

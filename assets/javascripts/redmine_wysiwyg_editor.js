@@ -183,6 +183,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     });
 
     self.changeMode(self._defaultMode.get());
+
+    self._jstElements.css('visibility', 'visible');
     self._jstEditor.css('visibility', 'visible');
 
     self._postInit();
