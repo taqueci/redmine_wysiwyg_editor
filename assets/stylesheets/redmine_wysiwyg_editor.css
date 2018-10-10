@@ -1,10 +1,3 @@
-.jstTabs,
-.jstElements,
-.jstEditor {
-  /* To avoid flickering of the original editor. */
-  visibility: hidden;
-}
-
 .wysiwyg-editor {
   padding-right: 2px;
 }
