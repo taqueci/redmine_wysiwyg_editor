@@ -21,16 +21,29 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
         []
     %>
     <% html_tag_allowed = textilizable('<div></div>').include?('<div></div>') %>
+    <style type="text/css">
+.jstElements,
+.jstEditor {
+  /* To avoid flickering of the original editor. */
+  visibility: hidden;
+}
+    </style>
     <script>
 function initRedmineWysiwygEditor() {
+  var setVisible = function() {
+    $('.jstTabs, .jstElements, .jstEditor').css('visibility', 'visible');
+  };
+
   var previewButton = $('a[accesskey=r]');
 
-  if (previewButton.length == 0) return;
+  var previewUrl = (previewButton.length > 0) ?
+      previewButton.attr('onclick').match(/submitPreview\("(.+?)",/)[1] :
+      null;
 
-  var previewUrl = previewButton.attr('onclick')
-      .match(/submitPreview\("(.+?)",/)[1];
-
-  if (!previewUrl) return;
+  if (!previewUrl) {
+    setVisible();
+    return;
+  }
 
   var allAttachments = function() {
     var attachments = <%= raw attachments.to_json %>;
@@ -81,6 +94,8 @@ function initRedmineWysiwygEditor() {
         rwe.updateVisualContent();
       }
     });
+
+    setVisible();
   };
 
   var rwe = new RedmineWysiwygEditor($(this), previewUrl);

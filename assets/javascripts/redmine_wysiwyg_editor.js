@@ -154,7 +154,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
 
   if (!self._editor) return false;
 
-  self._updateImageButtonMenu();
+  self._updateAttachmentButtonMenu();
   self._setVisualContent();
 
   return true;
@@ -172,7 +172,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     editor.on('blur', function(e) {
       self._setTextContent();
     }).on('focus', function(e) {
-      self._updateImageButtonMenu();
+      self._updateAttachmentButtonMenu();
     }).on('paste', function(e) {
       self._pasteEventHandler(e);
     }).on('dragover', function(e) {
@@ -190,14 +190,14 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var setup = function(editor) {
     self._editor = editor;
 
-    var menu = self._imageButtonMenu = self._imageButtonMenuItems();
+    var menu = self._attachmentButtonMenu = self._attachmentButtonMenuItems();
 
-    editor.addButton('insertimage', {
+    editor.addButton('attachment', {
       type: 'menubutton',
-      icon: 'image',
+      icon: 'newdocument',
       menu: menu,
       onPostRender: function() {
-        self._imageButton = this;
+        self._attachmentButton = this;
         this.disabled(menu.length === 0);
       }
     });
@@ -213,10 +213,10 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
+      'formatselect | bold italic underline strikethrough code forecolor | link image attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough code | link insertimage | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
-      'formatselect | bold italic strikethrough code | link insertimage | bullist numlist blockquote | hr | table | undo redo';
+      'formatselect | bold italic strikethrough code | link image attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
+      'formatselect | bold italic strikethrough code | link image attachment | bullist numlist blockquote | hr | table | undo redo';
 
   tinymce.init($.extend({
     // Configurable parameters
@@ -224,7 +224,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     content_style: style,
     height: self._jstEditorTextArea.height(),
     branding: false,
-    plugins: 'link lists hr table textcolor',
+    plugins: 'link image lists hr table textcolor',
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
@@ -245,7 +245,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   }));
 };
 
-RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
+RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
   var self = this;
 
   return self._attachment.filter(function(file) {
@@ -261,15 +261,15 @@ RedmineWysiwygEditor.prototype._imageButtonMenuItems = function() {
   });
 };
 
-RedmineWysiwygEditor.prototype._updateImageButtonMenu = function() {
+RedmineWysiwygEditor.prototype._updateAttachmentButtonMenu = function() {
   var self = this;
-  var button = self._imageButton;
+  var button = self._attachmentButton;
 
-  var menu = self._imageButtonMenuItems();
+  var menu = self._attachmentButtonMenuItems();
 
-  self._imageButtonMenu.length = 0;
+  self._attachmentButtonMenu.length = 0;
   menu.forEach(function(file) {
-    self._imageButtonMenu.push(file);
+    self._attachmentButtonMenu.push(file);
   });
 
   // Note this is unofficial solution.
