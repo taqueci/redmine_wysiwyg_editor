@@ -229,6 +229,12 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     toolbar: toolbar,
     toolbar_items_size: 'small',
     convert_urls: false,
+    invalid_styles: {
+      'table': 'width height',
+      'tr': 'width height',
+      'th': 'width height',
+      'td': 'width height'
+    },
     table_appearance_options: false,
     table_advtab: false,
     table_cell_advtab: false,
