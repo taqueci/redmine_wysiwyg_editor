@@ -124,7 +124,8 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
     self._jstEditor.hide();
     self._preview.hide();
 
-    self._defaultMode.set('visual');
+    self._mode = mode;
+    self._defaultMode.set(mode);
     break;
   case 'preview':
     self._setPreview();
@@ -133,6 +134,8 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
     self._jstElements.hide();
     self._jstEditor.hide();
     self._visualEditor.hide();
+
+    self._mode = mode;
     break;
   default:
     // Note text content is set by blur event.
@@ -142,6 +145,7 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
     self._visualEditor.hide();
     self._preview.hide();
 
+    self._mode = 'text';
     self._defaultMode.set('text');
     break;
   }
@@ -155,6 +159,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
   if (!self._editor) return false;
 
   self._updateAttachmentButtonMenu();
+  if (self._mode === 'visual') self._setTextContent();
   self._setVisualContent();
 
   return true;
