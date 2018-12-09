@@ -22,10 +22,33 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
     %>
     <% html_tag_allowed = textilizable('<div></div>').include?('<div></div>') %>
     <style type="text/css">
+.jstTabs,
 .jstElements,
 .jstEditor {
   /* To avoid flickering of the original editor. */
   visibility: hidden;
+}
+
+#content .jstBlock .jstTabs.tabs {
+  width: 100%;
+  height: auto;
+}
+
+#content .jstBlock .jstTabs ul {
+  height: auto;
+}
+
+#content .jstBlock .jstTabs li {
+  height: auto;
+  margin: 0;
+}
+
+#content .jstBlock .jstTabs ul li:not(.tab-elements) {
+  display: none;
+}
+
+#content .jstBlock .jstTabs .jstElements {
+  height: auto;
 }
     </style>
     <script>
@@ -34,9 +57,11 @@ function initRedmineWysiwygEditor() {
     $('.jstTabs, .jstElements, .jstEditor').css('visibility', 'visible');
   };
 
+  var previewTab = $('.jstTabs .tab-preview');
   var previewButton = $('a[accesskey=r]');
 
-  var previewUrl = (previewButton.length > 0) ?
+  var previewUrl = (previewTab.length > 0) ? previewTab.data('url') :
+      (previewButton.length > 0) ?
       previewButton.attr('onclick').match(/submitPreview\("(.+?)",/)[1] :
       null;
 
