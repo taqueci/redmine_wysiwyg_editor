@@ -2,7 +2,12 @@
   padding-right: 2px;
 }
 
+.wysiwyg-editor-preview.wiki-preview {
+  background-color: #fafafa;
+}
+
 .wysiwyg-editor-preview p {
+  clear: none;
   padding: 0;
 }
 
@@ -12,8 +17,8 @@
 
 .wysiwyg-editor-tab ul {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 .wysiwyg-editor-tab ul li {

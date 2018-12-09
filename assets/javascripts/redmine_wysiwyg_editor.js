@@ -74,13 +74,26 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
       self._i18n.preview + '</a></li>' +
       '</ul></div>';
 
-  self._jstEditor.after(editorHtml + previewHtml + modeTabHtml);
-
-  self._jstElements = container.find('.jstElements');
   self._jstEditorTextArea = self._jstEditor.find('textarea');
+
+  self._jstEditorTextArea.after(previewHtml);
+  self._jstEditor.after(editorHtml + modeTabHtml);
+
   self._visualEditor = container.find('.wysiwyg-editor').hide();
   self._preview = container.find('.wysiwyg-editor-preview').hide();
   self._modeTab = container.find('.wysiwyg-editor-tab');
+
+  var jstTabs = container.find('.jstTabs');
+  var jstElements = container.find('.jstElements');
+
+  if (jstTabs.length > 0) {
+    self._jstElements = jstTabs;
+    self._oldPreviewAccess = false;
+    self._preview.addClass('wiki-preview');
+  } else {
+    self._jstElements = jstElements;
+    self._oldPreviewAccess = true;
+  }
 
   self._modeTab.on('click', 'li a', function(e) {
     e.preventDefault();
@@ -130,9 +143,10 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
   case 'preview':
     self._setPreview();
     self._preview.show();
+    self._jstEditor.show();
 
     self._jstElements.hide();
-    self._jstEditor.hide();
+    self._jstEditorTextArea.hide();
     self._visualEditor.hide();
 
     self._mode = mode;
@@ -140,6 +154,7 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
   default:
     // Note text content is set by blur event.
     self._jstElements.show();
+    self._jstEditorTextArea.show();
     self._jstEditor.show();
 
     self._visualEditor.hide();
@@ -384,8 +399,10 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     var escapeText = (self._format === 'textile') ?
         escapeTextile : escapeMarkdown;
 
+    var name = self._oldPreviewAccess ? textarea[0].name : 'text';
+
     var data = {};
-    data[textarea[0].name] =
+    data[name] =
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
       .replace(/\[\[/g, '[$$[')
@@ -403,7 +420,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/version:/g, 'versioin$$:')
       .replace(/#([1-9][0-9]*((#note)?-[1-9][0-9]*)?(\s|$))/g, '#$$$1')
       .replace(/r([1-9][0-9]*(\s|$))/g, 'r$$$1')
-      + ' ';
+      + '&nbsp;';
 
     params.push($.param(data));
 
@@ -946,13 +963,17 @@ RedmineWysiwygEditor.prototype._setPreview = function() {
   var previewData = function(textarea) {
     var params = [$.param($("input[name^='attachments']"))];
 
+    var name = self._oldPreviewAccess ? textarea[0].name : 'text';
+
     var data = {};
-    data[textarea[0].name] = textarea[0].value + ' ';
+    data[name] = textarea[0].value + ' ';
 
     params.push($.param(data));
 
     return params.join('&');
   };
+
+  self._preview.css('min-height', self._visualEditor.height());
 
   $.ajax({
     type: 'POST',
