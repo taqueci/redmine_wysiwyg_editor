@@ -420,7 +420,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/version:/g, 'versioin$$:')
       .replace(/#([1-9][0-9]*((#note)?-[1-9][0-9]*)?(\s|$))/g, '#$$$1')
       .replace(/r([1-9][0-9]*(\s|$))/g, 'r$$$1')
-      + '&nbsp;';
+      + '\n\n';
 
     params.push($.param(data));
 
