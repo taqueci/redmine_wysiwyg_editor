@@ -139,6 +139,13 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextTextile(content), expected);
     });
 
+    test('Code block (code sample plugin)', function() {
+      var content = '<pre class="language-c" contenteditable="false"><code>#include &lt;stdio.h&gt;<br><br>int main(int argc, char *argv[])<br>{<br>    printf("Hello, world<br>");<br><br>    return 0;<br>}<br></code></pre>';
+      var expected = '<pre><code class="c">\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
     test('Block quote', function() {
       var content = '<blockquote><blockquote><p>Rails is a full-stack framework for developing database-backed web applications according to the Model-View-Control pattern.<br>To go live, all you need to add is a database and a web server.</p></blockquote><p>Great!</p></blockquote>';
       var expected = '> > Rails is a full-stack framework for developing database-backed web applications according to the Model-View-Control pattern.\n> > To go live, all you need to add is a database and a web server.\n> \n> Great!';
@@ -246,6 +253,13 @@ suite('Redmine WYSIWYG Editor', function() {
     test('Code block', function() {
       var content = '<pre data-code="c">#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>';
       var expected = '~~~ c\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Code block (code sample plugin)', function() {
+      var content = '<pre class="language-c" contenteditable="false"><code>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
+      var expected = '~~~ c\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n} \n~~~';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
