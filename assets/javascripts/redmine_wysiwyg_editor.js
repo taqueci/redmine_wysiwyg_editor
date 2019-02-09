@@ -233,18 +233,18 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor | link image attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
+      'formatselect | bold italic underline strikethrough code forecolor | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough code | link image attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
-      'formatselect | bold italic strikethrough code | link image attachment | bullist numlist blockquote | hr | table | undo redo';
+      'formatselect | bold italic strikethrough code | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
+      'formatselect | bold italic strikethrough code | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
 
   tinymce.init($.extend({
     // Configurable parameters
     language: self._language,
     content_style: style,
-    height: self._jstEditorTextArea.height(),
+    height: Math.max(self._jstEditorTextArea.height(), 200),
     branding: false,
-    plugins: 'link image lists hr table textcolor',
+    plugins: 'link image lists hr table textcolor codesample',
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
@@ -259,7 +259,9 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     table_advtab: false,
     table_cell_advtab: false,
     table_row_advtab: false,
-    table_default_styles: {}
+    table_default_styles: {},
+    codesample_dialog_height: $(window).height() * 0.85,
+    codesample_languages: self._codeLanguages()
   }, setting, {
     // Mandatory parameters
     target: self._visualEditor.find('div')[0],
@@ -420,7 +422,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/version:/g, 'versioin$$:')
       .replace(/#([1-9][0-9]*((#note)?-[1-9][0-9]*)?(\s|$))/g, '#$$$1')
       .replace(/r([1-9][0-9]*(\s|$))/g, 'r$$$1')
-      + '&nbsp;';
+      + '\n\n&nbsp;'; // Append NBSP to supress 'Nothing to preview'
 
     params.push($.param(data));
 
@@ -715,7 +717,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     replacement: function(content, node) {
       if (node.firstChild && (node.firstChild.nodeName === 'CODE')) {
         var code = node.firstChild.className;
-        var attr = code ? ' class="' + code + '"' : '';
+        var lang = node.className.match(/language-(\S+)/);
+
+        var klass = code ? code :
+            lang ? self._languageClassName(lang[1]) : null;
+
+        var attr = klass ? ' class="' + klass + '"' : '';
 
         return '\n\n<pre><code' + attr + '>\n' +
           content.replace(/\s?$/, '\n') + '</code></pre>\n\n';
@@ -911,7 +918,12 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     filter: 'pre',
     replacement: function(content, node) {
       var code = node.dataset.code;
-      var opt = code ? ' ' + code : '';
+      var lang = node.className.match(/language-(\S+)/);
+
+      var klass = code ? code :
+          lang ? self._languageClassName(lang[1]) : null;
+
+      var opt = klass ? ' ' + klass : '';
 
       return '~~~' + opt + '\n' + content.replace(/\n?$/, '\n') + '~~~\n\n';
     }
@@ -983,4 +995,73 @@ RedmineWysiwygEditor.prototype._setPreview = function() {
       self._preview.html(data);
     }
   });
+};
+
+RedmineWysiwygEditor.prototype._codeLanguages = function() {
+  var self = this;
+
+  return self._oldPreviewAccess ? [
+    // CodeRay (Redmine 3)
+    { text: 'C', value: 'c', klass: 'c' },
+    { text: 'C++', value: 'cpp', klass: 'cpp' },
+    { text: 'Clojure', value: 'clojure', klass: 'clojure' },
+    { text: 'CSS', value: 'css', klass: 'css' },
+    { text: 'Delphi', value: 'delphi', klass: 'delphi' },
+    { text: 'Diff', value: 'diff', klass: 'diff' },
+    { text: 'ERB', value: 'erb', klass: 'erb' },
+    { text: 'Go', value: 'go', klass: 'go' },
+    { text: 'Groovy', value: 'groovy', klass: 'groovy' },
+    { text: 'Haml', value: 'haml', klass: 'haml' },
+    { text: 'HTML', value: 'markup', klass: 'html' },
+    { text: 'Java', value: 'java', klass: 'java' },
+    { text: 'JavaScript', value: 'javascript', klass: 'javascript' },
+    { text: 'JSON', value: 'json', klass: 'json' },
+    { text: 'Lua', value: 'lua', klass: 'lua' },
+    { text: 'PHP', value: 'php', klass: 'php' },
+    { text: 'Python', value: 'python', klass: 'python' },
+    { text: 'Ruby', value: 'ruby', klass: 'ruby' },
+    { text: 'Sass', value: 'sass', klass: 'sass' },
+    { text: 'SQL', value: 'sql', klass: 'sql' },
+    { text: 'TaskPaper', value: 'taskpaper', klass: 'taskpaper' },
+    { text: 'Text', value: 'text', klass: 'text' },
+    { text: 'XML', value: 'xml', klass: 'xml' },
+    { text: 'YAML', value: 'yaml', klass: 'yaml' }
+  ] : [
+    // Rouge (Redmine 4)
+    { text: 'C', value: 'c', klass: 'c' },
+    { text: 'C++', value: 'cpp', klass: 'cpp' },
+    { text: 'C#', value: 'csharp', klass: 'csharp' },
+    { text: 'CSS', value: 'css', klass: 'css' },
+    { text: 'Diff', value: 'diff', klass: 'diff' },
+    { text: 'Go', value: 'go', klass: 'go' },
+    { text: 'Groovy', value: 'groovy', klass: 'groovy' },
+    { text: 'HTML', value: 'markup', klass: 'html' },
+    { text: 'Java', value: 'java', klass: 'java' },
+    { text: 'JavaScript', value: 'javascript', klass: 'javascript' },
+    { text: 'Objective C', value: 'objc', klass: 'objc' },
+    { text: 'Perl', value: 'perl', klass: 'perl' },
+    { text: 'PHP', value: 'php', klass: 'php' },
+    { text: 'Python', value: 'python', klass: 'python' },
+    { text: 'R', value: 'r', klass: 'r' },
+    { text: 'Ruby', value: 'ruby', klass: 'ruby' },
+    { text: 'Sass', value: 'sass', klass: 'sass' },
+    { text: 'Scala', value: 'scala', klass: 'scala' },
+    { text: 'Shell', value: 'bash', klass: 'shell' },
+    { text: 'SQL', value: 'sql', klass: 'sql' },
+    { text: 'Swift', value: 'swift', klass: 'swift' },
+    { text: 'XML', value: 'xml', klass: 'xml' },
+    { text: 'YAML', value: 'yaml', klass: 'yaml' }
+  ];
+};
+
+RedmineWysiwygEditor.prototype._languageClassName = function(lang) {
+  var self = this;
+
+  var code = self._codeLanguages();
+
+  for (var i = 0; i < code.length; i++) {
+    if (code[i].value === lang) return code[i].klass;
+  }
+
+  return null;
 };
