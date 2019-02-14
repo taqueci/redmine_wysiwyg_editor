@@ -269,7 +269,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     setup: setup,
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
-    invalid_elements: 'fieldset'
+    invalid_elements: 'fieldset,colgroup'
   }));
 };
 
