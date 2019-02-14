@@ -29,7 +29,7 @@ suite('Redmine WYSIWYG Editor', function() {
 
     test('Span', function() {
       var content = '<span>Hello, world</span>';
-      var expected = '%Hello, world%';
+      var expected = 'Hello, world';
 
       assert.equal(x._toTextTextile(content), expected);
     });
