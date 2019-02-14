@@ -769,6 +769,16 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         content.replace(/\n\n+/g, '\n') + ' |';
     }
   }, {
+    // Paragraph in table
+    filter: function(node) {
+      return (node.nodeName === 'P') &&
+        ((node.parentNode.nodeName === 'TH') ||
+         (node.parentNode.nodeName === 'TD'));
+    },
+    replacement: function(content, node) {
+      return content;
+    }
+  }, {
     // Block
     filter: [
       'div', 'address', 'article', 'aside', 'footer', 'header', 'nav',
