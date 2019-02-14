@@ -230,7 +230,7 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Table', function() {
-      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;">Origin</th></tr><tr><td>Axl Rose</td><td>Vocal</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td>Jul 23, 1965</td><td>LA</td></tr></tbody></table>';
+      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;"><p>Origin</p></th></tr><tr><td>Axl Rose</td><td>Vocal</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td><p>Jul 23, 1965</p></td><td>LA</td></tr></tbody></table>';
       var expected = '| Name | Role | Born | Origin |\n| --- | :-- | :-: | --: |\n| Axl Rose | Vocal | Feb 6, 1962 | LA |\n| Slash | Guitar | Jul 23, 1965 | LA |';
 
       assert.equal(x._toTextMarkdown(content), expected);

@@ -925,6 +925,16 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     replacement: function(content) {
       return content;
     }
+  }).addRule('pTable', {
+    // Paragraph in table
+    filter: function(node) {
+      return (node.nodeName === 'P') &&
+        ((node.parentNode.nodeName === 'TH') ||
+         (node.parentNode.nodeName === 'TD'));
+    },
+    replacement: function(content) {
+      return content;
+    }
   }).addRule('pre', {
     filter: 'pre',
     replacement: function(content, node) {
