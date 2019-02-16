@@ -233,10 +233,10 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
+      'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough code | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
-      'formatselect | bold italic strikethrough code | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
+      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
+      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
 
   tinymce.init($.extend({
     // Configurable parameters
@@ -269,7 +269,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     setup: setup,
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
-    invalid_elements: 'fieldset'
+    invalid_elements: 'fieldset,colgroup'
   }));
 };
 
@@ -631,9 +631,11 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     filter: 'span',
     replacement: function(content, node) {
       // Remove percentage value because RedCloth3 can't parse correctly.
-      var c = '%' + styleAttr(node).replace(/\s*\d+%/g, '') + content + '%';
+      var attr = styleAttr(node).replace(/\s*\d+%/g, '');
 
-      return gluableContent(c, node, NT);
+      return ((attr.length > 0) && (content.length > 0) &&
+              (node.parentNode.nodeName !== 'SPAN')) ?
+        gluableContent('%' + attr + content + '%', node, NT) : content;
     }
   }, {
     // Bold
@@ -769,6 +771,14 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         content.replace(/\n\n+/g, '\n') + ' |';
     }
   }, {
+    // Paragraph in table
+    filter: function(node) {
+      return (node.nodeName === 'P') && ($(node).closest('table').length > 0);
+    },
+    replacement: function(content, node) {
+      return content;
+    }
+  }, {
     // Block
     filter: [
       'div', 'address', 'article', 'aside', 'footer', 'header', 'nav',
@@ -831,8 +841,8 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   turndownService.addRule('br', {
     // Suppress appending two spaces at the end of the line.
     filter: 'br',
-    replacement: function(content) {
-      return '\n';
+    replacement: function(content, node) {
+      return ($(node).closest('table').length > 0) ? ' ' : '\n';
     }
   }).addRule('div', {
     filter: function(node) {
@@ -911,6 +921,14 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     }
   }).addRule('table', {
     filter: 'table',
+    replacement: function(content) {
+      return content;
+    }
+  }).addRule('pTable', {
+    // Paragraph in table
+    filter: function(node) {
+      return (node.nodeName === 'P') && ($(node).closest('table').length > 0);
+    },
     replacement: function(content) {
       return content;
     }

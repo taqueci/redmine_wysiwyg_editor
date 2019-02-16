@@ -28,8 +28,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Span', function() {
-      var content = '<span>Hello, world</span>';
-      var expected = '%Hello, world%';
+      var content = '<span>Hello, <span>world</span></span><span></span>';
+      var expected = 'Hello, world';
 
       assert.equal(x._toTextTextile(content), expected);
     });
@@ -154,7 +154,7 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Table', function() {
-      var content = '<table style="width: 100%"><tbody><tr><th>UserID</th><th>Name</th><th>Group</th><th>attribute list</th></tr><tr><td>Starting with</td><td>a</td><td>simple</td><td>row</td></tr><tr><td style="text-align:center;" colspan="3">IT</td><td style="text-align:left;">align left</td></tr><tr><td>1</td><td>Artur Pirozhkov</td><td rowspan="2">Users</td><td style="text-align:right;">align right</td></tr><tr style="color: #dad;"><td>2</td><td>Vasya Rogov</td><td style="text-align:center;">center</td></tr><tr><td>3</td><td>John Smith</td><td>Admin<br>(root)</td><td style="vertical-align:top;">valign top</td></tr><tr><td>4</td><td>-</td><td>Nobody<br>(anonymous) </td><td style="vertical-align:bottom;">valign bottom</td></tr></tbody></table>';
+      var content = '<table style="width: 100%"><tbody><tr><th>UserID</th><th>Name</th><th>Group</th><th><p>attribute list</p></th></tr><tr><td>Starting with</td><td>a</td><td>simple</td><td>row</td></tr><tr><td style="text-align:center;" colspan="3">IT</td><td style="text-align:left;">align left</td></tr><tr><td>1</td><td>Artur Pirozhkov</td><td rowspan="2">Users</td><td style="text-align:right;">align right</td></tr><tr style="color: #dad;"><td>2</td><td>Vasya Rogov</td><td style="text-align:center;">center</td></tr><tr><td>3</td><td>John Smith</td><td>Admin<br>(root)</td><td style="vertical-align:top;">valign top</td></tr><tr><td>4</td><td>-</td><td><p>Nobody<br>(anonymous) </p></td><td style="vertical-align:bottom;">valign bottom</td></tr></tbody></table>';
       var expected = 'table{width: 100%;}.\n|_. UserID |_. Name |_. Group |_. attribute list |\n| Starting with | a | simple | row |\n|\\3=. IT |<. align left |\n| 1 | Artur Pirozhkov |/2. Users |>. align right |\n{color: #ddaadd;}. | 2 | Vasya Rogov |=. center |\n| 3 | John Smith | Admin\n(root) |^. valign top |\n| 4 | - | Nobody\n(anonymous) |~. valign bottom |';
 
       assert.equal(x._toTextTextile(content), expected);
@@ -230,7 +230,7 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Table', function() {
-      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;">Origin</th></tr><tr><td>Axl Rose</td><td>Vocal</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td>Jul 23, 1965</td><td>LA</td></tr></tbody></table>';
+      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;"><p>Origin</p></th></tr><tr><td>Axl Rose</td><td>Vocal</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td><p>Jul 23, 1965</p></td><td>LA</td></tr></tbody></table>';
       var expected = '| Name | Role | Born | Origin |\n| --- | :-- | :-: | --: |\n| Axl Rose | Vocal | Feb 6, 1962 | LA |\n| Slash | Guitar | Jul 23, 1965 | LA |';
 
       assert.equal(x._toTextMarkdown(content), expected);
