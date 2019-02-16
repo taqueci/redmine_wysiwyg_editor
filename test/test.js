@@ -28,7 +28,7 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Span', function() {
-      var content = '<span>Hello, world</span>';
+      var content = '<span>Hello, <span>world</span></span><span></span>';
       var expected = 'Hello, world';
 
       assert.equal(x._toTextTextile(content), expected);
