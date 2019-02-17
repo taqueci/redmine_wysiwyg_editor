@@ -168,13 +168,23 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
   return true;
 };
 
-RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
+RedmineWysiwygEditor.prototype.updateVisualEditor = function(mode) {
   var self = this;
 
   if (!self._editor) return false;
 
   self._updateAttachmentButtonMenu();
   if (self._mode === 'visual') self._setTextContent();
+  self._setVisualContent();
+
+  return true;
+};
+
+RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
+  var self = this;
+
+  if (!self._editor) return false;
+
   self._setVisualContent();
 
   return true;
