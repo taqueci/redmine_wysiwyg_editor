@@ -174,8 +174,11 @@ RedmineWysiwygEditor.prototype.updateVisualEditor = function(mode) {
   if (!self._editor) return false;
 
   self._updateAttachmentButtonMenu();
-  if (self._mode === 'visual') self._setTextContent();
-  self._setVisualContent();
+
+  if (self._mode === 'visual') {
+    self._setTextContent();
+    self._setVisualContent();
+  }
 
   return true;
 };
@@ -185,7 +188,7 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
 
   if (!self._editor) return false;
 
-  self._setVisualContent();
+  if (self._mode === 'visual') self._setVisualContent();
 
   return true;
 };
@@ -293,6 +296,7 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
       text: file,
       onclick: function() {
         self._insertImage(file);
+        self._setTextContent();
         self._setVisualContent();
       }
     };
@@ -479,7 +483,6 @@ RedmineWysiwygEditor.prototype._insertImage = function(path) {
       '!' + path + '!' : '![](' + path + ')';
 
   self._editor.insertContent('<br>' + content + '<br>');
-  self._setTextContent();
 };
 
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {
