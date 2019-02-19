@@ -436,7 +436,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/version:/g, 'versioin$$:')
       .replace(/#([1-9][0-9]*((#note)?-[1-9][0-9]*)?(\s|$))/g, '#$$$1')
       .replace(/r([1-9][0-9]*(\s|$))/g, 'r$$$1')
-      + '\n\n&nbsp;'; // Append NBSP to supress 'Nothing to preview'
+      + '\n\n&nbsp;'; // Append NBSP to suppress 'Nothing to preview'
 
     params.push($.param(data));
 
