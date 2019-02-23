@@ -2,6 +2,8 @@
 
 This plugin adds WYSIWYG editor mode to Redmine.
 
+This plugin works with Redmine 3.3.0 or later.
+
 ![](doc/img/screenshot.png)
 
 The plugin is powered by:

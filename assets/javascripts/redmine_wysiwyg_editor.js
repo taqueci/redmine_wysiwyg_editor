@@ -168,14 +168,27 @@ RedmineWysiwygEditor.prototype.changeMode = function(mode) {
   return true;
 };
 
-RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
+RedmineWysiwygEditor.prototype.updateVisualEditor = function(mode) {
   var self = this;
 
   if (!self._editor) return false;
 
   self._updateAttachmentButtonMenu();
-  if (self._mode === 'visual') self._setTextContent();
-  self._setVisualContent();
+
+  if (self._mode === 'visual') {
+    self._setTextContent();
+    self._setVisualContent();
+  }
+
+  return true;
+};
+
+RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
+  var self = this;
+
+  if (!self._editor) return false;
+
+  if (self._mode === 'visual') self._setVisualContent();
 
   return true;
 };
@@ -283,6 +296,7 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
       text: file,
       onclick: function() {
         self._insertImage(file);
+        self._setTextContent();
         self._setVisualContent();
       }
     };
@@ -422,7 +436,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/version:/g, 'versioin$$:')
       .replace(/#([1-9][0-9]*((#note)?-[1-9][0-9]*)?(\s|$))/g, '#$$$1')
       .replace(/r([1-9][0-9]*(\s|$))/g, 'r$$$1')
-      + '\n\n&nbsp;'; // Append NBSP to supress 'Nothing to preview'
+      + '\n\n&nbsp;'; // Append NBSP to suppress 'Nothing to preview'
 
     params.push($.param(data));
 
@@ -469,7 +483,6 @@ RedmineWysiwygEditor.prototype._insertImage = function(path) {
       '!' + path + '!' : '![](' + path + ')';
 
   self._editor.insertContent('<br>' + content + '<br>');
-  self._setTextContent();
 };
 
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {

@@ -116,7 +116,7 @@ function initRedmineWysiwygEditor() {
         rwe.updateVisualContent();
       } else if (/\/uploads\.js\?.+$/.test(url)) {
         rwe.setAttachments(allAttachments());
-        rwe.updateVisualContent();
+        rwe.updateVisualEditor();
       }
     });
 
