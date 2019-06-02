@@ -137,10 +137,10 @@ function initRedmineWysiwygEditor() {
   rwe.setAttachments(allAttachments());
   if (isAttachmentUploadable($(this))) rwe.setAttachmentUploader(uploader);
 
-  rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>)
+  rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>);
 
   var setting = (typeof WYSIWYG_EDITOR_SETTING !== 'undefined') ?
-      WYSIWYG_EDITOR_SETTING : {}
+      WYSIWYG_EDITOR_SETTING : {};
 
   rwe.init(setting);
 }
