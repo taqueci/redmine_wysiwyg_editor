@@ -265,7 +265,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     },
     queryBy: 'label',
     renderDropdown: function() {
-      return '<ul class="rte-autocomplete mce-container mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
+      return '<ul class="rte-autocomplete mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
     },
     render: function(item) {
       return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
