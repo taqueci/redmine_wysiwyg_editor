@@ -54,6 +54,10 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
+RedmineWysiwygEditor.prototype.setAutocompleteIssuePath = function(path) {
+  this._autocompleteIssuePath = path;
+};
+
 RedmineWysiwygEditor.prototype.init = function(editorSetting) {
   var self = this;
 
@@ -199,7 +203,9 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var style = 'pre { padding: .5em 1em; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 3px; width: auto; white-space: pre-wrap; }' +
     'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
     'pre code { padding: 0; background: none; }' +
-    'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }';
+    'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
+    'span#autocomplete { background-color: #eee; } ' +
+    'span#autocomplete-delimiter { background-color: #ddd; }';
 
   var callback = function(editor) {
     editor.on('blur', function(e) {
@@ -251,13 +257,31 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
 
+  var autocompleteConfig = {
+    delimiter: ['#'],
+    source: function(query, process, delimiter) {
+      if (query.length)
+        $.getJSON(self._autocompleteIssuePath, {q: query}).done(process);
+    },
+    queryBy: 'label',
+    renderDropdown: function() {
+      return '<ul class="rte-autocomplete mce-container mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
+    },
+    render: function(item) {
+      return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
+    },
+    insert: function(item) {
+      return '#' + item.id + ' ';
+    }
+  };
+
   tinymce.init($.extend({
     // Configurable parameters
     language: self._language,
     content_style: style,
     height: Math.max(self._jstEditorTextArea.height(), 200),
     branding: false,
-    plugins: 'link image lists hr table textcolor codesample paste',
+    plugins: 'link image lists hr table textcolor codesample paste mention',
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
@@ -282,7 +306,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     setup: setup,
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
-    invalid_elements: 'fieldset,colgroup'
+    invalid_elements: 'fieldset,colgroup',
+    mentions: autocompleteConfig
   }));
 };
 
