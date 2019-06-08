@@ -257,7 +257,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
 
-  var autocompleteConfig = {
+  var autocompleteConfig = self._autocompleteIssuePath ? {
     delimiter: ['#'],
     source: function(query, process, delimiter) {
       if (query.length)
@@ -273,7 +273,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     insert: function(item) {
       return '#' + item.id + ' ';
     }
-  };
+  } : {};
 
   tinymce.init($.extend({
     // Configurable parameters
