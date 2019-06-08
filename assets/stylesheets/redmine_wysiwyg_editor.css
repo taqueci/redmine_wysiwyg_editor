@@ -61,3 +61,12 @@
   font-size: 16px;
   color: #595959;
 }
+
+.rte-autocomplete > li > strong {
+  font-weight: bold;
+}
+
+.rte-autocomplete > .active {
+  background: #555c66;
+  color: white;
+}
