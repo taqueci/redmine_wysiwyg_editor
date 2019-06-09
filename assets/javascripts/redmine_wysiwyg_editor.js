@@ -201,11 +201,11 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var self = this;
 
   var style = 'pre { padding: .5em 1em; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 3px; width: auto; white-space: pre-wrap; }' +
-    'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
-    'pre code { padding: 0; background: none; }' +
-    'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
-    'span#autocomplete { background-color: #eee; } ' +
-    'span#autocomplete-delimiter { background-color: #ddd; }';
+      'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
+      'pre code { padding: 0; background: none; }' +
+      'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
+      'span#autocomplete { background-color: #eee; } ' +
+      'span#autocomplete-delimiter { background-color: #ddd; }';
 
   var callback = function(editor) {
     editor.on('blur', function(e) {
@@ -514,7 +514,7 @@ RedmineWysiwygEditor.prototype._imageUrl = function(url) {
   var self = this;
 
   var base = url.replace(/^.+\//, '');
-  var dir = url.replace(/\/[^\/]*$/, '')
+  var dir = url.replace(/\/[^\/]*$/, '');
 
   return (dir.match(/\/attachments\/download\/\d+$/) &&
           (self._attachment.indexOf(base) >= 0)) ? base : url;
