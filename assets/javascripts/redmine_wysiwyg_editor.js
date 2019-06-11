@@ -942,7 +942,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   }).addRule('code', {
     filter: ['kbd', 'samp', 'tt', 'var'],
     replacement: function(content) {
-      return gluableContent('`' + content + '`', node, ' ');
+      return '`' + content + '`';
     }
   }).addRule('a', {
     filter: function(node) {
