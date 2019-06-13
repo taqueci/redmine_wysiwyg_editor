@@ -54,8 +54,16 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
+RedmineWysiwygEditor.prototype.setProject = function(id) {
+  this._project = id;
+};
+
 RedmineWysiwygEditor.prototype.setAutocompleteIssuePath = function(path) {
   this._autocompleteIssuePath = path;
+};
+
+RedmineWysiwygEditor.prototype.setAutocompleteUserPath = function(path) {
+  this._autocompleteUserPath = path;
 };
 
 RedmineWysiwygEditor.prototype.init = function(editorSetting) {
@@ -205,7 +213,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'pre code { padding: 0; background: none; }' +
       'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
       'span#autocomplete { background-color: #eee; } ' +
-      'span#autocomplete-delimiter { background-color: #ddd; }';
+      'span#autocomplete-delimiter { background-color: #ddd; }' +
+      '.rte-autocomplete img.gravatar { margin-right: 5px; }';
 
   var callback = function(editor) {
     editor.on('blur', function(e) {
@@ -258,20 +267,35 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
 
   var autocompleteConfig = self._autocompleteIssuePath ? {
-    delimiter: ['#'],
+    delimiter: ['#', '@'],
     source: function(query, process, delimiter) {
-      if (query.length)
+      if (query.length === 0) return [];
+
+      if (delimiter === '#') {
         $.getJSON(self._autocompleteIssuePath, {q: query}).done(process);
+      } else {
+        $.getJSON(self._autocompleteUserPath, {project: self._project, q: query})
+          .done(process);
+      }
     },
     queryBy: 'label',
     renderDropdown: function() {
       return '<ul class="rte-autocomplete mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
     },
     render: function(item) {
-      return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
+      if (this.options.delimiter === '#') {
+        return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
+      } else {
+        return '<li class="mce-menu-item mce-menu-item-normal">' +
+          item.avatar + ' ' + item.label + '</li>';
+      }
     },
     insert: function(item) {
-      return '#' + item.id + ' ';
+      if (this.options.delimiter === '#') {
+        return '#' + item.id + '&nbsp;';
+      } else {
+        return 'user#' + item.id + '&nbsp;';
+      }
     }
   } : {};
 

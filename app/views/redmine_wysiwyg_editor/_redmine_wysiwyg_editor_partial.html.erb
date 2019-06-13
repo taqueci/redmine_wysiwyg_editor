@@ -139,6 +139,11 @@ function initRedmineWysiwygEditor() {
 
   rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>);
   rwe.setAutocompleteIssuePath('<%= escape_javascript auto_complete_issues_path %>');
+  rwe.setAutocompleteUserPath('<%= escape_javascript editor_users_path %>');
+
+  var pid = <%= @project ? @project.id : 'null' %> || $('#issue_project_id').val();
+
+  rwe.setProject(pid);
 
   var setting = (typeof WYSIWYG_EDITOR_SETTING !== 'undefined') ?
       WYSIWYG_EDITOR_SETTING : {};
