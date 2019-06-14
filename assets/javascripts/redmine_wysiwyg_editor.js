@@ -546,11 +546,12 @@ RedmineWysiwygEditor.prototype._insertImage = function(path) {
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {
   var self = this;
 
-  var base = url.replace(/^.+\//, '');
+  var base = decodeURI(url.replace(/^.+\//, ''));
   var dir = url.replace(/\/[^\/]*$/, '');
 
   return (dir.match(/\/attachments\/download\/\d+$/) &&
-          (self._attachment.indexOf(base) >= 0)) ? base : url;
+          (self._attachment.indexOf(base) >= 0)) ?
+    base.replace(/ /g, '%20') : url;
 }
 
 RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
