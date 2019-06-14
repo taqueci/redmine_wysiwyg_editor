@@ -344,18 +344,31 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
   var self = this;
 
-  return self._attachment.filter(function(file) {
-    return file.match(/\.(jpeg|jpg|png|gif)$/i);
+  var item = self._attachment.filter(function(file) {
+    return /\.(jpeg|jpg|png|gif|bmp)$/i.test(file);
   }).map(function(file) {
     return {
+      icon: 'image',
       text: file,
       onclick: function() {
-        self._insertImage(file);
+        self._insertImage(file.replace(/ /g, '%20'));
         self._setTextContent();
         self._setVisualContent();
       }
     };
   });
+
+  self._attachment.forEach(function(file) {
+    item.push({
+      icon: 'link',
+      text: file,
+      onclick: function() {
+        self._editor.insertContent('<a class="attachment">' + file + '</a>&nbsp;');
+      }
+    });
+  });
+
+  return item;
 };
 
 RedmineWysiwygEditor.prototype._updateAttachmentButtonMenu = function() {
