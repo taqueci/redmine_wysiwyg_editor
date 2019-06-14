@@ -54,8 +54,16 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
+RedmineWysiwygEditor.prototype.setProject = function(id) {
+  this._project = id;
+};
+
 RedmineWysiwygEditor.prototype.setAutocompleteIssuePath = function(path) {
   this._autocompleteIssuePath = path;
+};
+
+RedmineWysiwygEditor.prototype.setAutocompleteUserPath = function(path) {
+  this._autocompleteUserPath = path;
 };
 
 RedmineWysiwygEditor.prototype.init = function(editorSetting) {
@@ -201,11 +209,17 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var self = this;
 
   var style = 'pre { padding: .5em 1em; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 3px; width: auto; white-space: pre-wrap; }' +
-    'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
-    'pre code { padding: 0; background: none; }' +
-    'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
-    'span#autocomplete { background-color: #eee; } ' +
-    'span#autocomplete-delimiter { background-color: #ddd; }';
+      'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
+      'pre code { padding: 0; background: none; }' +
+      'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
+      'a.issue, a.version, a.attachment, a.changeset, a.source, a.project, a.user { padding: .1em .2em; background-color: rgba(0,0,0,0.6); border-radius: 3px; color: white; text-decoration: none; font-size: 80%; }' +
+      'a.version::before { content: "version:"; }' +
+      'a.attachment::before { content: "attachment:"; }' +
+      'a.project::before { content: "project:"; }' +
+      'a.user::before { content: "@"; }' +
+      'span#autocomplete { background-color: #eee; }' +
+      'span#autocomplete-delimiter { background-color: #ddd; }' +
+      '.rte-autocomplete img.gravatar { margin-right: 5px; }';
 
   var callback = function(editor) {
     editor.on('blur', function(e) {
@@ -257,23 +271,39 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
       'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
 
-  var autocompleteConfig = {
-    delimiter: ['#'],
+  var autocompleteConfig = self._autocompleteIssuePath ? {
+    delimiter: ['#', '@'],
     source: function(query, process, delimiter) {
-      if (query.length)
+      if (query.length === 0) return [];
+
+      if (delimiter === '#') {
         $.getJSON(self._autocompleteIssuePath, {q: query}).done(process);
+      } else {
+        $.getJSON(self._autocompleteUserPath, {project: self._project, q: query})
+          .done(process);
+      }
     },
     queryBy: 'label',
     renderDropdown: function() {
       return '<ul class="rte-autocomplete mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
     },
     render: function(item) {
-      return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
+      if (this.options.delimiter === '#') {
+        return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
+      } else {
+        return '<li class="mce-menu-item mce-menu-item-normal">' +
+          item.avatar + ' ' + item.label + '</li>';
+      }
     },
     insert: function(item) {
-      return '#' + item.id + ' ';
+      if (this.options.delimiter === '#') {
+        return '<a class="issue">#' + item.id + '</a>&nbsp;';
+      } else {
+        return '<a class="user" href="/' + item.id + '" contenteditable="false">' +
+          item.label + '</a>&nbsp;';
+      }
     }
-  };
+  } : {};
 
   tinymce.init($.extend({
     // Configurable parameters
@@ -314,18 +344,31 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
   var self = this;
 
-  return self._attachment.filter(function(file) {
-    return file.match(/\.(jpeg|jpg|png|gif)$/i);
+  var item = self._attachment.filter(function(file) {
+    return /\.(jpeg|jpg|png|gif|bmp)$/i.test(file);
   }).map(function(file) {
     return {
+      icon: 'image',
       text: file,
       onclick: function() {
-        self._insertImage(file);
+        self._insertImage(file.replace(/ /g, '%20'));
         self._setTextContent();
         self._setVisualContent();
       }
     };
   });
+
+  self._attachment.forEach(function(file) {
+    item.push({
+      icon: 'link',
+      text: file,
+      onclick: function() {
+        self._editor.insertContent('<a class="attachment">' + file + '</a>&nbsp;');
+      }
+    });
+  });
+
+  return item;
 };
 
 RedmineWysiwygEditor.prototype._updateAttachmentButtonMenu = function() {
@@ -447,20 +490,10 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
       .replace(/\[\[/g, '[$$[')
-      .replace(/attachment:/g, 'attachment$$:')
-      .replace(/commit:/g, 'commit$$:')
       .replace(/document:/g, 'document$$:')
-      .replace(/export:/g, 'export$$:')
       .replace(/forum:/g, 'forum$$:')
       .replace(/message:/g, 'message$$:')
       .replace(/news:/g, 'news$$:')
-      .replace(/project:/g, 'project$$:')
-      .replace(/sandbox:/g, 'sandbox$$:')
-      .replace(/source:/g, 'source$$:')
-      .replace(/user:/g, 'user$$:')
-      .replace(/version:/g, 'versioin$$:')
-      .replace(/#([1-9][0-9]*((#note)?-[1-9][0-9]*)?(\s|$))/g, '#$$$1')
-      .replace(/r([1-9][0-9]*(\s|$))/g, 'r$$$1')
       + '\n\n&nbsp;'; // Append NBSP to suppress 'Nothing to preview'
 
     params.push($.param(data));
@@ -513,11 +546,12 @@ RedmineWysiwygEditor.prototype._insertImage = function(path) {
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {
   var self = this;
 
-  var base = url.replace(/^.+\//, '');
-  var dir = url.replace(/\/[^\/]*$/, '')
+  var base = decodeURI(url.replace(/^.+\//, ''));
+  var dir = url.replace(/\/[^\/]*$/, '');
 
   return (dir.match(/\/attachments\/download\/\d+$/) &&
-          (self._attachment.indexOf(base) >= 0)) ? base : url;
+          (self._attachment.indexOf(base) >= 0)) ?
+    base.replace(/ /g, '%20') : url;
 }
 
 RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
@@ -553,6 +587,81 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 
   self._jstEditorTextArea.val(text);
 };
+
+var gluableContent = RedmineWysiwygEditor.prototype._gluableContent;
+var qq = function(str) { return /\s/.test(str) ? '"' + str + '"' : str; };
+
+RedmineWysiwygEditor._resorceLinkRule = [
+  {
+    key: 'issue',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('issue');
+    },
+    replacement: function(content, node) {
+      return gluableContent(content, node, ' ');
+    }
+  }, {
+    key: 'version',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('version');
+    },
+    replacement: function(content, node) {
+      // FIXME: Does not work with 'sandbox:version:1.0.0'
+      return gluableContent('version:' + qq(content), node, ' ');
+    }
+  }, {
+    key: 'attachment',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('attachment');
+    },
+    replacement: function(content, node) {
+      return gluableContent('attachment:' + qq(content), node, ' ');
+    }
+  }, {
+    key: 'changeset',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('changeset');
+    },
+    replacement: function(content, node) {
+      if (/^(\w+:)?(\w+\|)?r[1-9][0-9]*$/.test(content)) {
+        return gluableContent(content, node, ' ');
+      } else {
+        var m = content.match(/^(\w+:)?(\w+\|)?([0-9a-f]+)$/);
+
+        var p = m[1] || ''; // Project
+        var r = m[2] || ''; // Repository
+
+        return gluableContent(p + 'commit:' + r + m[3], node, ' ');
+      }
+    }
+  }, {
+    key: 'source',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('source');
+    },
+    replacement: function(content, node) {
+      return gluableContent(content, node, ' ');
+    }
+  }, {
+    key: 'project',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('project');
+    },
+    replacement: function(content, node) {
+      return gluableContent('project:' + qq(content), node, ' ');
+    }
+  }, {
+    key: 'user',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('user');
+    },
+    replacement: function(content, node) {
+      var m = node.getAttribute('href').match(/\/(\d+)$/);
+
+      return gluableContent('user#' + m[1], node, ' ');
+    }
+  }
+];
 
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
   var self = this;
@@ -632,8 +741,6 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
 
     return (attr.length > 0) ? attr.join('') + '.' : '';
   };
-
-  var gluableContent = self._gluableContent;
 
   var NT = '<notextile></notextile>';
 
@@ -849,7 +956,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
   }];
 
   return toTextile(content, {
-    converters: converters,
+    converters: RedmineWysiwygEditor._resorceLinkRule.concat(converters),
     ignorePotentialOlTriggers: true
   });
 };
@@ -875,6 +982,10 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   };
 
   turndownService.use(turndownPluginGfm.tables);
+
+  RedmineWysiwygEditor._resorceLinkRule.forEach(function(x) {
+    turndownService.addRule(x.key, x);
+  });
 
   turndownService.addRule('br', {
     // Suppress appending two spaces at the end of the line.
@@ -942,7 +1053,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   }).addRule('code', {
     filter: ['kbd', 'samp', 'tt', 'var'],
     replacement: function(content) {
-      return gluableContent('`' + content + '`', node, ' ');
+      return '`' + content + '`';
     }
   }).addRule('a', {
     filter: function(node) {

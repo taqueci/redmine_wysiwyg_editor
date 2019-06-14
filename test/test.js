@@ -4,7 +4,7 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Textile', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
-    x.setAttachments(['foo.png']);
+    x.setAttachments(['foo.png', 'f o o.png', 'フー.png']);
 
     test('Underline', function() {
       var content = '<span style="text-decoration: underline">Hello, world</span>';
@@ -91,8 +91,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image (attachment)', function() {
-      var content = '<img src="/attachments/download/1/foo.png">';
-      var expected = '!foo.png!';
+      var content = '<img src="/attachments/download/1/foo.png"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
+      var expected = '!foo.png!\n!f%20o%20o.png!\n!フー.png!';
 
       assert.equal(x._toTextTextile(content), expected);
     });
@@ -187,12 +187,47 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(x._toTextTextile(content), expected);
     });
+
+    test('Resource link (issue)', function() {
+      var content = '<a class="issue">#1</a>';
+      var expected = '#1';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (version)', function() {
+      var content = '<a class="version">1.0.0</a><br><a class="version">1 0 0</a>';
+      var expected = 'version:1.0.0\nversion:"1 0 0"';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (attachment)', function() {
+      var content = '<a class="attachment">foo.png</a><br><a class="attachment">f o o.png</a>';
+      var expected = 'attachment:foo.png\nattachment:"f o o.png"';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (project)', function() {
+      var content = '<a class="project">X</a><br><a class="project">X Y Z</a>';
+      var expected = 'project:X\nproject:"X Y Z"';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (user)', function() {
+      var content = '<a class="user" href="/redmine/user/5">Axl Rose</a>';
+      var expected = 'user#5';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
   });
 
   suite('Markdown', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
-    x.setAttachments(['foo.png']);
+    x.setAttachments(['foo.png', 'f o o.png', 'フー.png']);
 
     test('Line-through', function() {
       var content = '<span style="text-decoration: line-through">Hello, world</span>';
@@ -278,8 +313,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image (attachment)', function() {
-      var content = '<img src="/attachments/download/1/foo.png" alt="Foo">';
-      var expected = '![Foo](foo.png)';
+      var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
+      var expected = '![Foo](foo.png)\n![](f%20o%20o.png)\n![](フー.png)';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
@@ -317,6 +352,41 @@ suite('Redmine WYSIWYG Editor', function() {
       var expected = 'Under<ins>line</ins>\nPlain<sup>superscript</sup>\nPlain<sub>subscript</sub>';
 
       assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Resource link (issue)', function() {
+      var content = '<a class="issue">#1</a>';
+      var expected = '#1';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (version)', function() {
+      var content = '<a class="version">1.0.0</a><br><a class="version">1 0 0</a>';
+      var expected = 'version:1.0.0\nversion:"1 0 0"';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (attachment)', function() {
+      var content = '<a class="attachment">foo.png</a><br><a class="attachment">f o o.png</a>';
+      var expected = 'attachment:foo.png\nattachment:"f o o.png"';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (project)', function() {
+      var content = '<a class="project">X</a><br><a class="project">X Y Z</a>';
+      var expected = 'project:X\nproject:"X Y Z"';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (user)', function() {
+      var content = '<a class="user" href="/redmine/user/5">Axl Rose</a>';
+      var expected = 'user#5';
+
+      assert.equal(x._toTextTextile(content), expected);
     });
   });
 });
