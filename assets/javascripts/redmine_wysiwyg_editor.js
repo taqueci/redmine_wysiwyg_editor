@@ -305,6 +305,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     }
   } : {};
 
+  var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
+
   tinymce.init($.extend({
     // Configurable parameters
     language: self._language,
@@ -337,6 +339,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset,colgroup',
+    object_resizing: isObjectResizable,
     mentions: autocompleteConfig
   }));
 };
@@ -1102,7 +1105,10 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   }).addRule('img', {
     filter: 'img',
     replacement: function(content, node) {
-      return '![' + node.alt + '](' + self._imageUrl(node.src) + ')';
+      return (self._htmlTagAllowed && (node.getAttribute('width') ||
+                                       node.getAttribute('height'))) ?
+        node.outerHTML :
+        '![' + node.alt + '](' + self._imageUrl(node.src) + ')';
     }
   }).addRule('block', {
     filter: [
