@@ -340,6 +340,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset,colgroup',
     object_resizing: isObjectResizable,
+    image_dimensions: isObjectResizable,
     mentions: autocompleteConfig
   }));
 };
