@@ -109,7 +109,7 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
 
   self._modeTab.on('click', 'li a', function(e) {
     e.preventDefault();
-    self.changeMode($(this).data('type'));
+    self._changeMode($(this).data('type'));
   });
 
   self._defaultMode =
@@ -131,6 +131,16 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
 };
 
 RedmineWysiwygEditor.prototype.changeMode = function(mode) {
+  var self = this;
+
+  if (!self._editor) return false;
+
+  if ((self._mode === 'visual') && (mode !== 'visual')) self._setTextContent();
+
+  return self._changeMode(mode);
+};
+
+RedmineWysiwygEditor.prototype._changeMode = function(mode) {
   var self = this;
 
   if (!self._editor) return false;
@@ -235,7 +245,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       e.preventDefault();
     });
 
-    self.changeMode(self._defaultMode.get());
+    self._changeMode(self._defaultMode.get());
 
     self._postInit();
   };
@@ -305,6 +315,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     }
   } : {};
 
+  var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
+
   tinymce.init($.extend({
     // Configurable parameters
     language: self._language,
@@ -337,6 +349,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset,colgroup',
+    object_resizing: isObjectResizable,
+    image_dimensions: isObjectResizable,
     mentions: autocompleteConfig
   }));
 };
@@ -344,7 +358,12 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
   var self = this;
 
-  var item = self._attachment.filter(function(file) {
+  // Remove duplicated ones and sort.
+  var attachment = self._attachment.filter(function(e, i, a) {
+    return a.indexOf(e) === i;
+  }).sort();
+
+  var item = attachment.filter(function(file) {
     return /\.(jpeg|jpg|png|gif|bmp)$/i.test(file);
   }).map(function(file) {
     return {
@@ -358,12 +377,13 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
     };
   });
 
-  self._attachment.forEach(function(file) {
+  attachment.forEach(function(file) {
     item.push({
       icon: 'link',
       text: file,
       onclick: function() {
-        self._editor.insertContent('<a class="attachment">' + file + '</a>&nbsp;');
+        self._editor.insertContent('<a class="attachment">' + file +
+                                   '</a>&nbsp;');
       }
     });
   });
@@ -1102,7 +1122,10 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   }).addRule('img', {
     filter: 'img',
     replacement: function(content, node) {
-      return '![' + node.alt + '](' + self._imageUrl(node.src) + ')';
+      return (self._htmlTagAllowed && (node.getAttribute('width') ||
+                                       node.getAttribute('height'))) ?
+        node.outerHTML :
+        '![' + node.alt + '](' + self._imageUrl(node.src) + ')';
     }
   }).addRule('block', {
     filter: [

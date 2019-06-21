@@ -389,4 +389,26 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextTextile(content), expected);
     });
   });
+
+  suite('Markdown (HTML tag enabled)', function() {
+    var x = new RedmineWysiwygEditor(null, null);
+
+    x.setHtmlTagAllowed(true);
+    x.setAttachments(['foo.png', 'f o o.png', 'フー.png']);
+
+    test('Image (attachment)', function() {
+      var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
+      var expected = '![Foo](foo.png)\n![](f%20o%20o.png)\n![](フー.png)';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Image (resized)', function() {
+      var content = '<img src="/attachments/download/1/foo.png" alt="Foo" width="5296" height="3972"><br><img src="/attachments/download/2/f%20o%20o.png" width="5296" height="3972"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png" width="5296" height="3972">';
+
+      var expected = '<img src="/attachments/download/1/foo.png" alt="Foo" width="5296" height="3972">\n<img src="/attachments/download/2/f%20o%20o.png" width="5296" height="3972">\n<img src="/attachments/download/3/%E3%83%95%E3%83%BC.png" width="5296" height="3972">';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+  });
 });
