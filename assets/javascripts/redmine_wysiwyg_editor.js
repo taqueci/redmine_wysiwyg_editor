@@ -109,7 +109,7 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
 
   self._modeTab.on('click', 'li a', function(e) {
     e.preventDefault();
-    self.changeMode($(this).data('type'));
+    self._changeMode($(this).data('type'));
   });
 
   self._defaultMode =
@@ -131,6 +131,16 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
 };
 
 RedmineWysiwygEditor.prototype.changeMode = function(mode) {
+  var self = this;
+
+  if (!self._editor) return false;
+
+  if ((self._mode === 'visual') && (mode !== 'visual')) self._setTextContent();
+
+  return self._changeMode(mode);
+};
+
+RedmineWysiwygEditor.prototype._changeMode = function(mode) {
   var self = this;
 
   if (!self._editor) return false;
@@ -235,7 +245,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       e.preventDefault();
     });
 
-    self.changeMode(self._defaultMode.get());
+    self._changeMode(self._defaultMode.get());
 
     self._postInit();
   };
