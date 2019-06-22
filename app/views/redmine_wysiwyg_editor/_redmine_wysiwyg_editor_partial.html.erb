@@ -138,8 +138,8 @@ function initRedmineWysiwygEditor() {
   if (isAttachmentUploadable($(this))) rwe.setAttachmentUploader(uploader);
 
   rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>);
-  rwe.setAutocompleteIssuePath('<%= escape_javascript auto_complete_issues_path %>');
-  rwe.setAutocompleteUserPath('<%= escape_javascript editor_users_path %>');
+  rwe.setAutocomplete('<%= escape_javascript auto_complete_issues_path %>',
+                      '<%= escape_javascript editor_users_path %>');
 
   var pid = <%= @project ? @project.id : 'null' %> || $('#issue_project_id').val();
 
