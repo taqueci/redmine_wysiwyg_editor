@@ -535,7 +535,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/\$(.)/g, '$1')
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
-      .replace(/<a href="#.+?>.+<\/a>/g, '');
+      .replace(/<a href="#(?!note-\d+).+?>.+<\/a>/g, '');
   }
 
   $.ajax({
@@ -675,6 +675,15 @@ RedmineWysiwygEditor._resorceLinkRule = [
       var m = node.getAttribute('href').match(/\/(\d+)$/);
 
       return gluableContent('user#' + m[1], node, ' ');
+    }
+  }, {
+    key: 'note',
+    filter: function(node) {
+      return (node.nodeName === 'A') &&
+        /^#note-\d+/.test(node.getAttribute('href'));
+    },
+    replacement: function(content, node) {
+      return node.getAttribute('href');
     }
   }
 ];

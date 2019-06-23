@@ -222,6 +222,13 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(x._toTextTextile(content), expected);
     });
+
+    test('Resource link (note)', function() {
+      var content = '<a href="#note-256">#note-256</a>';
+      var expected = '#note-256';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
   });
 
   suite('Markdown', function() {
@@ -385,6 +392,13 @@ suite('Redmine WYSIWYG Editor', function() {
     test('Resource link (user)', function() {
       var content = '<a class="user" href="/redmine/user/5">Axl Rose</a>';
       var expected = 'user#5';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Resource link (note)', function() {
+      var content = '<a href="#note-256">#note-256</a>';
+      var expected = '#note-256';
 
       assert.equal(x._toTextTextile(content), expected);
     });
