@@ -119,6 +119,16 @@ function initRedmineWysiwygEditor() {
       }
     });
 
+    // Redmine 4.1+
+    $(document).on('ajax:success', function(event) {
+      var url = event.target.href;
+
+      if (/\/quoted(\?.+)?$/.test(url)) {
+        // Set comment content with quoted text.
+        rwe.updateVisualContent();
+      }
+    });
+
     setVisible();
   };
 
@@ -157,6 +167,14 @@ $(function() {
   $(document).ajaxSuccess(function(event, xhr, settings) {
     if (settings.url.match(/\/(edit\.js|new\.js|edit)$/)) {
       // New instance for editing comment and changing tracker or status
+      $('.jstEditor').each(initRedmineWysiwygEditor);
+    }
+  });
+
+  // Redmine 4.1+
+  $(document).on('ajax:success', function(event) {
+    if (/\/edit$/.test(event.target.href)) {
+      // Editing comment
       $('.jstEditor').each(initRedmineWysiwygEditor);
     }
   });
