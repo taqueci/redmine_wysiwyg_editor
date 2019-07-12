@@ -58,12 +58,8 @@ RedmineWysiwygEditor.prototype.setProject = function(id) {
   this._project = id;
 };
 
-RedmineWysiwygEditor.prototype.setAutocompleteIssuePath = function(path) {
-  this._autocompleteIssuePath = path;
-};
-
-RedmineWysiwygEditor.prototype.setAutocompleteUserPath = function(path) {
-  this._autocompleteUserPath = path;
+RedmineWysiwygEditor.prototype.setAutocomplete = function(issue, user) {
+  this._autocomplete = {issue: issue, user: user};
 };
 
 RedmineWysiwygEditor.prototype.init = function(editorSetting) {
@@ -276,20 +272,20 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo' :
+      'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo' :
-      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo';
+      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
+      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
 
-  var autocompleteConfig = self._autocompleteIssuePath ? {
+  var autocompleteSetting = self._autocomplete ? {
     delimiter: ['#', '@'],
     source: function(query, process, delimiter) {
       if (query.length === 0) return [];
 
       if (delimiter === '#') {
-        $.getJSON(self._autocompleteIssuePath, {q: query}).done(process);
+        $.getJSON(self._autocomplete.issue, {q: query}).done(process);
       } else {
-        $.getJSON(self._autocompleteUserPath, {project: self._project, q: query})
+        $.getJSON(self._autocomplete.user, {project: self._project, q: query})
           .done(process);
       }
     },
@@ -323,7 +319,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     content_style: style,
     height: Math.max(self._jstEditorTextArea.height(), 200),
     branding: false,
-    plugins: 'link image lists hr table textcolor codesample paste mention',
+    plugins: 'link image lists hr table textcolor codesample paste mention fullscreen',
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
@@ -351,7 +347,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     invalid_elements: 'fieldset,colgroup',
     object_resizing: isObjectResizable,
     image_dimensions: isObjectResizable,
-    mentions: autocompleteConfig
+    mentions: autocompleteSetting
   }));
 };
 
@@ -539,7 +535,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/\$(.)/g, '$1')
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
-      .replace(/<a href="#.+?>.+<\/a>/g, '');
+      .replace(/<a href="#(?!note-\d+).+?>.+<\/a>/g, '');
   }
 
   $.ajax({
@@ -679,6 +675,15 @@ RedmineWysiwygEditor._resorceLinkRule = [
       var m = node.getAttribute('href').match(/\/(\d+)$/);
 
       return gluableContent('user#' + m[1], node, ' ');
+    }
+  }, {
+    key: 'note',
+    filter: function(node) {
+      return (node.nodeName === 'A') &&
+        /^#note-\d+/.test(node.getAttribute('href'));
+    },
+    replacement: function(content, node) {
+      return node.getAttribute('href');
     }
   }
 ];
