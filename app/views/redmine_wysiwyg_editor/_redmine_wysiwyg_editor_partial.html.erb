@@ -151,7 +151,8 @@ function initRedmineWysiwygEditor() {
   rwe.setAutocomplete('<%= escape_javascript auto_complete_issues_path %>',
                       '<%= escape_javascript editor_users_path %>');
 
-  var pid = <%= @project ? @project.id : 'null' %> || $('#issue_project_id').val();
+  var pid = <%= (@project && @project.id) ? @project.id : 'null' %> ||
+      $('#issue_project_id').val();
 
   rwe.setProject(pid);
 
