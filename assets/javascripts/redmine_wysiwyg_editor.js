@@ -12,7 +12,7 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
     preview: 'Preview'
   };
 
-  this._attachments = [];
+  this._attachment = [];
   this._attachmentUploader = function(file) { return false };
 
   this._htmlTagAllowed = false;
@@ -186,7 +186,7 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
   return true;
 };
 
-RedmineWysiwygEditor.prototype.updateVisualEditor = function(mode) {
+RedmineWysiwygEditor.prototype.updateVisualEditor = function() {
   var self = this;
 
   if (!self._editor) return false;
@@ -201,7 +201,7 @@ RedmineWysiwygEditor.prototype.updateVisualEditor = function(mode) {
   return true;
 };
 
-RedmineWysiwygEditor.prototype.updateVisualContent = function(mode) {
+RedmineWysiwygEditor.prototype.updateVisualContent = function() {
   var self = this;
 
   if (!self._editor) return false;
@@ -438,7 +438,7 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
       blockEventPropagation(e);
     }
   }
-}
+};
 
 RedmineWysiwygEditor.prototype._pasteImage = function(dataTransferItem) {
   var self = this;
@@ -568,7 +568,7 @@ RedmineWysiwygEditor.prototype._imageUrl = function(url) {
   return (dir.match(/\/attachments\/download\/\d+$/) &&
           (self._attachment.indexOf(base) >= 0)) ?
     base.replace(/ /g, '%20') : url;
-}
+};
 
 RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
   var ELEMENT_NODE = 1;
