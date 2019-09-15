@@ -4,7 +4,9 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Textile', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
-    x.setAttachments(['foo.png', 'f o o.png', 'フー.png']);
+    x.setAttachments([{name: 'foo.png', id: 1},
+                      {name: 'f o o.png', id: 2},
+                      {name: 'フー.png', id: 3}]);
 
     test('Underline', function() {
       var content = '<span style="text-decoration: underline">Hello, world</span>';
@@ -84,8 +86,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image (external)', function() {
-      var content = '<img src="http://example.com/foo.png">';
-      var expected = '!http://example.com/foo.png!';
+      var content = '<img src="http://example.com/foo.png"><br><img src="http://example.com/attachments/download/10/foo.png">';
+      var expected = '!http://example.com/foo.png!\n!http://example.com/attachments/download/10/foo.png!';
 
       assert.equal(x._toTextTextile(content), expected);
     });
@@ -234,7 +236,9 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Markdown', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
-    x.setAttachments(['foo.png', 'f o o.png', 'フー.png']);
+    x.setAttachments([{name: 'foo.png', id: 1},
+                      {name: 'f o o.png', id: 2},
+                      {name: 'フー.png', id: 3}]);
 
     test('Line-through', function() {
       var content = '<span style="text-decoration: line-through">Hello, world</span>';
@@ -313,8 +317,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image (external)', function() {
-      var content = '<img src="http://example.com/foo.png" alt="Foo">';
-      var expected = '![Foo](http://example.com/foo.png)';
+      var content = '<img src="http://example.com/foo.png" alt="Foo"><br><img src="http://example.com/attachments/download/10/foo.png" alt="Foo">';
+      var expected = '![Foo](http://example.com/foo.png)\n![Foo](http://example.com/attachments/download/10/foo.png)';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
@@ -408,7 +412,9 @@ suite('Redmine WYSIWYG Editor', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
     x.setHtmlTagAllowed(true);
-    x.setAttachments(['foo.png', 'f o o.png', 'フー.png']);
+    x.setAttachments([{name: 'foo.png', id: 1},
+                      {name: 'f o o.png', id: 2},
+                      {name: 'フー.png', id: 3}]);
 
     test('Image (attachment)', function() {
       var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
