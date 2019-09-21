@@ -521,8 +521,13 @@ RedmineWysiwygEditor.prototype._dropEventHandler = function(e) {
   e.stopPropagation();
   e.preventDefault();
 
+  // Replaces special characters with '_'
+  var fileName = function(name) {
+    return name.replace(/["\%\*\:<>\?@\[\\\]\^\|]/g, '_');
+  };
+
   Array.prototype.forEach.call(e.dataTransfer.files, function(file) {
-    self._uploadAttachment(file, file.name);
+    self._uploadAttachment(file, fileName(file.name));
   });
 };
 
@@ -606,7 +611,8 @@ RedmineWysiwygEditor.prototype._insertImage = function(name, id) {
 
   if (!self._editor) return false;
 
-  var url = self._prefix + ['attachments', 'download', id, name].join('/');
+  var url = self._prefix +
+      ['attachments', 'download', id, encodeURIComponent(name)].join('/');
 
   self._editor.insertContent('<br><img src="' + url + '"><br>');
 };
@@ -622,14 +628,21 @@ RedmineWysiwygEditor.prototype._insertAttachment = function(name) {
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {
   var self = this;
 
-  var base = decodeURI(url.replace(/^.+\//, ''));
+  var encodedName = function(name) {
+    return name
+      .replace(/[\"\%\'\*\:<>\?]/g, '_')
+      .replace(/[ \!\&\(\)\+\[\]]/g, function(c) {
+        return '%' + c.charCodeAt(0).toString(16);
+      });
+  };
+
+  var base = decodeURIComponent(url.replace(/^.+\//, ''));
   var dir = url.replace(/\/[^\/]*$/, '');
 
   var m = dir.match(/\/attachments\/download\/(\d+)$/);
   var id = m ? parseInt(m[1]) : null;
 
-  return (id && (self._attachment[base] === id)) ?
-    base.replace(/ /g, '%20') : url;
+  return (id && (self._attachment[base] === id)) ? encodedName(base) : url;
 };
 
 RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
@@ -667,7 +680,9 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 };
 
 var gluableContent = RedmineWysiwygEditor.prototype._gluableContent;
-var qq = function(str) { return /[\s\(\)]/.test(str) ? '"' + str + '"' : str };
+var qq = function(str) {
+  return /[\s\!\&\(\),\;\[\]\{\}]/.test(str) ? '"' + str + '"' : str;
+};
 
 RedmineWysiwygEditor._resorceLinkRule = [
   {

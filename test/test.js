@@ -6,7 +6,8 @@ suite('Redmine WYSIWYG Editor', function() {
 
     x.setAttachments([{name: 'foo.png', id: 1},
                       {name: 'f o o.png', id: 2},
-                      {name: 'フー.png', id: 3}]);
+                      {name: 'フー.png', id: 3},
+                      {name: '!&()+[].png', id: 4}]);
 
     test('Underline', function() {
       var content = '<span style="text-decoration: underline">Hello, world</span>';
@@ -93,8 +94,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image (attachment)', function() {
-      var content = '<img src="/attachments/download/1/foo.png"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
-      var expected = '!foo.png!\n!f%20o%20o.png!\n!フー.png!';
+      var content = '<img src="/attachments/download/1/foo.png"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png"><br><img src="/attachments/download/4/%21%26%28%29%2B%5B%5D.png">';
+      var expected = '!foo.png!\n!f%20o%20o.png!\n!フー.png!\n!%21%26%28%29%2b%5b%5d.png!';
 
       assert.equal(x._toTextTextile(content), expected);
     });
@@ -238,7 +239,8 @@ suite('Redmine WYSIWYG Editor', function() {
 
     x.setAttachments([{name: 'foo.png', id: 1},
                       {name: 'f o o.png', id: 2},
-                      {name: 'フー.png', id: 3}]);
+                      {name: 'フー.png', id: 3},
+                      {name: '!&()+[].png', id: 4}]);
 
     test('Line-through', function() {
       var content = '<span style="text-decoration: line-through">Hello, world</span>';
@@ -414,7 +416,8 @@ suite('Redmine WYSIWYG Editor', function() {
     x.setHtmlTagAllowed(true);
     x.setAttachments([{name: 'foo.png', id: 1},
                       {name: 'f o o.png', id: 2},
-                      {name: 'フー.png', id: 3}]);
+                      {name: 'フー.png', id: 3},
+                      {name: '!&()+[].png', id: 4}]);
 
     test('Image (attachment)', function() {
       var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
