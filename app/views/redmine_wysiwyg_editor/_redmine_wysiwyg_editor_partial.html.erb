@@ -13,12 +13,8 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
     <%= javascript_include_tag('redmine_wysiwyg_editor.js', plugin: 'redmine_wysiwyg_editor') %>
     <%= stylesheet_link_tag('redmine_wysiwyg_editor.css', plugin: 'redmine_wysiwyg_editor') %>
     <%
-    attachments = @issue ? @issue.attachments.map {|a| a.filename } :
-        @page ? @page.attachments.map {|a| a.filename } :
-        @news ? @news.attachments.map {|a| a.filename } :
-        @document ? @document.attachments.map {|a| a.filename } :
-        @topic ? @topic.attachments.map {|a| a.filename } :
-        []
+    t = @issue || @page || @news || @document || @topic || nil
+    attachments = t ? t.attachments.map {|a| {id: a.id, name: a.filename} } : []
     %>
     <% html_tag_allowed = textilizable('<div></div>').include?('<div></div>') %>
     <style type="text/css">
@@ -72,13 +68,15 @@ function initRedmineWysiwygEditor() {
   var allAttachments = function() {
     var attachments = <%= raw attachments.to_json %>;
 
-    $('.attachments_fields input.filename').each(function() {
-      attachments.push($(this).val());
-    });
+    $('.attachments_fields span, #attachments_fields span').each(function() {
+      var token = $(this).find('input.token').val();
 
-    // For Redmine 3.3
-    $('#attachments_fields input.filename').each(function() {
-      attachments.push($(this).val());
+      if (token) {
+        var name = $(this).find('input.filename').val();
+        var m = token.match(/^(\d+)\./);
+
+        attachments.push({id: parseInt(m[1]), name: name});
+      }
     });
 
     return attachments;
@@ -114,8 +112,16 @@ function initRedmineWysiwygEditor() {
         // Set comment content with quoted text or issue template.
         rwe.updateVisualContent();
       } else if (/\/uploads\.js\?.+$/.test(url)) {
+        var a = allAttachments();
+        var m = xhr.responseText.match(/attachments\/(\d+)\.js/);
+
+        // Adds attachment which has been uploaded just now.
+        a.push({id: parseInt(m[1]), name: settings.data.name});
+
+        rwe.setAttachments(a);
+      } else if (/\/attachments\/\d+\.js/.test(url)) {
+        // Update when an attachment is deleted.
         rwe.setAttachments(allAttachments());
-        rwe.updateVisualEditor();
       }
     });
 
@@ -136,6 +142,7 @@ function initRedmineWysiwygEditor() {
 
   rwe.setPostInitCallback(function() { postInit(rwe) });
 
+  rwe.setPrefixPath('<%= home_path %>');
   rwe.setFormat('<%= formatting %>');
   rwe.setLanguage('<%= current_language %>');
   rwe.setI18n({
