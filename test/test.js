@@ -326,8 +326,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Image (attachment)', function() {
-      var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
-      var expected = '![Foo](foo.png)\n![](f%20o%20o.png)\n![](フー.png)';
+      var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png"><br><img src="/attachments/download/4/%21%26%28%29%2B%5B%5D.png">';
+      var expected = '![Foo](foo.png)\n![](f%20o%20o.png)\n![](フー.png)\n![](%21%26%28%29%2b%5b%5d.png)';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
@@ -420,8 +420,8 @@ suite('Redmine WYSIWYG Editor', function() {
                       {name: '!&()+[].png', id: 4}]);
 
     test('Image (attachment)', function() {
-      var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png">';
-      var expected = '![Foo](foo.png)\n![](f%20o%20o.png)\n![](フー.png)';
+      var content = '<img src="/attachments/download/1/foo.png" alt="Foo"><br><img src="/attachments/download/2/f%20o%20o.png"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png"><br><img src="/attachments/download/4/%21%26%28%29%2B%5B%5D.png">';
+      var expected = '![Foo](foo.png)\n![](f%20o%20o.png)\n![](フー.png)\n![](%21%26%28%29%2b%5b%5d.png)';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
