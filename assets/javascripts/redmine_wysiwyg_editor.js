@@ -563,6 +563,10 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     data[name] =
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
+      .replace(/\[\[([^\|]+)\|(.+?)\]\]/g, function(m, name, text) {
+        // Cheap trick for escaping '|' in order not to broke table
+        return '[[' + name + '/' + text + ']]';
+      })
       .replace(/\[\[/g, '[$$[')
       .replace(/document:/g, 'document$$:')
       .replace(/forum:/g, 'forum$$:')
@@ -591,6 +595,9 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     // FIXME: Lost if exists in PRE.
     return unescapeHtml(data)
       .replace(/\$(.)/g, '$1')
+      .replace(/\[\[([^\/]+)\/(.+?)\]\]/g, function(m, name, text) {
+        return '[[' + name + '|' + text + ']]';
+      })
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
       .replace(/<a href="#(?!note-\d+).+?>.+<\/a>/g, '');
