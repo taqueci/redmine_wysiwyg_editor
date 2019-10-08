@@ -564,7 +564,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
       .replace(/\[\[([^\|]+)\|(.+?)\]\]/g, function(m, name, text) {
-        // Cheap trick for escaping '|' in order not to broke table
+        // Cheap trick for escaping '|' in order not to break table
         return '[[' + name + '/' + text + ']]';
       })
       .replace(/\[\[/g, '[$$[')
