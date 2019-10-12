@@ -14,7 +14,7 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
   };
 
   this._attachment = {};
-  this._attachmentUploader = function(file) { return false };
+  this._attachmentUploader = function() { return false; };
   this._attachmentUploading = {};
 
   this._htmlTagAllowed = false;
@@ -37,7 +37,7 @@ RedmineWysiwygEditor.prototype.setFormat = function(format) {
 RedmineWysiwygEditor.prototype.setLanguage = function(lang) {
   var option = ['af_ZA', 'ar', 'be', 'bg_BG', 'bn_BD', 'ca', 'cs', 'cs_CZ', 'cy', 'da', 'de', 'de_AT', 'dv', 'el', 'en_CA', 'en_GB', 'es', 'es_MX', 'et', 'eu', 'fa_IR', 'fi', 'fr_FR', 'ga', 'gl', 'he_IL', 'hr', 'hu_HU', 'id', 'it', 'ja', 'ka_GE', 'kab', 'kk', 'km_KH', 'ko_KR', 'lt', 'lv', 'nb_NO', 'nl', 'pl', 'pt_BR', 'pt_PT', 'ro', 'ru', 'sk', 'sl_SI', 'sr', 'sv_SE', 'ta', 'ta_IN', 'th_TH', 'tr', 'tr_TR', 'ug', 'uk', 'uk_UA', 'uz', 'vi_VN', 'zh_CN', 'zh_TW'];
 
-  var language = lang.replace(/-.+/, function(match, offset, string)  {
+  var language = lang.replace(/-.+/, function(match)  {
     return match.toUpperCase().replace('-', '_');
   });
 
@@ -136,7 +136,7 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
         localStorage.setItem(self._defaultModeKey, mode);
       }
     } : {
-      get: function() {return 'text'},
+      get: function() { return 'text'; },
       set: function() {}
     };
 
@@ -247,9 +247,9 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       '.rte-autocomplete img.gravatar { margin-right: 5px; }';
 
   var callback = function(editor) {
-    editor.on('blur', function(e) {
+    editor.on('blur', function() {
       self._setTextContent();
-    }).on('focus', function(e) {
+    }).on('focus', function() {
       self._updateAttachmentButtonMenu();
     }).on('paste', function(e) {
       self._pasteEventHandler(e);
@@ -491,10 +491,11 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
   };
 
   var data = e.clipboardData;
+  var isImage;
 
   if (data) {
-    var isImage = (data.types.length === 1) && (data.types[0] === 'Files') &&
-        data.items && (data.items[0].type.indexOf('image') >= 0);
+    isImage = (data.types.length === 1) && (data.types[0] === 'Files') &&
+      data.items && (data.items[0].type.indexOf('image') >= 0);
 
     if (isImage) {
       blockEventPropagation(e);
@@ -506,7 +507,7 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
   }
   else {
     // FIXME: Please tell me how to detect image or not in IE...
-    var isImage = (window.clipboardData.getData('Text') === null);
+    isImage = (window.clipboardData.getData('Text') === null);
 
     if (isImage) {
       // Can not do anything against IE.
@@ -523,7 +524,7 @@ RedmineWysiwygEditor.prototype._dropEventHandler = function(e) {
 
   // Replaces special characters with '_'
   var fileName = function(name) {
-    return name.replace(/["\%\*\:<>\?@\[\\\]\^\|]/g, '_');
+    return name.replace(/["%*:<>?@[\\\]^|]/g, '_');
   };
 
   Array.prototype.forEach.call(e.dataTransfer.files, function(file) {
@@ -563,7 +564,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     data[name] =
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
-      .replace(/\[\[([^\|]+)\|(.+?)\]\]/g, function(m, name, text) {
+      .replace(/\[\[([^|]+)\|(.+?)\]\]/g, function(m, name, text) {
         // Cheap trick for escaping '|' in order not to break table
         return '[[' + name + '/' + text + ']]';
       })
@@ -585,7 +586,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     };
 
     var unescapeHtmlMarkdown = function(data) {
-      return data.replace(/<pre>(\w+)\+\-\*\/\!\?([\S\s]+?)<\/pre>/g,
+      return data.replace(/<pre>(\w+)\+-\*\/!\?([\S\s]+?)<\/pre>/g,
                           '<pre data-code="$1">$2</pre>');
     };
 
@@ -595,7 +596,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     // FIXME: Lost if exists in PRE.
     return unescapeHtml(data)
       .replace(/\$(.)/g, '$1')
-      .replace(/\[\[([^\/]+)\/(.+?)\]\]/g, function(m, name, text) {
+      .replace(/\[\[([^/]+)\/(.+?)\]\]/g, function(m, name, text) {
         return '[[' + name + '|' + text + ']]';
       })
       .replace(/<legend>.+<\/legend>/g, '')
@@ -637,14 +638,14 @@ RedmineWysiwygEditor.prototype._imageUrl = function(url) {
 
   var encodedName = function(name) {
     return name
-      .replace(/[\"\%\'\*\:<>\?]/g, '_')
-      .replace(/[ \!\&\(\)\+\[\]]/g, function(c) {
+      .replace(/["%'*:<>?]/g, '_')
+      .replace(/[ !&()+[\]]/g, function(c) {
         return '%' + c.charCodeAt(0).toString(16);
       });
   };
 
   var base = decodeURIComponent(url.replace(/^.+\//, ''));
-  var dir = url.replace(/\/[^\/]*$/, '');
+  var dir = url.replace(/\/[^/]*$/, '');
 
   var m = dir.match(/\/attachments\/download\/(\d+)$/);
   var id = m ? parseInt(m[1]) : null;
@@ -688,7 +689,7 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 
 var gluableContent = RedmineWysiwygEditor.prototype._gluableContent;
 var qq = function(str) {
-  return /[\s\!\&\(\),\;\[\]\{\}]/.test(str) ? '"' + str + '"' : str;
+  return /[\s!&(),;[\]{}]/.test(str) ? '"' + str + '"' : str;
 };
 
 RedmineWysiwygEditor._resorceLinkRule = [
@@ -923,7 +924,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     filter: function(node) {
       return (node.nodeName === 'A') && (node.textContent.length === 0);
     },
-    replacement: function(content) {
+    replacement: function() {
       return '';
     }
   }, {
@@ -943,7 +944,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
         return gluableContent(content, node, ' ');
       } else {
         var titlePart = node.title ? ' (' + node.title + ')' : '';
-        var c = '\"' + content +  titlePart + '\":' + href;
+        var c = '"' + content +  titlePart + '":' + href;
 
         return gluableContent(c, node, NT);
       }
@@ -957,7 +958,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
   }, {
     // Line
     filter: 'hr',
-    replacement: function(content) {
+    replacement: function() {
       return '---';
     }
   }, {
@@ -1029,7 +1030,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     filter: function(node) {
       return (node.nodeName === 'P') && ($(node).closest('table').length > 0);
     },
-    replacement: function(content, node) {
+    replacement: function(content) {
       return content;
     }
   }, {
@@ -1050,7 +1051,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       'button', 'datalist', 'fieldset', 'form', 'meter', 'optgroup', 'select',
       'details', 'big'
     ],
-    replacement: function(content, node) {
+    replacement: function(content) {
       return content;
     }
   }, {
@@ -1059,7 +1060,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       'rp', 'rt', 'rtc', 'wbr', 'area', 'map', 'embed', 'object', 'param',
       'source', 'canvas', 'noscript', 'script', 'input', 'output'
     ],
-    replacement: function(content, node) {
+    replacement: function() {
       return '';
     }
   }];
@@ -1126,7 +1127,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     }
   }).addRule('bold', {
     filter: 'mark',
-    replacement: function(content, node) {
+    replacement: function(content) {
       return '**' + content + '**';
     }
   }).addRule('italic', {
@@ -1141,7 +1142,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       return (name === 'U') || (name === 'INS') ||
         ((name === 'SPAN') && (node.style.textDecoration === 'underline'));
     },
-    replacement: function(content, node) {
+    replacement: function(content) {
       return '<ins>' + content + '</ins>';
     }
   }).addRule('strikethrough', {
@@ -1232,7 +1233,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       'button', 'datalist', 'fieldset', 'form', 'meter', 'optgroup', 'select',
       'details', 'big', 'abbr'
     ],
-    replacement: function(content, node) {
+    replacement: function(content) {
       return content;
     }
   }).addRule('none', {
@@ -1240,7 +1241,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       'rp', 'rt', 'rtc', 'wbr', 'area', 'map', 'embed', 'object', 'param',
       'source', 'canvas', 'noscript', 'script', 'input', 'output'
     ],
-    replacement: function(content, node) {
+    replacement: function() {
       return '';
     }
   }).keep(['sup', 'sub']);
