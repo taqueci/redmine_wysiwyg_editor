@@ -1,0 +1,22 @@
+{
+  "name": "redmine_wysiwyg_editor",
+  "version": "0.0.0",
+  "description": "Redmine WYSIWYG Editor plugin",
+  "scripts": {
+    "eslint": "eslint assets/javascripts/redmine_wysiwyg_editor.js"
+  },
+  "author": "Takeshi Nakamura",
+  "license": "GPL-2.0",
+  "directories": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taqueci/redmine_wysiwyg_editor.git"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "eslint": "^6.5.0"
+  }
+}
+
