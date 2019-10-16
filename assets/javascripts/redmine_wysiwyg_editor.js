@@ -1,4 +1,22 @@
-function RedmineWysiwygEditor(jstEditor, previewUrl) {
+(function(root, factory) {
+  if (typeof exports === 'object') {
+    var jsdom = require('jsdom');
+    var dom = new jsdom.JSDOM('<!doctype html>');
+
+    module.exports = factory(require('jquery')(dom.window),
+                             require('rwe-to-textile'),
+                             require('turndown'),
+                             require('rwe-turndown-plugin-gfm'));
+  } else {
+    var tt = (typeof toTextile !== 'undefined') ? toTextile : null;
+    var td = (typeof TurndownService !== 'undefined') ? TurndownService : null;
+    var gfm = (typeof turndownPluginGfm !== 'undefined') ? turndownPluginGfm : null;
+
+    root.RedmineWysiwygEditor = factory($, tt, td, gfm);
+  }
+}(this, function($, toTextile, TurndownService, turndownPluginGfm) {
+
+var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
   this._jstEditor = jstEditor;
   this._previewUrl = previewUrl;
   this._postInit = function() {};
@@ -20,7 +38,7 @@ function RedmineWysiwygEditor(jstEditor, previewUrl) {
   this._htmlTagAllowed = false;
 
   this._defaultModeKey = 'redmine-wysiwyg-editor-mode';
-}
+};
 
 RedmineWysiwygEditor.prototype.setPostInitCallback = function(func) {
   this._postInit = func;
@@ -1359,3 +1377,6 @@ RedmineWysiwygEditor.prototype._attachmentCallback = function(name, id) {
     self._attachmentUploading[name] = false;
   }
 };
+
+return RedmineWysiwygEditor;
+}));

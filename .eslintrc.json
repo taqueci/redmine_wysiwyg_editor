@@ -11,7 +11,9 @@
     "tinymce": false,
     "toTextile": false,
     "TurndownService": false,
-    "turndownPluginGfm": false
+    "turndownPluginGfm": false,
+    "require": false,
+    "module": false
   },
   "rules": {
     "semi": "error"

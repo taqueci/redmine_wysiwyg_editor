@@ -1,4 +1,13 @@
-var assert = chai.assert;
+(function(root, factory) {
+  if (typeof exports === 'object') {
+    var rwe = require('../assets/javascripts/redmine_wysiwyg_editor.js');
+    var assert = require('chai').assert;
+
+    factory(false, rwe, assert);
+  } else {
+    factory(true, RedmineWysiwygEditor, chai.assert);
+  }
+}(this, function(isBrowser, RedmineWysiwygEditor, assert) {
 
 suite('Redmine WYSIWYG Editor', function() {
   suite('Textile', function() {
@@ -184,6 +193,7 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextTextile(content), expected);
     });
 
+    isBrowser &&
     test('Pasting as HTML', function() {
       var content = '<div><h1 style="box-sizing: border-box; font-size: 2em; margin-top: 0px !important; margin-right: 0px; margin-bottom: 16px; margin-left: 0px; font-weight: 600; line-height: 1.25; padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236, 239); color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial;">Redmine WYSIWYG Editor plugin</h1><p style="box-sizing: border-box; margin-top: 0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial;">This plugin adds WYSIWYG editor mode to Redmine.</p></div>';
       var expected = 'h1{background-color: #ffffff; border-bottom: 1px solid #eaecef; color: #24292e; font-size: 2em; font-style: normal; font-variant-caps: normal; font-variant-ligatures: normal; font-weight: 600; margin-bottom: 16px; margin-left: 0px; margin-right: 0px; padding-bottom: 0.3em;}. Redmine WYSIWYG Editor plugin\n\np{background-color: #ffffff; color: #24292e; font-size: 16px; font-style: normal; font-variant-caps: normal; font-variant-ligatures: normal; font-weight: 400; margin-bottom: 16px; margin-top: 0px;}. This plugin adds WYSIWYG editor mode to Redmine.';
@@ -435,3 +445,5 @@ suite('Redmine WYSIWYG Editor', function() {
     });
   });
 });
+
+}));
