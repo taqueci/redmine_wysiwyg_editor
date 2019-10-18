@@ -14,7 +14,7 @@
     "url": "https://github.com/taqueci/redmine_wysiwyg_editor.git"
   },
   "dependencies": {
-    "jquery": "1.11.1",
+    "jquery": "3.4.1",
     "jsdom": "^11.3.0",
     "turndown": "4.0.1",
     "rwe-to-textile": "0.2.8",
