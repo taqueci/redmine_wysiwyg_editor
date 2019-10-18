@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/taqueci/redmine_wysiwyg_editor.svg?branch=develop)](https://travis-ci.org/taqueci/redmine_wysiwyg_editor)
+
 # Redmine WYSIWYG Editor plugin
 
 This plugin adds WYSIWYG editor mode to Redmine.

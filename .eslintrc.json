@@ -1,0 +1,21 @@
+{
+  "extends": ["eslint:recommended"],
+  "plugins": [],
+  "parserOptions": {
+  },
+  "env": {
+    "browser": true
+  },
+  "globals": {
+    "$": false,
+    "tinymce": false,
+    "toTextile": false,
+    "TurndownService": false,
+    "turndownPluginGfm": false,
+    "require": false,
+    "module": false
+  },
+  "rules": {
+    "semi": "error"
+  }
+}
