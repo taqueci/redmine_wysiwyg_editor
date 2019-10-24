@@ -17,7 +17,7 @@
     "jquery": "1.11.1",
     "jsdom": "^11.3.0",
     "turndown": "4.0.1",
-    "rwe-to-textile": "0.10.0",
+    "rwe-to-textile": "0.10.1",
     "rwe-turndown-plugin-gfm": "0.2.2"
   },
   "devDependencies": {
