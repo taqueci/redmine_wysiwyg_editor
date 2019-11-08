@@ -648,7 +648,7 @@ RedmineWysiwygEditor.prototype._insertAttachment = function(name) {
 
   if (!self._editor) return false;
 
-  self._editor.insertContent('<br><a class="attachment">' + name + '</a><br>');
+  self._editor.insertContent(' <a class="attachment">' + name + '</a> ');
 };
 
 RedmineWysiwygEditor.prototype._imageUrl = function(url) {
