@@ -680,13 +680,13 @@ RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
   var p = node.previousSibling;
   var n = node.nextSibling;
 
-  if (p && (((p.nodeType === TEXT_NODE) && /\S$/.test(p.nodeValue)) ||
+  if (p && (((p.nodeType === TEXT_NODE) && /[\S\u00a0]$/.test(p.nodeValue)) ||
             ((p.nodeType === ELEMENT_NODE) && (p.nodeName !== 'BR'))))
     c.push(glue);
 
   c.push(content);
 
-  if (n && (((n.nodeType === TEXT_NODE) && /^\S/.test(n.nodeValue)) ||
+  if (n && (((n.nodeType === TEXT_NODE) && /^[\S\u00a0]/.test(n.nodeValue)) ||
             ((n.nodeType === ELEMENT_NODE) && (n.nodeName !== 'BR'))))
       c.push(glue);
 
