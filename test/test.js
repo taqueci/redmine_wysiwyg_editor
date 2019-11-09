@@ -242,6 +242,13 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(x._toTextTextile(content), expected);
     });
+
+    test('NBSP', function() {
+      var content = 'foo<br>&nbsp;<a class="issue">#1</a><br><a class="issue">#2</a>&nbsp;<br>&nbsp;<a class="issue">#3</a>&nbsp;<br>&nbsp;<img src="/attachments/download/1/foo.png"><br><img src="/attachments/download/1/foo.png">&nbsp;<br>&nbsp;<img src="/attachments/download/1/foo.png">&nbsp;<br>bar';
+      var expected = 'foo\n\u00a0 #1\n#2 \u00a0\n\u00a0 #3 \u00a0\n\u00a0 !foo.png!\n!foo.png! \u00a0\n\u00a0 !foo.png! \u00a0\nbar';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
   });
 
   suite('Markdown', function() {
@@ -381,42 +388,49 @@ suite('Redmine WYSIWYG Editor', function() {
       var content = '<a class="issue">#1</a>';
       var expected = '#1';
 
-      assert.equal(x._toTextTextile(content), expected);
+      assert.equal(x._toTextMarkdown(content), expected);
     });
 
     test('Resource link (version)', function() {
       var content = '<a class="version">1.0.0</a><br><a class="version">1 0 0</a>';
       var expected = 'version:1.0.0\nversion:"1 0 0"';
 
-      assert.equal(x._toTextTextile(content), expected);
+      assert.equal(x._toTextMarkdown(content), expected);
     });
 
     test('Resource link (attachment)', function() {
       var content = '<a class="attachment">foo.png</a><br><a class="attachment">f o o.png</a>';
       var expected = 'attachment:foo.png\nattachment:"f o o.png"';
 
-      assert.equal(x._toTextTextile(content), expected);
+      assert.equal(x._toTextMarkdown(content), expected);
     });
 
     test('Resource link (project)', function() {
       var content = '<a class="project">X</a><br><a class="project">X Y Z</a>';
       var expected = 'project:X\nproject:"X Y Z"';
 
-      assert.equal(x._toTextTextile(content), expected);
+      assert.equal(x._toTextMarkdown(content), expected);
     });
 
     test('Resource link (user)', function() {
       var content = '<a class="user" href="/redmine/user/5">Axl Rose</a>';
       var expected = 'user#5';
 
-      assert.equal(x._toTextTextile(content), expected);
+      assert.equal(x._toTextMarkdown(content), expected);
     });
 
     test('Resource link (note)', function() {
       var content = '<a href="#note-256">#note-256</a>';
       var expected = '#note-256';
 
-      assert.equal(x._toTextTextile(content), expected);
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('NBSP', function() {
+      var content = 'foo<br>&nbsp;<a class="issue">#1</a><br><a class="issue">#2</a>&nbsp;<br>&nbsp;<a class="issue">#3</a>&nbsp;<br>bar';
+      var expected = 'foo\n\u00a0 #1\n#2 \u00a0\n\u00a0 #3 \u00a0\nbar';
+
+      assert.equal(x._toTextMarkdown(content), expected);
     });
   });
 

@@ -4,6 +4,7 @@ node_js:
   - "8"
 
 before_install:
+  - mv Gemfile.local Gemfile
   - bundle install
 
 script:
