@@ -244,8 +244,8 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('NBSP', function() {
-      var content = 'foo<br>&nbsp;<a class="issue">#1</a><br><a class="issue">#2</a>&nbsp;<br>&nbsp;<a class="issue">#3</a>&nbsp;<br>bar';
-      var expected = 'foo\n\u00a0 #1\n#2 \u00a0\n\u00a0 #3 \u00a0\nbar';
+      var content = 'foo<br>&nbsp;<a class="issue">#1</a><br><a class="issue">#2</a>&nbsp;<br>&nbsp;<a class="issue">#3</a>&nbsp;<br>&nbsp;<img src="/attachments/download/1/foo.png"><br><img src="/attachments/download/1/foo.png">&nbsp;<br>&nbsp;<img src="/attachments/download/1/foo.png">&nbsp;<br>bar';
+      var expected = 'foo\n\u00a0 #1\n#2 \u00a0\n\u00a0 #3 \u00a0\n\u00a0 !foo.png!\n!foo.png! \u00a0\n\u00a0 !foo.png! \u00a0\nbar';
 
       assert.equal(x._toTextTextile(content), expected);
     });

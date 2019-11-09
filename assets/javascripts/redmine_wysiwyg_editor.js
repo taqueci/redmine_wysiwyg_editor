@@ -926,7 +926,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     // Image
     filter: 'img',
     replacement: function(content, node) {
-      return img(node);
+      return gluableContent(img(node), node, ' ');
     }
   }, {
     // Image link
