@@ -6,15 +6,16 @@
     module.exports = factory(require('jquery')(dom.window),
                              require('rwe-to-textile'),
                              require('turndown'),
-                             require('rwe-turndown-plugin-gfm'));
+                             require('rwe-turndown-plugin-gfm'),
+                             {});
   } else {
     var tt = (typeof toTextile !== 'undefined') ? toTextile : null;
     var td = (typeof TurndownService !== 'undefined') ? TurndownService : null;
     var gfm = (typeof turndownPluginGfm !== 'undefined') ? turndownPluginGfm : null;
 
-    root.RedmineWysiwygEditor = factory($, tt, td, gfm);
+    root.RedmineWysiwygEditor = factory($, tt, td, gfm, navigator);
   }
-}(this, function($, toTextile, TurndownService, turndownPluginGfm) {
+}(this, function($, toTextile, TurndownService, turndownPluginGfm, navigator) {
 
 var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
   this._jstEditor = jstEditor;
@@ -38,6 +39,8 @@ var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
   this._htmlTagAllowed = false;
 
   this._defaultModeKey = 'redmine-wysiwyg-editor-mode';
+
+  this._iOS = /iP(hone|(o|a)d)/.test(navigator.userAgent);
 };
 
 RedmineWysiwygEditor.prototype.setPostInitCallback = function(func) {
@@ -196,6 +199,8 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
     self._defaultMode.set(mode);
     break;
   case 'preview':
+    // Note text content is set by blur event except for iOS.
+    if (self._iOS && (self._mode === 'visual')) self._setTextContent();
     self._setPreview();
     self._preview.show();
     self._jstEditor.show();
@@ -207,7 +212,8 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
     self._mode = mode;
     break;
   default:
-    // Note text content is set by blur event.
+    // Note text content is set by blur event except for iOS.
+    if (self._iOS) self._setTextContent();
     self._jstElements.show();
     self._jstEditorTextArea.show();
     self._jstEditor.show();
