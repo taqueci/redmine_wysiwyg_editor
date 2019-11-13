@@ -32,6 +32,8 @@ var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
     preview: 'Preview'
   };
 
+  this._project = {};
+
   this._attachment = {};
   this._attachmentUploader = function() { return false; };
   this._attachmentUploading = {};
@@ -94,8 +96,8 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
-RedmineWysiwygEditor.prototype.setProject = function(id) {
-  this._project = id;
+RedmineWysiwygEditor.prototype.setProject = function(id, key) {
+  this._project = {id: id, key: key};
 };
 
 RedmineWysiwygEditor.prototype.setAutocomplete = function(issue, user) {
@@ -266,6 +268,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'a.attachment::before { content: "attachment:"; }' +
       'a.project::before { content: "project:"; }' +
       'a.user::before { content: "@"; }' +
+      'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }' +
       'span#autocomplete { background-color: #eee; }' +
       'span#autocomplete-delimiter { background-color: #ddd; }' +
       '.rte-autocomplete img.gravatar { margin-right: 5px; }';
@@ -327,7 +330,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       if (delimiter === '#') {
         $.getJSON(self._autocomplete.issue, {q: query}).done(process);
       } else {
-        $.getJSON(self._autocomplete.user, {project: self._project, q: query})
+        $.getJSON(self._autocomplete.user, {project: self._project.id, q: query})
           .done(process);
       }
     },
@@ -588,11 +591,6 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     data[name] =
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
-      .replace(/\[\[([^|]+)\|(.+?)\]\]/g, function(m, name, text) {
-        // Cheap trick for escaping '|' in order not to break table
-        return '[[' + name + '/' + text + ']]';
-      })
-      .replace(/\[\[/g, '[$$[')
       .replace(/document:/g, 'document$$:')
       .replace(/forum:/g, 'forum$$:')
       .replace(/message:/g, 'message$$:')
@@ -620,9 +618,6 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     // FIXME: Lost if exists in PRE.
     return unescapeHtml(data)
       .replace(/\$(.)/g, '$1')
-      .replace(/\[\[([^/]+)\/(.+?)\]\]/g, function(m, name, text) {
-        return '[[' + name + '|' + text + ']]';
-      })
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
       .replace(/<a href="#(?!note-\d+).+?>.+<\/a>/g, '');
@@ -797,6 +792,35 @@ RedmineWysiwygEditor._resorceLinkRule = [
   }
 ];
 
+RedmineWysiwygEditor.prototype._wikiLinkRule = function() {
+  var self = this;
+
+  // <a class="wiki-page" href="path/projects/PROJ/wiki/PAGE#ANCHOR">TEXT</a>
+  // [[PROJ:PAGE#ANCHOR|TEXT]]
+  return {
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('wiki-page');
+    },
+    replacement: function(content, node) {
+      var m = node.getAttribute('href')
+          .match(/\/projects\/([\w-]+)\/wiki(?:\/([^,./?;:|]+)(#.+)?)?$/);
+
+      var proj = m[1];
+      var page = m[2] ? decodeURIComponent(m[2]) : null;
+      var anchor = m[3] ? decodeURIComponent(m[3]) : null;
+
+      var r = [];
+
+      if ((proj !== self._project.key) || !page) r.push(proj + ':');
+      if (page) r.push(page);
+      if (anchor) r.push(anchor);
+      if ((page !== content) && (proj !== content)) r.push('|' + content);
+
+      return '[[' + r.join('') + ']]';
+    }
+  };
+};
+
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
   var self = this;
 
@@ -951,7 +975,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     replacement: function() {
       return '';
     }
-  }, {
+  }, self._wikiLinkRule(), {
     // Link
     filter: function(node) {
       return (node.nodeName === 'A') && node.getAttribute('href');
@@ -1120,6 +1144,8 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   RedmineWysiwygEditor._resorceLinkRule.forEach(function(x) {
     turndownService.addRule(x.key, x);
   });
+
+  turndownService.addRule('wiki', self._wikiLinkRule());
 
   turndownService.addRule('br', {
     // Suppress appending two spaces at the end of the line.

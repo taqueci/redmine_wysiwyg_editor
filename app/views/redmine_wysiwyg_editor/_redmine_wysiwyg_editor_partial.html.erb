@@ -161,7 +161,9 @@ function initRedmineWysiwygEditor() {
   var pid = <%= (@project && @project.id) ? @project.id : 'null' %> ||
       $('#issue_project_id').val();
 
-  rwe.setProject(pid);
+  var pkey = '<%= (@project && @project.identifier) ? @project.identifier : '' %>';
+
+  rwe.setProject(pid, pkey);
 
   var setting = (typeof WYSIWYG_EDITOR_SETTING !== 'undefined') ?
       WYSIWYG_EDITOR_SETTING : {};
