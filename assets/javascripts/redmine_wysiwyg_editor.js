@@ -6,15 +6,16 @@
     module.exports = factory(require('jquery')(dom.window),
                              require('rwe-to-textile'),
                              require('turndown'),
-                             require('rwe-turndown-plugin-gfm'));
+                             require('rwe-turndown-plugin-gfm'),
+                             {});
   } else {
     var tt = (typeof toTextile !== 'undefined') ? toTextile : null;
     var td = (typeof TurndownService !== 'undefined') ? TurndownService : null;
     var gfm = (typeof turndownPluginGfm !== 'undefined') ? turndownPluginGfm : null;
 
-    root.RedmineWysiwygEditor = factory($, tt, td, gfm);
+    root.RedmineWysiwygEditor = factory($, tt, td, gfm, navigator);
   }
-}(this, function($, toTextile, TurndownService, turndownPluginGfm) {
+}(this, function($, toTextile, TurndownService, turndownPluginGfm, navigator) {
 
 var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
   this._jstEditor = jstEditor;
@@ -28,8 +29,15 @@ var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
     textile: 'Textile',
     markdown: 'Markdown',
     visual: 'Visual editor',
-    preview: 'Preview'
+    preview: 'Preview',
+    project: 'Project',
+    page: 'Page',
+    text: 'Text',
+    mainPage: 'Main page',
+    insertWikiLink: 'Insert Wiki link'
   };
+
+  this._project = {};
 
   this._attachment = {};
   this._attachmentUploader = function() { return false; };
@@ -38,6 +46,10 @@ var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
   this._htmlTagAllowed = false;
 
   this._defaultModeKey = 'redmine-wysiwyg-editor-mode';
+
+  this._iOS = /iP(hone|(o|a)d)/.test(navigator.userAgent);
+
+  this._cache = {};
 };
 
 RedmineWysiwygEditor.prototype.setPostInitCallback = function(func) {
@@ -91,8 +103,8 @@ RedmineWysiwygEditor.prototype.setHtmlTagAllowed = function(isAllowed) {
   this._htmlTagAllowed = isAllowed;
 };
 
-RedmineWysiwygEditor.prototype.setProject = function(id) {
-  this._project = id;
+RedmineWysiwygEditor.prototype.setProject = function(id, key) {
+  this._project = {id: id, key: key};
 };
 
 RedmineWysiwygEditor.prototype.setAutocomplete = function(issue, user) {
@@ -196,6 +208,8 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
     self._defaultMode.set(mode);
     break;
   case 'preview':
+    // Note text content is set by blur event except for iOS.
+    if (self._iOS && (self._mode === 'visual')) self._setTextContent();
     self._setPreview();
     self._preview.show();
     self._jstEditor.show();
@@ -207,7 +221,8 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
     self._mode = mode;
     break;
   default:
-    // Note text content is set by blur event.
+    // Note text content is set by blur event except for iOS.
+    if (self._iOS) self._setTextContent();
     self._jstElements.show();
     self._jstEditorTextArea.show();
     self._jstEditor.show();
@@ -260,6 +275,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'a.attachment::before { content: "attachment:"; }' +
       'a.project::before { content: "project:"; }' +
       'a.user::before { content: "@"; }' +
+      'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }' +
       'span#autocomplete { background-color: #eee; }' +
       'span#autocomplete-delimiter { background-color: #ddd; }' +
       '.rte-autocomplete img.gravatar { margin-right: 5px; }';
@@ -287,6 +303,15 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 
     var menu = self._attachmentButtonMenu = self._attachmentButtonMenuItems();
 
+    editor.addButton('wiki', {
+      type: 'button',
+      icon: 'anchor',
+      tooltip: self._i18n.insertWikiLink,
+      onclick: function() {
+        self._wikiLinkDialog();
+      }
+    });
+
     editor.addButton('attachment', {
       type: 'menubutton',
       icon: 'newdocument',
@@ -308,10 +333,10 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
+      'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
-      'formatselect | bold italic strikethrough code removeformat | link image codesample attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
+      'formatselect | bold italic strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
+      'formatselect | bold italic strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
 
   var autocompleteSetting = self._autocomplete ? {
     delimiter: ['#', '@'],
@@ -321,7 +346,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       if (delimiter === '#') {
         $.getJSON(self._autocomplete.issue, {q: query}).done(process);
       } else {
-        $.getJSON(self._autocomplete.user, {project: self._project, q: query})
+        $.getJSON(self._autocomplete.user, {project: self._project.id, q: query})
           .done(process);
       }
     },
@@ -582,11 +607,6 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     data[name] =
       escapeText(textarea[0].value.replace(/\$/g, '$$$$'))
       .replace(/\{\{/g, '{$${')
-      .replace(/\[\[([^|]+)\|(.+?)\]\]/g, function(m, name, text) {
-        // Cheap trick for escaping '|' in order not to break table
-        return '[[' + name + '/' + text + ']]';
-      })
-      .replace(/\[\[/g, '[$$[')
       .replace(/document:/g, 'document$$:')
       .replace(/forum:/g, 'forum$$:')
       .replace(/message:/g, 'message$$:')
@@ -614,9 +634,6 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     // FIXME: Lost if exists in PRE.
     return unescapeHtml(data)
       .replace(/\$(.)/g, '$1')
-      .replace(/\[\[([^/]+)\/(.+?)\]\]/g, function(m, name, text) {
-        return '[[' + name + '|' + text + ']]';
-      })
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
       .replace(/<a href="#(?!note-\d+).+?>.+<\/a>/g, '');
@@ -791,6 +808,35 @@ RedmineWysiwygEditor._resorceLinkRule = [
   }
 ];
 
+RedmineWysiwygEditor.prototype._wikiLinkRule = function() {
+  var self = this;
+
+  // <a class="wiki-page" href="path/projects/PROJ/wiki/PAGE#ANCHOR">TEXT</a>
+  // [[PROJ:PAGE#ANCHOR|TEXT]]
+  return {
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('wiki-page');
+    },
+    replacement: function(content, node) {
+      var m = node.getAttribute('href')
+          .match(/\/projects\/([\w-]+)\/wiki(?:\/([^,./?;:|]+)(#.+)?)?$/);
+
+      var proj = m[1];
+      var page = m[2] ? decodeURIComponent(m[2]) : null;
+      var anchor = m[3] ? decodeURIComponent(m[3]) : null;
+
+      var r = [];
+
+      if ((proj !== self._project.key) || !page) r.push(proj + ':');
+      if (page) r.push(page);
+      if (anchor) r.push(anchor);
+      if ((page !== content) && (proj !== content)) r.push('|' + content);
+
+      return '[[' + r.join('') + ']]';
+    }
+  };
+};
+
 RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
   var self = this;
 
@@ -945,7 +991,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     replacement: function() {
       return '';
     }
-  }, {
+  }, self._wikiLinkRule(), {
     // Link
     filter: function(node) {
       return (node.nodeName === 'A') && node.getAttribute('href');
@@ -1114,6 +1160,8 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   RedmineWysiwygEditor._resorceLinkRule.forEach(function(x) {
     turndownService.addRule(x.key, x);
   });
+
+  turndownService.addRule('wiki', self._wikiLinkRule());
 
   turndownService.addRule('br', {
     // Suppress appending two spaces at the end of the line.
@@ -1375,6 +1423,93 @@ RedmineWysiwygEditor.prototype._attachmentCallback = function(name, id) {
     }
 
     self._attachmentUploading[name] = false;
+  }
+};
+
+RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
+  var self = this;
+
+  var insertLink = function(e) {
+    var proj = e.data.project;
+    var page = e.data.page;
+    var text = e.data.text || (page !== '?') ? page : proj;
+
+    var h = ['projects', proj, 'wiki'];
+
+    if (page !== '?') h.push(encodeURIComponent(page));
+
+    var href = self._prefix + h.join('/');
+    var c = '<a class="wiki-page" href="' + href + '">' + text + '</a>';
+
+    self._editor.insertContent(c);
+  };
+
+  var refreshDialog = function(e) {
+    // TODO: Update just only page list
+    self._editor.windowManager.close();
+    createDialog(e.target.value());
+  };
+
+  var openDialog = function(key) {
+    var arg = {
+      title: self._i18n.insertWikiLink,
+      body: [{
+        type: 'listbox',
+        name: 'project',
+        label: self._i18n.project,
+        values: self._cache.wiki.project,
+        value: key,
+        onselect: refreshDialog
+      }, {
+        type: 'listbox',
+        name: 'page',
+        label: self._i18n.page,
+        values : self._cache.wiki.page[key]
+      }, {
+        type: 'textbox',
+        name: 'text',
+        label: self._i18n.text,
+      }],
+      onsubmit: insertLink
+    };
+
+    self._editor.windowManager.open(arg);
+  };
+
+  var createDialog = function(key) {
+    if (self._cache.wiki.page[key]) {
+      openDialog(key);
+    } else {
+      var url = self._prefix + 'editor/projects/' + key + '/wikis';
+
+      $.getJSON(url, {}).done(function(data) {
+        var p = [{text: self._i18n.mainPage, value: '?'}];
+
+        data.forEach(function(x) {
+          p.push({text: x.title, value: x.title});
+        });
+
+        self._cache.wiki.page[key] = p;
+
+        openDialog(key);
+      });
+    }
+  };
+
+  if (self._cache.wiki) {
+    createDialog(self._project.key || self._cache.wiki.project[0].value);
+  } else {
+    var url = self._prefix + 'editor/projects';
+
+    $.getJSON(url, {}).done(function(data) {
+      var p = data.map(function(x) {
+        return {text: x.name, value: x.identifier};
+      });
+
+      self._cache.wiki = {project: p, page: {}};
+
+      createDialog(self._project.key || p[0].value);
+    });
   }
 };
 

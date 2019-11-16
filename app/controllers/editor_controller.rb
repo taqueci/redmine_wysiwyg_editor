@@ -4,8 +4,6 @@ class EditorController < ApplicationController
   AUTOCOMPLETE_NUM_MAX = 10
   AVATAR_SIZE = 16
 
-  before_action :require_login
-
   def users
     term = params[:q] || ''
 
@@ -25,6 +23,34 @@ class EditorController < ApplicationController
         label: user.name.to_s,
         id: user.id.to_s,
         avatar: avatar_image_tag(user)
+      }
+    }
+  rescue StandardError
+    render_error status: 403
+  end
+
+  def projects
+    render json: Project.visible.sorted.map { |proj|
+      {
+        id: proj.id.to_s,
+        identifier: proj.identifier.to_s,
+        name: proj.name.to_s
+      }
+    }
+  rescue StandardError
+    render_error status: 403
+  end
+
+  def wikis
+    proj = Project.find(params[:project_id])
+
+    raise unless authorized?(proj)
+
+    pages = proj.wiki.pages.reorder("#{WikiPage.table_name}.title")
+
+    render json: pages.map { |p|
+      {
+        title: p.title.to_s
       }
     }
   rescue StandardError

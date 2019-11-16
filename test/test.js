@@ -13,6 +13,7 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Textile', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
+    x.setProject(1, 'gnr');
     x.setAttachments([{name: 'foo.png', id: 1},
                       {name: 'f o o.png', id: 2},
                       {name: 'フー.png', id: 3},
@@ -201,6 +202,13 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextTextile(content), expected);
     });
 
+    test('Wiki link', function() {
+      var content = '<a class="wiki-page" href="/redmine/projects/aerosmith/wiki/Aerosmith#Steven">Steven Tyler</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki/Aerosmith">Joe</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki/Aerosmith">Aerosmith</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki">Aerosmith Wiki</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki">aerosmith</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki/GnR#Axl">Axl Rose</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki/GnR">Slash</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki/GnR">GnR</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki">Guns N\' Roses</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki">gnr</a>';
+      var expected = '[[aerosmith:Aerosmith#Steven|Steven Tyler]]\n[[aerosmith:Aerosmith|Joe]]\n[[aerosmith:Aerosmith]]\n[[aerosmith:|Aerosmith Wiki]]\n[[aerosmith:]]\n[[GnR#Axl|Axl Rose]]\n[[GnR|Slash]]\n[[GnR]]\n[[gnr:|Guns N\' Roses]]\n[[gnr:]]';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
     test('Resource link (issue)', function() {
       var content = '<a class="issue">#1</a>';
       var expected = '#1';
@@ -254,6 +262,7 @@ suite('Redmine WYSIWYG Editor', function() {
   suite('Markdown', function() {
     var x = new RedmineWysiwygEditor(null, null);
 
+    x.setProject(1, 'gnr');
     x.setAttachments([{name: 'foo.png', id: 1},
                       {name: 'f o o.png', id: 2},
                       {name: 'フー.png', id: 3},
@@ -380,6 +389,13 @@ suite('Redmine WYSIWYG Editor', function() {
     test('Font styles', function() {
       var content = 'Under<ins>line</ins><br>Plain<sup>superscript</sup><br>Plain<sub>subscript</sub>';
       var expected = 'Under<ins>line</ins>\nPlain<sup>superscript</sup>\nPlain<sub>subscript</sub>';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Wiki link', function() {
+      var content = '<a class="wiki-page" href="/redmine/projects/aerosmith/wiki/Aerosmith#Steven">Steven Tyler</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki/Aerosmith">Joe</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki/Aerosmith">Aerosmith</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki">Aerosmith Wiki</a><br><a class="wiki-page" href="/redmine/projects/aerosmith/wiki">aerosmith</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki/GnR#Axl">Axl Rose</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki/GnR">Slash</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki/GnR">GnR</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki">Guns N\' Roses</a><br><a class="wiki-page" href="/redmine/projects/gnr/wiki">gnr</a>';
+      var expected = '[[aerosmith:Aerosmith#Steven|Steven Tyler]]\n[[aerosmith:Aerosmith|Joe]]\n[[aerosmith:Aerosmith]]\n[[aerosmith:|Aerosmith Wiki]]\n[[aerosmith:]]\n[[GnR#Axl|Axl Rose]]\n[[GnR|Slash]]\n[[GnR]]\n[[gnr:|Guns N\' Roses]]\n[[gnr:]]';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });

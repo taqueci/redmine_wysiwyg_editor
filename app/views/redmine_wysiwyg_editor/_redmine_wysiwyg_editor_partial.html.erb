@@ -149,7 +149,12 @@ function initRedmineWysiwygEditor() {
     textile: 'Textile',
     markdown: 'Markdown',
     visual: '<%= l(:label_visual_editor) %>',
-    preview: '<%= l(:label_preview) %>'
+    preview: '<%= l(:label_preview) %>',
+    project: '<%= l(:label_project) %>',
+    page: '<%= l(:label_wiki_page) %>',
+    text: '<%= l(:label_string) %>',
+    mainPage: '<%= l(:field_start_page) %>',
+    insertWikiLink: '<%= l(:label_insert_wiki_link) %>'
   });
   rwe.setAttachments(allAttachments());
   if (isAttachmentUploadable($(this))) rwe.setAttachmentUploader(uploader);
@@ -161,7 +166,9 @@ function initRedmineWysiwygEditor() {
   var pid = <%= (@project && @project.id) ? @project.id : 'null' %> ||
       $('#issue_project_id').val();
 
-  rwe.setProject(pid);
+  var pkey = '<%= (@project && @project.identifier) ? @project.identifier : '' %>';
+
+  rwe.setProject(pid, pkey);
 
   var setting = (typeof WYSIWYG_EDITOR_SETTING !== 'undefined') ?
       WYSIWYG_EDITOR_SETTING : {};
