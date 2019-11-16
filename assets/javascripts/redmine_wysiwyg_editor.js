@@ -29,7 +29,12 @@ var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
     textile: 'Textile',
     markdown: 'Markdown',
     visual: 'Visual editor',
-    preview: 'Preview'
+    preview: 'Preview',
+    project: 'Project',
+    page: 'Page',
+    text: 'Text',
+    mainPage: 'Main page',
+    insertWikiLink: 'Insert Wiki link'
   };
 
   this._project = {};
@@ -301,7 +306,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     editor.addButton('wiki', {
       type: 'button',
       icon: 'anchor',
-      tooltip: 'Insert Wiki link',
+      tooltip: self._i18n.insertWikiLink,
       onclick: function() {
         self._wikiLinkDialog();
       }
@@ -1447,23 +1452,23 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
 
   var openDialog = function(key) {
     var arg = {
-      title: 'Insert Wiki link',
+      title: self._i18n.insertWikiLink,
       body: [{
         type: 'listbox',
         name: 'project',
-        label: 'Project',
+        label: self._i18n.project,
         values: self._cache.wiki.project,
         value: key,
         onselect: refreshDialog
       }, {
         type: 'listbox',
         name: 'page',
-        label: 'Page',
+        label: self._i18n.page,
         values : self._cache.wiki.page[key]
       }, {
         type: 'textbox',
         name: 'text',
-        label: 'Text'
+        label: self._i18n.text,
       }],
       onsubmit: insertLink
     };
@@ -1478,7 +1483,7 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
       var url = self._prefix + 'editor/projects/' + key + '/wikis';
 
       $.getJSON(url, {}).done(function(data) {
-        var p = [{text: 'Main page', value: '?'}];
+        var p = [{text: self._i18n.mainPage, value: '?'}];
 
         data.forEach(function(x) {
           p.push({text: x.title, value: x.title});
