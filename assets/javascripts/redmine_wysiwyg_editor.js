@@ -433,6 +433,9 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
     };
   });
 
+  // Separator
+  if (item.length > 0) item.push({text: '|'});
+
   attachment.forEach(function(name) {
     item.push({
       icon: 'link',
