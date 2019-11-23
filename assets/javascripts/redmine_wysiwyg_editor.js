@@ -209,7 +209,7 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
     break;
   case 'preview':
     // Note text content is set by blur event except for iOS.
-    if (self._iOS && (self._mode === 'visual')) self._setTextContent();
+    if (self._iOS && (self._mode === 'visual')) self._editor.fire('blur');
     self._setPreview();
     self._preview.show();
     self._jstEditor.show();
@@ -222,7 +222,7 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
     break;
   default:
     // Note text content is set by blur event except for iOS.
-    if (self._iOS) self._setTextContent();
+    if (self._iOS) self._editor.fire('blur');
     self._jstElements.show();
     self._jstEditorTextArea.show();
     self._jstEditor.show();
@@ -280,11 +280,34 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'span#autocomplete-delimiter { background-color: #ddd; }' +
       '.rte-autocomplete img.gravatar { margin-right: 5px; }';
 
+  var toolbarControls = function() {
+    var button = {};
+    var toolbar = self._editor.theme.panel.rootControl.controlIdLookup;
+
+    Object.keys(toolbar).forEach(function(key) {
+      var setting = toolbar[key].settings;
+      var name = setting.icon;
+
+      if (name) {
+        // Note index is not control ID but icon name.
+        button[name] = toolbar[key];
+      } else if (setting.values && (setting.values[0].text === 'Paragraph')) {
+        button['format'] = toolbar[key];
+      }
+    });
+
+    return button;
+  };
+
   var callback = function(editor) {
+    self._control = toolbarControls();
+
     editor.on('blur', function() {
       self._setTextContent();
+      self._enableUpdatingToolbar(false);
     }).on('focus', function() {
       self._updateAttachmentButtonMenu();
+      self._enableUpdatingToolbar(true);
     }).on('paste', function(e) {
       self._pasteEventHandler(e);
     }).on('dragover', function(e) {
@@ -433,6 +456,9 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
     };
   });
 
+  // Separator
+  if (item.length > 0) item.push({text: '|'});
+
   attachment.forEach(function(name) {
     item.push({
       icon: 'link',
@@ -444,6 +470,42 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
   });
 
   return item;
+};
+
+RedmineWysiwygEditor.prototype._updateToolbar = function() {
+  var self = this;
+
+  // FIXME: Table insertion should also be disabled.
+  var TARGETS =
+      ['format', 'codesample', 'numlist', 'bullist', 'blockquote', 'hr'];
+
+  var isInTable = function(node) {
+    while (node && (node.nodeName !== 'BODY')) {
+      if (node.nodeName === 'TD') return true;
+
+      node = node.parentNode;
+    }
+
+    return false;
+  };
+
+  var ctrl = self._control;
+  var disabled = isInTable(self._editor.selection.getNode());
+
+  TARGETS.forEach(function(x) { ctrl[x].disabled(disabled); });
+};
+
+RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
+  var self = this;
+  var INTERVAL = 1000;
+
+  if (!enabled) {
+    clearInterval(self._toolbarIntervalId);
+    self._toolbarIntervalId = null;
+  } else if (!self._toolbarIntervalId) {
+    self._toolbarIntervalId =
+      setInterval(function() { self._updateToolbar(); }, INTERVAL);
+  }
 };
 
 RedmineWysiwygEditor.prototype._updateAttachmentButtonMenu = function() {
