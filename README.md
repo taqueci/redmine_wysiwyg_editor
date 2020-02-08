@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/taqueci/redmine_wysiwyg_editor.svg?branch=develop)](https://travis-ci.org/taqueci/redmine_wysiwyg_editor)
+[![Build Status](https://travis-ci.org/taqueci/redmine_wysiwyg_editor.svg?branch=master)](https://travis-ci.org/taqueci/redmine_wysiwyg_editor)
 
 # Redmine WYSIWYG Editor plugin
 
