@@ -407,6 +407,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
+    browser_spellcheck: true,
     convert_urls: false,
     invalid_styles: {
       'table': 'width height',
