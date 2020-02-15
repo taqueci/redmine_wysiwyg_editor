@@ -1,8 +1,8 @@
 FROM ruby:2.6
 
-MAINTAINER Takeshi Nakamura
+LABEL maintainer="Takeshi Nakamura"
 
-ARG version=4.0.5
+ARG version=4.1.0
 ARG install_dir=/opt/redmine
 
 RUN apt-get update && apt-get install -qq -y sqlite3 git
@@ -32,4 +32,4 @@ RUN bundle exec rake redmine:plugins:migrate
 RUN bundle exec rake generate_secret_token
 
 EXPOSE 3000
-CMD bundle exec rails s -p 3000 -b '0.0.0.0'
+CMD ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
