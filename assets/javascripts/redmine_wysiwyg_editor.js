@@ -1495,7 +1495,7 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
   var insertLink = function(e) {
     var proj = e.data.project;
     var page = e.data.page;
-    var text = e.data.text || (page !== '?') ? page : proj;
+    var text = e.data.text || ((page !== '?') ? page : proj);
 
     var h = ['projects', proj, 'wiki'];
 
