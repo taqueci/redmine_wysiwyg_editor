@@ -881,7 +881,9 @@ RedmineWysiwygEditor.prototype._wikiLinkRule = function() {
       return (node.nodeName === 'A') && node.classList.contains('wiki-page');
     },
     replacement: function(content, node) {
-      var m = node.getAttribute('href')
+      var href = node.getAttribute('href');
+
+      var m = href.replace(/\?.+$/, '')
           .match(/\/projects\/([\w-]+)\/wiki(?:\/([^,./?;:|]+)(#.+)?)?$/);
 
       var proj = m[1];
