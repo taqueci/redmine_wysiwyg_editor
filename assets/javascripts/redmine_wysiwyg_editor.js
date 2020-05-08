@@ -883,6 +883,12 @@ RedmineWysiwygEditor.prototype._wikiLinkRule = function() {
     replacement: function(content, node) {
       var href = node.getAttribute('href');
 
+      if (/^#/.test(href)) {
+        return (href === content) ?
+          ('[[' + href + ']]') :
+          ('[[' + href + '|' + content + ']]');
+      }
+
       var m = href.replace(/\?.+$/, '')
           .match(/\/projects\/([\w-]+)\/wiki(?:\/([^,./?;:|]+)(#.+)?)?$/);
 
