@@ -962,7 +962,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     var classes = node.classList;
 
     return (classes.length > 0) ? '(' + classes.value.replace(/wiki-class-/g, '') + ')' : '';
-  }
+  };
 
   var img = function(node) {
     var alt = node.alt ? '(' + node.alt + ')' : '';
