@@ -62,7 +62,7 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Span with class and style attributes', function() {
-      var content = '<span class="wiki-class-test" style="color: rgb(255, 255, 255);"">Hello, world</span>';
+      var content = '<span class="wiki-class-test" style="color: rgb(255, 255, 255);">Hello, world</span>';
       var expected = '%(test){color: #ffffff;}Hello, world%';
 
       assert.equal(x._toTextTextile(content), expected);
