@@ -54,6 +54,20 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(x._toTextTextile(content), expected);
     });
 
+    test('Span with class attribute', function() {
+      var content = '<span class="wiki-class-test another-class-test">Hello, world</span>';
+      var expected = '%(test another-class-test)Hello, world%';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
+    test('Span with class and style attributes', function() {
+      var content = '<span class="wiki-class-test" style="color: rgb(255, 255, 255);"">Hello, world</span>';
+      var expected = '%(test){color: #ffffff;}Hello, world%';
+
+      assert.equal(x._toTextTextile(content), expected);
+    });
+
     test('Strong', function() {
       var content = '<strong>Hello, world</strong>';
       var expected = '*Hello, world*';
