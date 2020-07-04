@@ -958,6 +958,12 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     return (style.length > 0) ? '{' + style + '}' : '';
   };
 
+  var classAttr = function(node) {
+    var classes = node.classList;
+
+    return (classes.length > 0) ? '(' + classes.value.replace(/wiki-class-/g, '') + ')' : '';
+  };
+
   var img = function(node) {
     var alt = node.alt ? '(' + node.alt + ')' : '';
 
@@ -1022,10 +1028,15 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     replacement: function(content, node) {
       // Remove percentage value because RedCloth3 can't parse correctly.
       var attr = styleAttr(node).replace(/\s*\d+%/g, '');
+      var classes = classAttr(node);
 
-      return ((attr.length > 0) && (content.length > 0) &&
-              (node.parentNode.nodeName !== 'SPAN')) ?
-        gluableContent('%' + attr + content + '%', node, NT) : content;
+      if (((attr.length > 0) || (classes.length > 0)) &&
+              (content.length > 0) &&
+              (node.parentNode.nodeName !== 'SPAN')) {
+        return gluableContent('%' + classes + attr + content + '%', node, NT);
+      } else {
+        return content;
+      }
     }
   }, {
     // Bold
