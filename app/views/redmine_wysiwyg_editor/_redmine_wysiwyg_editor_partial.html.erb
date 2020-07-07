@@ -49,6 +49,12 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
     <script>
 function initRedmineWysiwygEditor() {
   var setVisible = function() {
+    // Fixed for IE 11
+    const ua = navigator.userAgent;
+    if (ua.indexOf('Trident') !== -1) {
+      $('.jstElements').parent().addClass('tab-elements');
+    }
+
     $('.jstTabs, .jstElements, .jstEditor').css('visibility', 'visible');
   };
 
