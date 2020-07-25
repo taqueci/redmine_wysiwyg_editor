@@ -358,8 +358,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var toolbar = (self._format === 'textile') ?
       'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
-      'formatselect | bold italic strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
+      'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
+      'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
 
   var autocompleteSetting = self._autocomplete ? {
     delimiter: ['#', '@'],
@@ -1274,14 +1274,14 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
       return '<span style="' + node.style.cssText + '">' + content + '</span>';
     }
   }).addRule('bold', {
-    filter: 'mark',
+    filter: ['strong', 'mark'],
     replacement: function(content) {
       return '**' + content + '**';
     }
   }).addRule('italic', {
-    filter: 'q',
+    filter: ['em', 'q'],
     replacement: function(content) {
-      return '_' + content + '_';
+      return '*' + content + '*';
     }
   }).addRule('underline', {
     filter: function(node) {
@@ -1291,7 +1291,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
         ((name === 'SPAN') && (node.style.textDecoration === 'underline'));
     },
     replacement: function(content) {
-      return '<ins>' + content + '</ins>';
+      return '_' + content + '_';
     }
   }).addRule('strikethrough', {
     filter: function(node) {

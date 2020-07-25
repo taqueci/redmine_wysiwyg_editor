@@ -283,8 +283,22 @@ suite('Redmine WYSIWYG Editor', function() {
                       {name: '!&()+[].png', id: 4}]);
 
     test('Line-through', function() {
-      var content = '<span style="text-decoration: line-through">Hello, world</span>';
-      var expected = '~~Hello, world~~';
+      var content = '<span style="text-decoration: line-through">Hello, world</span><br><del>Hello, world</del>';
+      var expected = '~~Hello, world~~\n~~Hello, world~~';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Strong', function() {
+      var content = '<strong>Hello, world</strong>';
+      var expected = '**Hello, world**';
+
+      assert.equal(x._toTextMarkdown(content), expected);
+    });
+
+    test('Italic', function() {
+      var content = '<em>Hello, world</em>';
+      var expected = '*Hello, world*';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
@@ -394,15 +408,15 @@ suite('Redmine WYSIWYG Editor', function() {
     });
 
     test('Underline', function() {
-      var content = '<span style="text-decoration: underline">Hello, world</span>';
-      var expected = '<ins>Hello, world</ins>';
+      var content = '<span style="text-decoration: underline">Hello, world</span><br><u>Hello, world</u>';
+      var expected = '_Hello, world_\n_Hello, world_';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
 
     test('Font styles', function() {
-      var content = 'Under<ins>line</ins><br>Plain<sup>superscript</sup><br>Plain<sub>subscript</sub>';
-      var expected = 'Under<ins>line</ins>\nPlain<sup>superscript</sup>\nPlain<sub>subscript</sub>';
+      var content = 'Plain<sup>superscript</sup><br>Plain<sub>subscript</sub>';
+      var expected = 'Plain<sup>superscript</sup>\nPlain<sub>subscript</sub>';
 
       assert.equal(x._toTextMarkdown(content), expected);
     });
