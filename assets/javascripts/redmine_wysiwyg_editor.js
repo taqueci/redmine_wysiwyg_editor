@@ -356,7 +356,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
+      'formatselect | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
       self._htmlTagAllowed ?
       'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
       'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
