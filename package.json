@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Redmine WYSIWYG Editor plugin",
   "scripts": {
-    "eslint": "eslint assets/javascripts/redmine_wysiwyg_editor.js",
+    "eslint": "eslint assets/javascripts/redmine_wysiwyg_editor.js assets/javascripts/RedmineFormatPlugin.js",
     "test": "mocha test/*.js"
   },
   "author": "Takeshi Nakamura",

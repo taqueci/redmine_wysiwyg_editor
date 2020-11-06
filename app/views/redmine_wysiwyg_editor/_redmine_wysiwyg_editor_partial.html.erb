@@ -10,6 +10,7 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
       <%= javascript_include_tag('turndown.js', plugin: 'redmine_wysiwyg_editor') %>
       <%= javascript_include_tag('turndown-plugin-gfm.js', plugin: 'redmine_wysiwyg_editor') %>
     <% end %>
+    <%= javascript_include_tag('RedmineFormatPlugin.js', plugin: 'redmine_wysiwyg_editor') %>
     <%= javascript_include_tag('redmine_wysiwyg_editor.js', plugin: 'redmine_wysiwyg_editor') %>
     <%= stylesheet_link_tag('redmine_wysiwyg_editor.css', plugin: 'redmine_wysiwyg_editor') %>
     <%
