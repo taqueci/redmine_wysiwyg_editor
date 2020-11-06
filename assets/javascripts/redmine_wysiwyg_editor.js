@@ -1,9 +1,6 @@
 (function(root, factory) {
   if (typeof exports === 'object') {
-    var jsdom = require('jsdom');
-    var dom = new jsdom.JSDOM('<!doctype html>');
-
-    module.exports = factory(require('jquery')(dom.window),
+    module.exports = factory(require('jquery'),
                              require('rwe-to-textile'),
                              require('turndown'),
                              require('rwe-turndown-plugin-gfm'),
