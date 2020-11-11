@@ -14,6 +14,8 @@ if (typeof exports === 'object') {
       var tinymce = require('../../assets/javascripts/tinymce/tinymce.min');
       global.tinymce = window.tinymce = tinymce;
       global.RedmineWysiwygEditor = require('../../assets/javascripts/redmine_wysiwyg_editor');
+
+      require('../../assets/javascripts/RedmineFormatPlugin');
     },
     afterAll() {
       delete global.chai;
