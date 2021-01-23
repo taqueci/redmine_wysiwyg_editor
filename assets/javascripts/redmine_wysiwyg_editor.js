@@ -307,10 +307,14 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       self._enableUpdatingToolbar(true);
     }).on('paste', function(e) {
       self._pasteEventHandler(e);
+      self._setChanged();
     }).on('dragover', function(e) {
       e.preventDefault();
     }).on('drop', function(e) {
       self._dropEventHandler(e);
+      self._setChanged();
+    }).on('keyup', function() {
+      self._setChanged();
     });
 
     self._changeMode(self._defaultMode.get());
@@ -1526,6 +1530,13 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
       createDialog(self._project.key || p[0].value);
     });
   }
+};
+
+RedmineWysiwygEditor.prototype._setChanged = function() {
+  var self = this;
+
+  // Warn before leaving page with unsaved changes.
+  self._jstEditorTextArea.data('changed', 'changed');
 };
 
 return RedmineWysiwygEditor;
