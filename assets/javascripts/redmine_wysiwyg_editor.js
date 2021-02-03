@@ -1523,6 +1523,8 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
     $.getJSON(url, {}).done(function(data) {
       var p = data.map(function(x) {
         return {text: x.name, value: x.identifier};
+      }).sort(function(a, b) {
+        return a.text.toUpperCase() > b.text.toUpperCase();
       });
 
       self._cache.wiki = {project: p, page: {}};
