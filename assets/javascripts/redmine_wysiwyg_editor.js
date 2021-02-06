@@ -1458,7 +1458,8 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
     if (page !== '?') h.push(encodeURIComponent(page));
 
     var href = self._prefix + h.join('/');
-    var c = '<a class="wiki-page" href="' + href + '">' + text + '</a>';
+    var c = '<a class="wiki-page" href="' + href + '">' +
+        text.replace(/_/g, ' ') + '</a>';
 
     self._editor.insertContent(c);
   };
@@ -1505,7 +1506,7 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
         var p = [{text: self._i18n.mainPage, value: '?'}];
 
         data.forEach(function(x) {
-          p.push({text: x.title, value: x.title});
+          p.push({text: x.title.replace(/_/g, ' '), value: x.title});
         });
 
         self._cache.wiki.page[key] = p;
@@ -1523,6 +1524,8 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
     $.getJSON(url, {}).done(function(data) {
       var p = data.map(function(x) {
         return {text: x.name, value: x.identifier};
+      }).sort(function(a, b) {
+        return a.text.toUpperCase() > b.text.toUpperCase();
       });
 
       self._cache.wiki = {project: p, page: {}};
