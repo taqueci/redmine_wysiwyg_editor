@@ -136,6 +136,8 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
     self._tabsUl.removeChild(self._tabsUl.firstChild);
     self._tabsUl.removeChild(self._tabsUl.firstChild);
 
+    /* global jsToolBar, jsTab */
+
     jsToolBar.strings['rwe-preview'] = self._i18n.preview;
     var prvtab = new jsTab('rwe-preview', false);
     prvtab.onclick = function(){
