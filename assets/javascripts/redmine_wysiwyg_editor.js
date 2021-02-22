@@ -138,17 +138,17 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
 
     jsToolBar.strings['rwe-preview'] = self._i18n.preview;
     var prvtab = new jsTab('rwe-preview', false);
-    prvtab.onclick = function(event){self._changeMode('preview');}
+    prvtab.onclick = function(event){self._changeMode('preview');return false;}
     self._tabsUl.prepend(prvtab);
 
     jsToolBar.strings['rwe-visual'] = self._i18n.visual;
     var vistab = new jsTab('rwe-visual', false);
-    vistab.onclick = function(event) {self._changeMode('visual');}
+    vistab.onclick = function(event) {self._changeMode('visual');return false;}
     self._tabsUl.prepend(vistab);
 
     jsToolBar.strings['rwe-text'] = self._i18n[self._format];
     var stdtab = new jsTab('rwe-text', true);
-    stdtab.onclick = function(event) {self._changeMode('text');}
+    stdtab.onclick = function(event) {self._changeMode('text');return false;}
     self._tabsUl.prepend(stdtab);
 
     self._oldPreviewAccess = false;
