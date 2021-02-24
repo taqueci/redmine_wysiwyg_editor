@@ -33,13 +33,14 @@ e.g. under ubuntu the plugin_assets is not automatically provided in the apache 
 
 #### Ubuntu 18.04 / 20.04
 
+```
  Alias "/redmine/plugin_assets/" /var/cache/redmine/default/plugin_assets/
  <Directory "/var/cache/redmine/default/plugin_assets">
     Allow from all
     Options -MultiViews
     Require all granted
  </Directory>
-
+```
 
 
 ## License
