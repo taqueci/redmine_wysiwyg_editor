@@ -1,5 +1,8 @@
 <%
-if content_for(:header_tags).present? && content_for(:header_tags).include?('/jstoolbar/')
+if content_for(:header_tags).present? &&
+    content_for(:header_tags).include?('/jstoolbar/') &&
+    (@project.nil? || @project.identifier.blank? ||
+     User.current.allowed_to?(:use_visual_editor, @project))
   content_for :header_tags do %>
     <%= javascript_include_tag('tinymce/tinymce.min.js', plugin: 'redmine_wysiwyg_editor') %>
     <%

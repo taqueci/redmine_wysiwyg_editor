@@ -24,6 +24,7 @@ WYSIWYG editor mode.
 
 1. Clone or copy files into the Redmine plugins directory
 2. Restart Redmine
+3. Enable "Visual editor" in project module settings
 
 ## FAQ / Errors
 
