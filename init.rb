@@ -7,8 +7,8 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
   author_url 'https://github.com/taqueci'
 
   project_module :visual_editor do
-    permission :use_visual_editor, { :redmine_wysiwyg_editor => [] },
-               :public => true, :require => :member
+    permission :use_visual_editor, { redmine_wysiwyg_editor: [] },
+               public: true, require: :member
   end
 
   settings default: { settings_visual_editor_mode_switch_tab: '' },
