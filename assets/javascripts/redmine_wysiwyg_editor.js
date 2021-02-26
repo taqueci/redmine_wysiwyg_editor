@@ -108,6 +108,10 @@ RedmineWysiwygEditor.prototype.setAutocomplete = function(issue, user) {
   this._autocomplete = {issue: issue, user: user};
 };
 
+RedmineWysiwygEditor.prototype.setTabModeSwitch = function(isTab) {
+  this._tabModeSwitch = isTab;
+};
+
 RedmineWysiwygEditor.prototype.init = function(editorSetting) {
   var self = this;
 
@@ -119,48 +123,64 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
 
   var previewHtml = '<div class="wysiwyg-editor-preview wiki"></div>';
 
+  var modeTabHtml = self._tabModeSwitch ? '' :
+      '<div class="wysiwyg-editor-tab"><ul>' +
+      '<li><a href="#" data-type="text" class="active">' +
+      self._i18n[self._format] + '</a></li>' +
+      '<li><a href="#" data-type="visual">' +
+      self._i18n.visual + '</a></li>' +
+      '<li><a href="#" data-type="preview">' +
+      self._i18n.preview + '</a></li>' +
+      '</ul></div>';
+
   self._jstEditorTextArea = self._jstEditor.find('textarea');
 
   self._jstEditorTextArea.after(previewHtml);
-  self._jstEditor.after(editorHtml);
+  self._jstEditor.after(editorHtml + modeTabHtml);
 
   self._visualEditor = container.find('.wysiwyg-editor').hide();
   self._preview = container.find('.wysiwyg-editor-preview').hide();
+  self._modeTab = container.find('.wysiwyg-editor-tab');
 
   var jstTabs = container.find('.jstTabs');
   var jstElements = container.find('.jstElements');
 
   if (jstTabs.length > 0) {
-    self._jstElements = jstElements;
-    self._tabsUl = jstTabs[0].firstChild;
-    self._tabsUl.removeChild(self._tabsUl.firstChild);
-    self._tabsUl.removeChild(self._tabsUl.firstChild);
+    if (self._tabModeSwitch) {
+      self._jstElements = jstElements;
+      self._tabsUl = jstTabs[0].firstChild;
+      self._tabsUl.removeChild(self._tabsUl.firstChild);
+      self._tabsUl.removeChild(self._tabsUl.firstChild);
 
-    /* global jsToolBar, jsTab */
+      /* global jsToolBar, jsTab */
 
-    jsToolBar.strings['rwe-preview'] = self._i18n.preview;
-    var prvtab = new jsTab('rwe-preview', false);
-    prvtab.onclick = function(){
-      self._changeMode('preview');
-      return false;
-    };
-    self._tabsUl.prepend(prvtab);
+      jsToolBar.strings['rwe-preview'] = self._i18n.preview;
+      var prvtab = new jsTab('rwe-preview', false);
+      prvtab.onclick = function(){
+        self._changeMode('preview');
+        return false;
+      };
+      self._tabsUl.prepend(prvtab);
 
-    jsToolBar.strings['rwe-visual'] = self._i18n.visual;
-    var vistab = new jsTab('rwe-visual', false);
-    vistab.onclick = function() {
-      self._changeMode('visual');
-      return false;
-    };
-    self._tabsUl.prepend(vistab);
+      jsToolBar.strings['rwe-visual'] = self._i18n.visual;
+      var vistab = new jsTab('rwe-visual', false);
+      vistab.onclick = function() {
+        self._changeMode('visual');
+        return false;
+      };
+      self._tabsUl.prepend(vistab);
 
-    jsToolBar.strings['rwe-text'] = self._i18n[self._format];
-    var stdtab = new jsTab('rwe-text', true);
-    stdtab.onclick = function() {
-      self._changeMode('text');
-      return false;
-    };
-    self._tabsUl.prepend(stdtab);
+      jsToolBar.strings['rwe-text'] = self._i18n[self._format];
+      var stdtab = new jsTab('rwe-text', true);
+      stdtab.onclick = function() {
+        self._changeMode('text');
+        return false;
+      };
+      self._tabsUl.prepend(stdtab);
+    } else {
+      $('#content .jstBlock .jstTabs ul li:not(.tab-elements)').hide();
+      self._jstElements = jstTabs;
+    }
 
     self._oldPreviewAccess = false;
     self._preview.addClass('wiki-preview');
@@ -168,6 +188,11 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
     self._jstElements = jstElements;
     self._oldPreviewAccess = true;
   }
+
+  self._modeTab.on('click', 'li a', function(e) {
+    e.preventDefault();
+    self._changeMode($(this).data('type'));
+  });
 
   self._defaultMode =
     (('localStorage' in window) && (window.localStorage !== null)) ? {
@@ -202,13 +227,20 @@ RedmineWysiwygEditor.prototype._changeMode = function(mode) {
 
   if (!self._editor) return false;
 
-  for (var i = 0; i < 3; i++) {
-    var thisTab = self._tabsUl.childNodes[i].firstChild;
-    if (thisTab.classList.contains('tab-rwe-' + mode)) {
-      thisTab.classList.add('selected');
-    } else {
-      thisTab.classList.remove('selected');
+  if (self._tabModeSwitch) {
+    for (var i = 0; i < 3; i++) {
+      var thisTab = self._tabsUl.childNodes[i].firstChild;
+      if (thisTab.classList.contains('tab-rwe-' + mode)) {
+        thisTab.classList.add('selected');
+      } else {
+        thisTab.classList.remove('selected');
+      }
     }
+  } else {
+    self._modeTab.find('li a').each(function() {
+      if ($(this).data('type') === mode) $(this).addClass('active');
+      else $(this).removeClass('active');
+    });
   }
 
   switch (mode) {

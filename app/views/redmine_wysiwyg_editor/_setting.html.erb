@@ -1,0 +1,5 @@
+<p>
+  <label for="settings_visual_editor_mode_switch_tab"><%= l(:option_visual_editor_mode_switch_tab) %></label>
+  <%= hidden_field_tag 'settings[visual_editor_mode_switch_tab]', '0' %>
+  <%= check_box_tag 'settings[visual_editor_mode_switch_tab]', '1', @settings[:visual_editor_mode_switch_tab] == '1' %>
+</p>
