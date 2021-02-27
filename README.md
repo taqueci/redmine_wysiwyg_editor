@@ -24,6 +24,25 @@ WYSIWYG editor mode.
 
 1. Clone or copy files into the Redmine plugins directory
 2. Restart Redmine
+3. Enable "Visual editor" in project module settings
+
+## FAQ / Errors
+
+### you get a 404 on plugin_assets folder
+
+e.g. under ubuntu the plugin_assets is not automatically provided in the apache passenger config. So you need to add this directory too
+
+#### Ubuntu 18.04 / 20.04
+
+```
+ Alias "/redmine/plugin_assets/" /var/cache/redmine/default/plugin_assets/
+ <Directory "/var/cache/redmine/default/plugin_assets">
+    Allow from all
+    Options -MultiViews
+    Require all granted
+ </Directory>
+```
+
 
 ## License
 

@@ -1,5 +1,8 @@
 <%
-if content_for(:header_tags).present? && content_for(:header_tags).include?('/jstoolbar/')
+if content_for(:header_tags).present? &&
+    content_for(:header_tags).include?('/jstoolbar/') &&
+    (@project.nil? || @project.identifier.blank? ||
+     User.current.allowed_to?(:use_visual_editor, @project))
   content_for :header_tags do %>
     <%= javascript_include_tag('tinymce/tinymce.min.js', plugin: 'redmine_wysiwyg_editor') %>
     <%
@@ -37,10 +40,6 @@ if content_for(:header_tags).present? && content_for(:header_tags).include?('/js
 #content .jstBlock .jstTabs li {
   height: auto;
   margin: 0;
-}
-
-#content .jstBlock .jstTabs ul li:not(.tab-elements) {
-  display: none;
 }
 
 #content .jstBlock .jstTabs .jstElements {
@@ -169,6 +168,7 @@ function initRedmineWysiwygEditor() {
   rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>);
   rwe.setAutocomplete('<%= escape_javascript auto_complete_issues_path %>',
                       '<%= escape_javascript editor_users_path %>');
+  rwe.setTabModeSwitch(<%= (Setting.plugin_redmine_wysiwyg_editor[:visual_editor_mode_switch_tab] == '1') ? 'true' : 'false' %>);
 
   var pid = <%= (@project && @project.id) ? @project.id : 'null' %> ||
       $('#issue_project_id').val();

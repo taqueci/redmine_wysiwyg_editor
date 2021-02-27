@@ -1,3 +1,5 @@
 en:
   label_visual_editor: "Visual editor"
   label_insert_wiki_link: "Insert Wiki link"
+  project_module_visual_editor: "Visual editor"
+  option_visual_editor_mode_switch_tab: "Use tabs for mode switch"
