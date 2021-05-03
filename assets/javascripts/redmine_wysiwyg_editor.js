@@ -160,7 +160,7 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
         self._changeMode('preview');
         return false;
       };
-      self._tabsUl.prepend(prvtab);
+      self._tabsUl.insertBefore(prvtab, self._tabsUl.firstChild);
 
       jsToolBar.strings['rwe-visual'] = self._i18n.visual;
       var vistab = new jsTab('rwe-visual', false);
@@ -168,7 +168,7 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
         self._changeMode('visual');
         return false;
       };
-      self._tabsUl.prepend(vistab);
+       self._tabsUl.insertBefore(vistab, self._tabsUl.firstChild);
 
       jsToolBar.strings['rwe-text'] = self._i18n[self._format];
       var stdtab = new jsTab('rwe-text', true);
@@ -176,7 +176,7 @@ RedmineWysiwygEditor.prototype.init = function(editorSetting) {
         self._changeMode('text');
         return false;
       };
-      self._tabsUl.prepend(stdtab);
+      self._tabsUl.insertBefore(stdtab, self._tabsUl.firstChild);
     } else {
       $('#content .jstBlock .jstTabs ul li:not(.tab-elements)').hide();
       self._jstElements = jstTabs;
