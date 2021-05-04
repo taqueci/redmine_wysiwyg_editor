@@ -20,6 +20,13 @@ The plugin is powered by:
 Irreversible conversion may be caused between Textile/Markdown mode and
 WYSIWYG editor mode.
 
+Since version 0.21.0, the visual editor is disabled as default.
+If you have many existing projects,
+you can enable by executing on Rails console:
+```ruby
+Project.all.each { |p| p.enable_module!(:visual_editor) }
+```
+
 ## Installation
 
 1. Clone or copy files into the Redmine plugins directory
