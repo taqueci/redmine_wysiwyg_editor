@@ -1149,7 +1149,7 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
     filter: ['code', 'kbd', 'samp', 'tt', 'var'],
     replacement: function(content, node) {
       return (node.parentNode.nodeName === 'PRE') ?
-        content : gluableContent('@' + content + '@', node, ' ');
+        content : '@' + content + '@';
     }
   }, {
     // Preformatted
