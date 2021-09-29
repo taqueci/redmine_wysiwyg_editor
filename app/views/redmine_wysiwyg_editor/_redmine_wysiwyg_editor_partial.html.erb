@@ -107,7 +107,33 @@ function initRedmineWysiwygEditor() {
     // Disables uploading in editing note and adding news comment.
     return (jstEditor.closest('.journal').length === 0) &&
       (jstEditor.closest('#add_comment_form').length === 0);
-  }
+  };
+
+  // For Redmine Issue Template plugin 1.1.0+
+  var overrideIssueTemplatePluginMethods = function(rwe) {
+    if (typeof ISSUE_TEMPLATE === 'undefined') return;
+
+    var replace = ISSUE_TEMPLATE.prototype.replaceTemplateValue;
+
+    ISSUE_TEMPLATE.prototype.replaceTemplateValue = function(obj) {
+      replace.call(this, obj);
+      rwe.updateVisualContent();
+    };
+
+    var erase = ISSUE_TEMPLATE.prototype.eraseSubjectAndDescription;
+
+    ISSUE_TEMPLATE.prototype.eraseSubjectAndDescription = function() {
+      erase.call(this);
+      rwe.updateVisualContent();
+    };
+
+    var revert = ISSUE_TEMPLATE.prototype.revertAppliedTemplate;
+
+    ISSUE_TEMPLATE.prototype.revertAppliedTemplate = function() {
+      revert.call(this);
+      rwe.updateVisualContent();
+    };
+  };
 
   var postInit = function (rwe) {
     $(document).ajaxSuccess(function(event, xhr, settings) {
@@ -140,6 +166,9 @@ function initRedmineWysiwygEditor() {
         rwe.updateVisualContent();
       }
     });
+
+    // For Redmine Issue Template Plugin
+    overrideIssueTemplatePluginMethods(rwe);
 
     setVisible();
   };
