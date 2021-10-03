@@ -35,6 +35,13 @@ Project.all.each { |p| p.enable_module!(:visual_editor) }
 
 ## FAQ / Errors
 
+### Custom field
+
+The visual editor mode is available in long text custom field
+with Redmine 4.1.0+ by enabling:
+* Text formatting
+* Full width layout
+
 ### you get a 404 on plugin_assets folder
 
 e.g. under ubuntu the plugin_assets is not automatically provided in the apache passenger config. So you need to add this directory too
