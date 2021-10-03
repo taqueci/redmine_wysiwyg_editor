@@ -1,9 +1,24 @@
 version: '3.1'
 
 services:
-  main:
+  app:
     image: redmine:alpine
     ports:
       - 3000:3000
     volumes:
+      - ./_data/plugins:/usr/src/redmine/plugins
       - .:/usr/src/redmine/plugins/redmine_wysiwyg_editor
+    environment:
+      REDMINE_DB_POSTGRES: db
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: password
+
+  db:
+    image: postgres
+    volumes:
+      - ./_data/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: redmine
+      POSTGRES_USER: redmine
+      POSTGRES_PASSWORD: password
