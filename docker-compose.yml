@@ -6,6 +6,7 @@ services:
     ports:
       - 3000:3000
     volumes:
+      - ./_data/files:/usr/src/redmine/files
       - ./_data/plugins:/usr/src/redmine/plugins
       - .:/usr/src/redmine/plugins/redmine_wysiwyg_editor
     environment:

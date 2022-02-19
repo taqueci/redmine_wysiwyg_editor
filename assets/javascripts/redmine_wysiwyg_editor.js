@@ -353,6 +353,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     editor.on('blur', function() {
       self._setTextContent();
       self._enableUpdatingToolbar(false);
+    }).on('focusout', function() {
+      if (self._iOS) self._editor.fire('blur');
     }).on('focus', function() {
       self._updateAttachmentButtonMenu();
       self._enableUpdatingToolbar(true);
