@@ -89,7 +89,8 @@ function initRedmineWysiwygEditor() {
   };
 
   var uploader = function(file) {
-    var input = $('input:file.filedrop').first();
+    //var input = $('input:file.filedrop').first();
+    var input = this._inputFile;
 
     if (input.length > 0) {
       var sizeExceeded = uploadAndAttachFiles([file], input);
@@ -174,6 +175,9 @@ function initRedmineWysiwygEditor() {
   };
 
   var rwe = new RedmineWysiwygEditor($(this), previewUrl);
+
+  let inputForfile = $(this).closest("form").find('input:file.filedrop');
+  rwe.setInputFile(inputForfile);
 
   rwe.setPostInitCallback(function() { postInit(rwe) });
 

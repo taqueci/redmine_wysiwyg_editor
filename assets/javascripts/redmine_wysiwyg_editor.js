@@ -47,6 +47,8 @@ var RedmineWysiwygEditor = function(jstEditor, previewUrl) {
   this._iOS = /iP(hone|(o|a)d)/.test(navigator.userAgent);
 
   this._cache = {};
+
+  this._inputFile = [];
 };
 
 RedmineWysiwygEditor.prototype.setPostInitCallback = function(func) {
@@ -55,6 +57,10 @@ RedmineWysiwygEditor.prototype.setPostInitCallback = function(func) {
 
 RedmineWysiwygEditor.prototype.setPrefixPath = function(path) {
   this._prefix = path;
+};
+
+RedmineWysiwygEditor.prototype.setInputFile = function(inputFile) {
+  this._inputFile = inputFile;
 };
 
 RedmineWysiwygEditor.prototype.setFormat = function(format) {
