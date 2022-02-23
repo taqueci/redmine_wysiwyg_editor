@@ -929,7 +929,7 @@ RedmineWysiwygEditor.prototype._wikiLinkRule = function() {
       }
 
       var m = href.replace(/\?.+$/, '')
-          .match(/\/projects\/([\w-]+)\/wiki(?:\/([^,./?;:|]+)(#.+)?)?$/);
+          .match(/\/projects\/([\w-]+)\/(?:[\w-]+)(?:\/([^,./?;:|]+)(#.+)?)?$/);
 
       var proj = m[1];
       var page = m[2] ? decodeURIComponent(m[2]) : null;
