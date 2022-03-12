@@ -817,11 +817,13 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 
   var html = self._editor.getContent();
 
-  var text = (self._format === 'textile') ?
-      self._toTextTextile(html) :
-      self._toTextMarkdown(html);
+  if(html) {
+    var text = (self._format === 'textile') ?
+        self._toTextTextile(html) :
+        self._toTextMarkdown(html);
 
-  self._jstEditorTextArea.val(text);
+    self._jstEditorTextArea.val(text);
+  }
 };
 
 var gluableContent = RedmineWysiwygEditor.prototype._gluableContent;
