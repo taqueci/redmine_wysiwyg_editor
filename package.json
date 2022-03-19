@@ -14,15 +14,15 @@
     "url": "https://github.com/taqueci/redmine_wysiwyg_editor.git"
   },
   "dependencies": {
-    "jquery": "2.2.4",
-    "turndown": "4.0.1",
+    "jquery": "3.5.1",
     "rwe-to-textile": "0.10.1",
-    "rwe-turndown-plugin-gfm": "0.2.2"
+    "rwe-turndown-plugin-gfm": "0.2.2",
+    "turndown": "4.0.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "eslint": "^6.5.0",
-    "jsdom": "^16.4.0",
-    "mocha": "^8.2.0"
+    "chai": "^4.3.0",
+    "eslint": "^8.11.0",
+    "jsdom": "^19.0.0",
+    "mocha": "^9.2.0"
   }
 }
