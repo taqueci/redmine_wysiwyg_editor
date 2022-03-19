@@ -3,24 +3,26 @@ name: Run tests
 on: [push]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
-
+        node: [ '12', '14', '16' ]
+    name: Node ${{ matrix.node }}
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install, build, and test
-      run: |
-        npm install
-        npm run eslint
-        npm run test
-      env:
-        CI: true
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install Node packages
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run eslint
+
+      - name: Run tests
+        run: npm run test
