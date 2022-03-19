@@ -1,3 +1,4 @@
+[![Run tests](https://github.com/taqueci/redmine_wysiwyg_editor/actions/workflows/test.yml/badge.svg)](https://github.com/taqueci/redmine_wysiwyg_editor/actions/workflows/test.yml)
 [![Build Status](https://api.travis-ci.com/taqueci/redmine_wysiwyg_editor.svg?branch=master)](https://app.travis-ci.com/github/taqueci/redmine_wysiwyg_editor)
 
 # Redmine WYSIWYG Editor plugin
