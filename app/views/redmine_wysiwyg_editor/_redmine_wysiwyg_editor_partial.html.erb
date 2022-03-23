@@ -89,8 +89,7 @@ function initRedmineWysiwygEditor() {
   };
 
   var uploader = function(file) {
-    var input = $('input:file.filedrop').first();
-
+    var input = this._jstEditor.closest('form').find('input:file.filedrop');
     if (input.length > 0) {
       var sizeExceeded = uploadAndAttachFiles([file], input);
 
