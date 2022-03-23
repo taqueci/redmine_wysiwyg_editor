@@ -89,9 +89,7 @@ function initRedmineWysiwygEditor() {
   };
 
   var uploader = function(file) {
-    // Target the (input file) in the closest form instead of the first input file.
-    //var input = $('input:file.filedrop').first();
-    var input = this._jstEditor.closest("form").find('input:file.filedrop');
+    var input = this._jstEditor.closest('form').find('input:file.filedrop');
     if (input.length > 0) {
       var sizeExceeded = uploadAndAttachFiles([file], input);
 
