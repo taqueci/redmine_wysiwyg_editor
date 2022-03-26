@@ -654,15 +654,19 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
   var isImage;
 
   if (data) {
-    isImage = (data.types.length === 1) && (data.types[0] === 'Files') &&
-      data.items && (data.items[0].type.indexOf('image') >= 0);
+    // Browse all data.items, because of some versions (chrome and chromium)
+    // return 18 data.type
+    for (var i = 0; i < data.items.length; i++) {
+      var blob = data.items[i].getAsFile();
+      isImage = blob && (data.items[i].type.indexOf('image') >= 0);
 
-    if (isImage) {
-      blockEventPropagation(e);
-      pasteImage(data.items[0]);
-    } else if (data.types.length === 0) {
-      // Do nothing if file is pasted.
-      blockEventPropagation(e);
+      if (isImage) {
+        blockEventPropagation(e);
+        pasteImage(data.items[i]);
+      } else if (data.types.length === 0) {
+        // Do nothing if file is pasted.
+        blockEventPropagation(e);
+      }
     }
   }
   else {
