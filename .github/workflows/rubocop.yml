@@ -3,19 +3,24 @@ name: Run RuboCop
 on: [push]
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        ruby: [ '2.6', '2.7' ]
+    name: Ruby ${{ matrix.ruby }}
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Ruby 2.6
-      uses: actions/setup-ruby@v1
-      with:
-        ruby-version: 2.6.x
-    - name: Run RuboCop
-      run: |
-        cp Gemfile.local Gemfile
-        gem install bundler
-        bundle install --jobs 4 --retry 3
-        bundle exec rubocop
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: Run RuboCop
+        run: |
+          cp Gemfile.local Gemfile
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+          bundle exec rubocop
