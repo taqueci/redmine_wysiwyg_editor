@@ -15,4 +15,4 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
            partial: 'redmine_wysiwyg_editor/setting'
 end
 
-require File.expand_path('../lib/redmine_wysiwyg_editor', __FILE__)
+require File.expand_path('lib/redmine_wysiwyg_editor', __dir__)
