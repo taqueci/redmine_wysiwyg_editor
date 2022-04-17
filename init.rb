@@ -2,7 +2,7 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
   name 'Redmine WYSIWYG Editor plugin'
   author 'Takeshi Nakamura'
   description 'Redmine WYSIWYG text editor'
-  version '0.25.3'
+  version '0.26.0'
   url 'https://github.com/taqueci/redmine_wysiwyg_editor'
   author_url 'https://github.com/taqueci'
 
@@ -15,4 +15,4 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
            partial: 'redmine_wysiwyg_editor/setting'
 end
 
-require_dependency 'redmine_wysiwyg_editor'
+require File.expand_path('lib/redmine_wysiwyg_editor', __dir__)
