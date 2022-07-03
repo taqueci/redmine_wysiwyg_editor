@@ -1282,7 +1282,10 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     return string;
   };
 
-  turndownService.use(turndownPluginGfm.tables);
+  if (self._format === 'common_mark')
+    turndownService.use(turndownPluginGfm.gfm);
+  else
+    turndownService.use(turndownPluginGfm.tables);
 
   RedmineWysiwygEditor._resorceLinkRule.forEach(function(x) {
     turndownService.addRule(x.key, x);
@@ -1430,7 +1433,7 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
   }).addRule('none', {
     filter: [
       'rp', 'rt', 'rtc', 'wbr', 'area', 'map', 'embed', 'object', 'param',
-      'source', 'canvas', 'noscript', 'script', 'input', 'output'
+      'source', 'canvas', 'noscript', 'script', 'output'
     ],
     replacement: function() {
       return '';

@@ -9,7 +9,7 @@ if content_for(:header_tags).present? &&
     formatting = Setting.text_formatting
     if formatting == 'textile' %>
       <%= javascript_include_tag('to-textile.min.js', plugin: 'redmine_wysiwyg_editor') %>
-    <% elsif formatting == 'markdown' %>
+    <% elsif formatting == 'markdown'|| formatting == 'common_mark' %>
       <%= javascript_include_tag('turndown.js', plugin: 'redmine_wysiwyg_editor') %>
       <%= javascript_include_tag('turndown-plugin-gfm.js', plugin: 'redmine_wysiwyg_editor') %>
     <% end %>
@@ -182,6 +182,7 @@ function initRedmineWysiwygEditor() {
   rwe.setI18n({
     textile: 'Textile',
     markdown: 'Markdown',
+    common_mark: 'Markdown',
     visual: '<%= l(:label_visual_editor) %>',
     preview: '<%= l(:label_preview) %>',
     project: '<%= l(:label_project) %>',
