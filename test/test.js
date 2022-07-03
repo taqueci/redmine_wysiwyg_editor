@@ -499,4 +499,25 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(rwe._toTextMarkdown(content), expected);
     });
   });
+
+  suite('Markdown (GitHub Flavored)', function() {
+    var rwe;
+
+    setup(function () {
+      rwe = new RedmineWysiwygEditor(null, null);
+      rwe.setProject(1, 'gnr');
+      rwe.setAttachments([{name: 'foo.png', id: 1},
+        {name: 'f o o.png', id: 2},
+        {name: 'フー.png', id: 3},
+        {name: '!&()+[].png', id: 4}]);
+      rwe.setFormat('common_mark');
+    });
+
+    test('Task list items', function() {
+      var content = '<ul><li><input disabled="" type="checkbox"> foo</li><li><input checked="" disabled="" type="checkbox"> bar</li></ul>';
+      var expected = '*   [ ]  foo\n*   [x]  bar';
+
+      assert.equal(rwe._toTextMarkdown(content), expected);
+    });
+  });
 });
