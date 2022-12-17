@@ -340,6 +340,13 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(rwe._toTextMarkdown(content), expected);
     });
 
+    test('Table with empty row', function() {
+      var content = '<table><thead><tr><th>Header</th></tr></thead><tbody><tr><td></td></tr><tr><td>Cell</td></tr></tbody></table><table><thead><tr><th>Header 1</th><th>Header 2</th></tr></thead><tbody><tr><td></td><td></td></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></tbody></table>';
+      var expected = '| Header |\n| --- |\n|  |\n| Cell |\n| Header 1 | Header 2 |\n| --- | --- |\n|  |  |\n| Cell 1 | Cell 2 |';
+
+      assert.equal(rwe._toTextMarkdown(content), expected);
+    });
+
     test('Preformatted', function() {
       var content = '<pre>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</pre>\n\n<pre>No newline at the end of the content</pre>';
       var expected = '~~~\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~\n\n~~~\nNo newline at the end of the content\n~~~';
@@ -356,7 +363,7 @@ suite('Redmine WYSIWYG Editor', function() {
 
     test('Code block (code sample plugin)', function() {
       var content = '<pre class="language-c" contenteditable="false"><code>#include &lt;stdio.h&gt;\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n</code></pre>';
-      var expected = '~~~ c\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n} \n~~~';
+      var expected = '~~~ c\n#include <stdio.h>\n\nint main(int argc, char *argv[])\n{\n    printf("Hello, world\n");\n\n    return 0;\n}\n~~~';
 
       assert.equal(rwe._toTextMarkdown(content), expected);
     });
