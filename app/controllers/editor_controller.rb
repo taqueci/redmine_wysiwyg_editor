@@ -1,8 +1,10 @@
+require 'nokogiri'
+
 # Editor controller
 class EditorController < ApplicationController
   TERM_LEN_PUB_PROJ_MIN = 2
   AUTOCOMPLETE_NUM_MAX = 10
-  AVATAR_SIZE = 16
+  AVATAR_SIZE = 24
 
   def users
     term = params[:q] || ''
@@ -22,7 +24,7 @@ class EditorController < ApplicationController
       {
         label: user.name.to_s,
         id: user.id.to_s,
-        avatar: avatar_image_tag(user)
+        image: avatar_image_url(user)
       }
     }
   rescue StandardError
@@ -62,12 +64,15 @@ class EditorController < ApplicationController
                              project)
   end
 
-  def avatar_image_tag(user)
+  def avatar_image_url(user)
     avtr = view_context.avatar(user, size: AVATAR_SIZE.to_s)
 
-    avtr.presence ||
-      view_context.image_tag('default.png',
-                             plugin: 'redmine_wysiwyg_editor',
-                             size: AVATAR_SIZE.to_s, class: 'gravatar')
+    html = avtr.presence ||
+           view_context.image_tag('default.png',
+                                  plugin: 'redmine_wysiwyg_editor',
+                                  size: AVATAR_SIZE.to_s, class: 'gravatar')
+
+    # FIXME: It's not economy...
+    Nokogiri::HTML(html).css('img').first['src']
   end
 end

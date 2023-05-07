@@ -346,10 +346,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'a.attachment::before { content: "attachment:"; }' +
       'a.project::before { content: "project:"; }' +
       'a.user::before { content: "@"; }' +
-      'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }' +
-      'span#autocomplete { background-color: #eee; }' +
-      'span#autocomplete-delimiter { background-color: #ddd; }' +
-      '.rte-autocomplete img.gravatar { margin-right: 5px; }';
+      'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }';
 
   var toolbarControls = function() {
     var button = {};
@@ -426,6 +423,35 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
         editor.execCommand('mceToggleFormat', false, 'code');
       }
     });
+
+    editor.ui.registry.addAutocompleter('issue_autocomplete', {
+      ch: '#',
+      onAction: function (autocompleteApi, rng, value) {
+        editor.selection.setRng(rng);
+        editor.insertContent('<a class="issue">#' + value + '</a>&nbsp;');
+        autocompleteApi.hide();
+      },
+      fetch: function (pattern) {
+        return self._IssueAutocompleteItems(pattern);
+      }
+    });
+
+    editor.ui.registry.addAutocompleter('mention_autocomplete', {
+      ch: '@',
+      minChars: 3,
+      highlightOn: ['name'],
+      onAction: function (autocompleteApi, rng, value) {
+        var content = '<a class="user" href="/' + value.id +
+            '" contenteditable="false">' + value.label + '</a>&nbsp;';
+
+        editor.selection.setRng(rng);
+        editor.insertContent(content);
+        autocompleteApi.hide();
+      },
+      fetch: function (pattern) {
+        return self._MentionAutocompleteItems(pattern);
+      }
+    });
   };
 
   var toolbar = (self._format === 'textile') ?
@@ -433,40 +459,6 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       self._htmlTagAllowed ?
       'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
       'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
-
-  var autocompleteSetting = self._autocomplete ? {
-    delimiter: ['#', '@'],
-    source: function(query, process, delimiter) {
-      if (query.length === 0) return [];
-
-      if (delimiter === '#') {
-        $.getJSON(self._autocomplete.issue, {q: query}).done(process);
-      } else {
-        $.getJSON(self._autocomplete.user, {project: self._project.id, q: query})
-          .done(process);
-      }
-    },
-    queryBy: 'label',
-    renderDropdown: function() {
-      return '<ul class="rte-autocomplete mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
-    },
-    render: function(item) {
-      if (this.options.delimiter === '#') {
-        return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
-      } else {
-        return '<li class="mce-menu-item mce-menu-item-normal">' +
-          item.avatar + ' ' + item.label + '</li>';
-      }
-    },
-    insert: function(item) {
-      if (this.options.delimiter === '#') {
-        return '<a class="issue">#' + item.id + '</a>&nbsp;';
-      } else {
-        return '<a class="user" href="/' + item.id + '" contenteditable="false">' +
-          item.label + '</a>&nbsp;';
-      }
-    }
-  } : {};
 
   var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
 
@@ -476,7 +468,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     content_style: style,
     height: Math.max(self._jstEditorTextArea.height(), 200),
     branding: false,
-    plugins: 'redmineformat link image lists hr table textcolor codesample paste mention fullscreen',
+    plugins: 'redmineformat link image lists hr table textcolor codesample paste fullscreen',
     menubar: false,
     toolbar: toolbar,
     toolbar_items_size: 'small',
@@ -504,8 +496,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset,colgroup',
     object_resizing: isObjectResizable,
-    image_dimensions: isObjectResizable,
-    mentions: autocompleteSetting
+    image_dimensions: isObjectResizable
   }));
 };
 
@@ -547,6 +538,54 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function(cb) {
   });
 
   cb(item);
+};
+
+RedmineWysiwygEditor.prototype._IssueAutocompleteItems = function(pattern) {
+  var self = this;
+
+  return new tinymce.util.Promise(function (resolve) {
+    var url = self._autocomplete.issue;
+    var param = {q: pattern};
+
+    $.getJSON(url, param).done(function (data) {
+      resolve(data.map(function (x) {
+        return {
+          type: 'autocompleteitem',
+          value: String(x.value),
+          text: x.label
+        };
+      }));
+    });
+  });
+};
+
+RedmineWysiwygEditor.prototype._MentionAutocompleteItems = function(pattern) {
+  var self = this;
+
+  return new tinymce.util.Promise(function (resolve) {
+    var url = self._autocomplete.user;
+    var param = {project: self._project.id, q: pattern};
+
+    $.getJSON(url, param).done(function (data) {
+      resolve(data.map(function (x) {
+        return {
+          type: 'cardmenuitem',
+          value: x,
+          label: x.label,
+          items: [
+            {
+              type: 'cardcontainer',
+              direction: 'horizontal',
+              items: [
+                {type: 'cardimage', src: x.image},
+                {type: 'cardtext', text: x.label, name: 'name'}
+              ]
+            }
+          ]
+        };
+      }));
+    });
+  });
 };
 
 RedmineWysiwygEditor.prototype._updateToolbar = function() {
