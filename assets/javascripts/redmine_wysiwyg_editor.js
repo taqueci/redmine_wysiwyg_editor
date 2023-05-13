@@ -105,8 +105,7 @@ RedmineWysiwygEditor.prototype.setAttachments = function(files) {
   });
 
   self._attachment = attachment;
-
-  if (self._editor) self._updateAttachmentButtonMenu();
+  self._updateAttachmentButton();
 };
 
 RedmineWysiwygEditor.prototype.setAttachmentUploader = function(handler) {
@@ -308,8 +307,6 @@ RedmineWysiwygEditor.prototype.updateVisualEditor = function() {
 
   if (!self._editor) return false;
 
-  self._updateAttachmentButtonMenu();
-
   if (self._mode === 'visual') {
     self._setTextContent();
     self._setVisualContent();
@@ -347,11 +344,10 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 
   var toolbarControls = function() {
     var button = {};
-    var toolbar = self._editor.theme.panel.rootControl.controlIdLookup;
+    var toolbar = self._editor.ui.registry.getAll().buttons;
 
     Object.keys(toolbar).forEach(function(key) {
-      var setting = toolbar[key].settings;
-      var name = setting.icon;
+      var name = toolbar[key].icon;
 
       if (name) {
         // Note index is not control ID but icon name.
@@ -373,7 +369,6 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     }).on('focusout', function() {
       if (self._iOS) self._editor.fire('blur');
     }).on('focus', function() {
-      self._updateAttachmentButtonMenu();
       self._enableUpdatingToolbar(true);
     }).on('paste', function(e) {
       self._pasteEventHandler(e);
@@ -395,32 +390,30 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var setup = function(editor) {
     self._editor = editor;
 
-    var menu = self._attachmentButtonMenu = self._attachmentButtonMenuItems();
-
-    editor.addButton('wiki', {
-      type: 'button',
-      icon: 'anchor',
+    editor.ui.registry.addButton('wiki', {
+      icon: 'new-document',
       tooltip: self._i18n.insertWikiLink,
-      onclick: function() {
+      onAction: function () {
         self._wikiLinkDialog();
       }
     });
 
-    editor.addButton('attachment', {
-      type: 'menubutton',
-      icon: 'newdocument',
-      menu: menu,
-      onPostRender: function() {
-        self._attachmentButton = this;
-        this.disabled(menu.length === 0);
-      }
+    editor.ui.registry.addMenuButton('attachment', {
+      icon: 'plus',
+      onSetup: function (button) {
+        self._attachmentButton = button;
+        self._updateAttachmentButton();
+      },
+      fetch: function (callback) {
+        self._attachmentButtonMenuItems(callback);
+      },
     });
 
-    editor.addButton('code', {
+    editor.ui.registry.addButton('code', {
       type: 'button',
-      icon: 'code',
+      icon: 'sourcecode',
       tooltip: 'Code',
-      onclick: function() {
+      onAction: function () {
         editor.execCommand('mceToggleFormat', false, 'code');
       }
     });
@@ -511,7 +504,7 @@ RedmineWysiwygEditor._isImageFile = function(name) {
   return /\.(jpeg|jpg|png|gif|bmp)$/i.test(name);
 };
 
-RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
+RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function(cb) {
   var self = this;
 
   var attachment = Object.keys(self._attachment).sort();
@@ -520,28 +513,31 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
     return RedmineWysiwygEditor._isImageFile(name);
   }).map(function(name) {
     return {
+      type: 'menuitem',
       icon: 'image',
       text: name,
-      onclick: function() {
+      onAction: function () {
         self._insertImage(name, self._attachment[name]);
       }
     };
   });
 
   // Separator
-  if (item.length > 0) item.push({text: '|'});
+  // FIXME
+  // if (item.length > 0) item.push({text: '|'});
 
   attachment.forEach(function(name) {
     item.push({
+      type: 'menuitem',
       icon: 'link',
       text: name,
-      onclick: function() {
+      onAction: function () {
         self._insertAttachment(name);
       }
     });
   });
 
-  return item;
+  cb(item);
 };
 
 RedmineWysiwygEditor.prototype._updateToolbar = function() {
@@ -564,7 +560,8 @@ RedmineWysiwygEditor.prototype._updateToolbar = function() {
   var ctrl = self._control;
   var disabled = isInTable(self._editor.selection.getNode());
 
-  TARGETS.forEach(function(x) { ctrl[x].disabled(disabled); });
+  // FIXME
+  // TARGETS.forEach(function(x) { ctrl[x].disabled(disabled); });
 };
 
 RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
@@ -580,24 +577,13 @@ RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
   }
 };
 
-RedmineWysiwygEditor.prototype._updateAttachmentButtonMenu = function() {
+RedmineWysiwygEditor.prototype._updateAttachmentButton = function () {
   var self = this;
-  var button = self._attachmentButton;
 
-  var menu = self._attachmentButtonMenuItems();
+  if (!self._attachmentButton) return;
 
-  self._attachmentButtonMenu.length = 0;
-  menu.forEach(function(file) {
-    self._attachmentButtonMenu.push(file);
-  });
-
-  // Note this is unofficial solution.
-  if (button.menu) {
-    button.menu.remove();
-    button.menu = null;
-  }
-
-  button.disabled(menu.length === 0);
+  var disabled = Object.keys(self._attachment).length === 0;
+  self._attachmentButton.setDisabled(disabled);
 };
 
 RedmineWysiwygEditor._instantImageFileName = function() {
@@ -1527,10 +1513,12 @@ RedmineWysiwygEditor.prototype._attachmentCallback = function(name, id) {
 RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
   var self = this;
 
-  var insertLink = function(e) {
-    var proj = e.data.project;
-    var page = e.data.page;
-    var text = e.data.text || ((page !== '?') ? page : proj);
+  var insertLink = function(api) {
+    var data = api.getData();
+
+    var proj = data.project;
+    var page = data.page;
+    var text = data.text || ((page !== '?') ? page : proj);
 
     var h = ['projects', proj, 'wiki'];
 
@@ -1541,35 +1529,46 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
         text.replace(/_/g, ' ') + '</a>';
 
     self._editor.insertContent(c);
+    api.close();
   };
 
-  var refreshDialog = function(e) {
+  var refreshDialog = function(api) {
     // TODO: Update just only page list
-    self._editor.windowManager.close();
-    createDialog(e.target.value());
+    var data = api.getData();
+
+    api.close();
+    createDialog(data.project);
   };
 
   var openDialog = function(key) {
     var arg = {
       title: self._i18n.insertWikiLink,
-      body: [{
-        type: 'listbox',
-        name: 'project',
-        label: self._i18n.project,
-        values: self._cache.wiki.project,
-        value: key,
-        onselect: refreshDialog
+      body: {
+        type: 'panel',
+        items: [{
+          type: 'listbox',
+          name: 'project',
+          label: self._i18n.project,
+          items: self._cache.wiki.project
+        }, {
+          type: 'listbox',
+          name: 'page',
+          label: self._i18n.page,
+          items : self._cache.wiki.page[key]
+        }, {
+          type: 'input',
+          name: 'text',
+          label: self._i18n.text
+        }]
+      },
+      buttons: [{
+        type: 'cancel', text: 'Cancel'
       }, {
-        type: 'listbox',
-        name: 'page',
-        label: self._i18n.page,
-        values : self._cache.wiki.page[key]
-      }, {
-        type: 'textbox',
-        name: 'text',
-        label: self._i18n.text,
+        type: 'submit', text: 'Save', primary: true
       }],
-      onsubmit: insertLink
+      initialData: { project: key },
+      onChange: refreshDialog,
+      onSubmit: insertLink
     };
 
     self._editor.windowManager.open(arg);
