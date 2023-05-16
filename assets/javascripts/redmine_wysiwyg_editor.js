@@ -334,6 +334,34 @@ RedmineWysiwygEditor.prototype.updateVisualContent = function() {
   return true;
 };
 
+RedmineWysiwygEditor.prototype._toolbarItems = function () {
+  var self = this;
+
+  return (self._format === 'textile') ? [
+    ['formatselect'],
+    ['bold', 'italic', 'underline', 'strikethrough', 'code', 'forecolor',
+     'backcolor', 'removeformat'],
+    ['link', 'image', 'codesample', 'wiki', 'attachment'],
+    ['bullist', 'numlist', 'blockquote'],
+    ['alignleft', 'aligncenter', 'alignright'],
+    ['indent', 'outdent'],
+    ['hr'], ['table'], ['undo', 'redo'], ['fullscreen']
+  ] : self._htmlTagAllowed ? [
+    ['formatselect'],
+    ['bold', 'italic', 'underline', 'strikethrough', 'code', 'removeformat'],
+    ['link', 'image', 'codesample', 'wiki', 'attachment'],
+    ['bullist', 'numlist', 'blockquote'],
+    ['alignleft', 'aligncenter', 'alignright'],
+    ['hr'], ['table'], ['undo', 'redo'], ['fullscreen']
+  ] : [
+    ['formatselect'],
+    ['bold', 'italic', 'underline', 'strikethrough', 'code', 'removeformat'],
+    ['link', 'image', 'codesample', 'wiki', 'attachment'],
+    ['bullist', 'numlist', 'blockquote'],
+    ['hr'], ['table'], ['undo', 'redo'], ['fullscreen']
+  ];
+};
+
 RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var self = this;
 
@@ -349,19 +377,13 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }';
 
   var toolbarControls = function() {
+    // TinyMCE 5 do not provide API to look up control objects...
+    var expr = '.tox-editor-header .tox-tbtn:not(.tox-split-button__chevron)';
+    var objs = tinymce.dom.DomQuery(expr);
+    var items = self._toolbarItems().flat();
     var button = {};
-    var toolbar = self._editor.ui.registry.getAll().buttons;
 
-    Object.keys(toolbar).forEach(function(key) {
-      var name = toolbar[key].icon;
-
-      if (name) {
-        // Note index is not control ID but icon name.
-        button[name] = toolbar[key];
-      } else if (setting.values && (setting.values[0].text === 'Paragraph')) {
-        button['format'] = toolbar[key];
-      }
-    });
+    items.forEach(function (key, index) { button[key] = objs[index]; });
 
     return button;
   };
@@ -454,11 +476,9 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     });
   };
 
-  var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
-      self._htmlTagAllowed ?
-      'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
-      'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
+  var toolbar = self._toolbarItems().map(function (x) {
+    return x.join(' ');
+  }).join(' | ');
 
   var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
 
@@ -593,7 +613,7 @@ RedmineWysiwygEditor.prototype._updateToolbar = function() {
 
   // FIXME: Table insertion should also be disabled.
   var TARGETS =
-      ['format', 'codesample', 'numlist', 'bullist', 'blockquote', 'hr'];
+      ['formatselect', 'codesample', 'numlist', 'bullist', 'blockquote', 'hr'];
 
   var isInTable = function(node) {
     while (node && (node.nodeName !== 'BODY')) {
@@ -608,8 +628,7 @@ RedmineWysiwygEditor.prototype._updateToolbar = function() {
   var ctrl = self._control;
   var disabled = isInTable(self._editor.selection.getNode());
 
-  // FIXME
-  // TARGETS.forEach(function(x) { ctrl[x].disabled(disabled); });
+  TARGETS.forEach(function(x) { $(ctrl[x]).prop('disabled', disabled); });
 };
 
 RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
