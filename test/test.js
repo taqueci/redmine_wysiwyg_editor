@@ -478,6 +478,13 @@ suite('Redmine WYSIWYG Editor', function() {
 
       assert.equal(rwe._toTextMarkdown(content), expected);
     });
+
+    test('Newline in table', function() {
+      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;"><p>Origin</p></th></tr><tr><td>Axl Rose</td><td>Vocal<br>Piano</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td><p>Jul 23, 1965</p></td><td>LA</td></tr></tbody></table>';
+      var expected = '| Name | Role | Born | Origin |\n| --- | :-- | :-: | --: |\n| Axl Rose | Vocal Piano | Feb 6, 1962 | LA |\n| Slash | Guitar | Jul 23, 1965 | LA |';
+
+      assert.equal(rwe._toTextMarkdown(content), expected);
+    });
   });
 
   suite('Markdown (HTML tag enabled)', function() {
@@ -502,6 +509,13 @@ suite('Redmine WYSIWYG Editor', function() {
     test('Image (resized)', function() {
       var content = '<img src="/attachments/download/1/foo.png" alt="Foo" width="5296" height="3972"><br><img src="/attachments/download/2/f%20o%20o.png" width="5296" height="3972"><br><img src="/attachments/download/3/%E3%83%95%E3%83%BC.png" width="5296" height="3972">';
       var expected = '<img src="/attachments/download/1/foo.png" alt="Foo" width="5296" height="3972">\n<img src="/attachments/download/2/f%20o%20o.png" width="5296" height="3972">\n<img src="/attachments/download/3/%E3%83%95%E3%83%BC.png" width="5296" height="3972">';
+
+      assert.equal(rwe._toTextMarkdown(content), expected);
+    });
+
+    test('Newline in table', function() {
+      var content = '<table><tbody><tr><th>Name</th><th style="text-align: left;">Role</th><th style="text-align: center;">Born</th><th style="text-align: right;"><p>Origin</p></th></tr><tr><td>Axl Rose</td><td>Vocal<br>Piano</td><td>Feb 6, 1962</td><td>LA</td></tr><tr><td>Slash</td><td>Guitar</td><td><p>Jul 23, 1965</p></td><td>LA</td></tr></tbody></table>';
+      var expected = '| Name | Role | Born | Origin |\n| --- | :-- | :-: | --: |\n| Axl Rose | Vocal<br>Piano | Feb 6, 1962 | LA |\n| Slash | Guitar | Jul 23, 1965 | LA |';
 
       assert.equal(rwe._toTextMarkdown(content), expected);
     });
