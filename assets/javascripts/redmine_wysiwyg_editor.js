@@ -1314,7 +1314,8 @@ RedmineWysiwygEditor.prototype._initMarkdown = function() {
     // Suppress appending two spaces at the end of the line.
     filter: 'br',
     replacement: function(content, node) {
-      return ($(node).closest('table').length > 0) ? ' ' : '\n';
+      return ($(node).closest('table').length > 0) ?
+        (self._htmlTagAllowed ? '<br>' : ' ') : '\n';
     }
   }).addRule('div', {
     filter: function(node) {

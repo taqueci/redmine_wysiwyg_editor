@@ -2,7 +2,7 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
   name 'Redmine WYSIWYG Editor plugin'
   author 'Takeshi Nakamura'
   description 'Redmine WYSIWYG text editor'
-  version '0.29.0'
+  version '0.30.0'
   url 'https://github.com/taqueci/redmine_wysiwyg_editor'
   author_url 'https://github.com/taqueci'
 
