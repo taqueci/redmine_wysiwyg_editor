@@ -47,7 +47,21 @@ if content_for(:header_tags).present? &&
 }
     </style>
     <script>
-function initRedmineWysiwygEditor() {
+class RedmineWysiwygEditorManager {
+  editors = [];
+
+  update() {
+    this.editors = $('.jstEditor').map((index, element) => {
+      return this.find(element) || initRedmineWysiwygEditor(element);
+    }).get();
+  }
+
+  find(element) {
+    return this.editors.find(x => $(element).is(x._jstEditor));
+  }
+}
+
+function initRedmineWysiwygEditor(element) {
   var setVisible = function() {
     // Fixed for IE 11
     const ua = navigator.userAgent;
@@ -75,10 +89,10 @@ function initRedmineWysiwygEditor() {
     var attachments = <%= raw attachments.to_json %>;
 
     $('.attachments_fields span, #attachments_fields span').each(function() {
-      var token = $(this).find('input.token').val();
+      var token = $(element).find('input.token').val();
 
       if (token) {
-        var name = $(this).find('input.filename').val();
+        var name = $(element).find('input.filename').val();
         var m = token.match(/^(\d+)\./);
 
         attachments.push({id: parseInt(m[1]), name: name});
@@ -115,21 +129,21 @@ function initRedmineWysiwygEditor() {
     var replace = ISSUE_TEMPLATE.prototype.replaceTemplateValue;
 
     ISSUE_TEMPLATE.prototype.replaceTemplateValue = function(obj) {
-      replace.call(this, obj);
+      replace.call(element, obj);
       rwe.updateVisualContent();
     };
 
     var erase = ISSUE_TEMPLATE.prototype.eraseSubjectAndDescription;
 
     ISSUE_TEMPLATE.prototype.eraseSubjectAndDescription = function() {
-      erase.call(this);
+      erase.call(element);
       rwe.updateVisualContent();
     };
 
     var revert = ISSUE_TEMPLATE.prototype.revertAppliedTemplate;
 
     ISSUE_TEMPLATE.prototype.revertAppliedTemplate = function() {
-      revert.call(this);
+      revert.call(element);
       rwe.updateVisualContent();
     };
   };
@@ -172,7 +186,7 @@ function initRedmineWysiwygEditor() {
     setVisible();
   };
 
-  var rwe = new RedmineWysiwygEditor($(this), previewUrl);
+  var rwe = new RedmineWysiwygEditor($(element), previewUrl);
 
   rwe.setPostInitCallback(function() { postInit(rwe) });
 
@@ -192,7 +206,7 @@ function initRedmineWysiwygEditor() {
     insertWikiLink: '<%= l(:label_insert_wiki_link) %>'
   });
   rwe.setAttachments(allAttachments());
-  if (isAttachmentUploadable($(this))) rwe.setAttachmentUploader(uploader);
+  if (isAttachmentUploadable($(element))) rwe.setAttachmentUploader(uploader);
 
   rwe.setHtmlTagAllowed(<%= html_tag_allowed ? 'true' : 'false' %>);
   rwe.setAutocomplete('<%= escape_javascript auto_complete_issues_path %>',
@@ -210,18 +224,22 @@ function initRedmineWysiwygEditor() {
       WYSIWYG_EDITOR_SETTING : {};
 
   rwe.init(setting);
+
+  return rwe
 }
 
-$(function() {
-  $('.jstEditor').each(initRedmineWysiwygEditor);
+let redmineWysiwygEditorManager = new RedmineWysiwygEditorManager();
 
-  $(document).ajaxSuccess(function() {
-    $('.jstEditor').each(initRedmineWysiwygEditor);
+$(function() {
+  redmineWysiwygEditorManager.update();
+
+  $(document).ajaxSuccess(function (event, jqXHR, ajaxSettings, thrownError) {
+    redmineWysiwygEditorManager.update();
   });
 
   // Redmine 4.1+
-  $(document).on('ajax:success', function() {
-    $('.jstEditor').each(initRedmineWysiwygEditor);
+  $(document).on('ajax:success', function (event) {
+    redmineWysiwygEditorManager.update();
   });
 });
     </script>
