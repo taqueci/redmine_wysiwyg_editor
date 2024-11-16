@@ -4,6 +4,7 @@
 
 .wysiwyg-editor-preview.wiki-preview {
   background-color: #ffffff;
+  position: relative;
 }
 
 .wysiwyg-editor-preview p {
