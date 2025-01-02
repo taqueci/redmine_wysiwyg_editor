@@ -17,7 +17,7 @@ end
 
 require File.expand_path('lib/redmine_wysiwyg_editor', __dir__)
 
-def create_non_digested_tinymce_assets()
+def create_non_digested_tinymce_assets
   plugin_asset_path = 'public/assets/plugin_assets/redmine_wysiwyg_editor'
   assets = Dir.glob(Rails.root.join(plugin_asset_path, 'tinymce', '**/*'))
 
@@ -35,6 +35,6 @@ def create_non_digested_tinymce_assets()
 end
 
 if Redmine::VERSION.to_s >= '6.0.0'
-  # Workaround for TinyMCE aseet file accesss issue
-  create_non_digested_tinymce_assets()
+  # Workaround for TinyMCE asset file access issue
+  create_non_digested_tinymce_assets
 end
