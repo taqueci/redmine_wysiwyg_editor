@@ -470,6 +470,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 
   tinymce.init($.extend({
     // Configurable parameters
+    content_css: "/mpi/plugin_assets/redmine_wysiwyg_editor/stylesheets/wysiwyg_custom.css",
     language: self._language,
     content_style: style,
     height: Math.max(self._jstEditorTextArea.height(), 200),

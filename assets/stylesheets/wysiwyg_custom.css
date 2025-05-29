@@ -1,0 +1,33 @@
+/* plugins/redmine_wysiwyg_editor/assets/stylesheets/wysiwyg_custom.css */
+
+/* Custom Nested List Styling for TinyMCE Editor */
+
+/* Unordered Lists */
+body#tinymce ul {
+list-style-type: disc;
+}
+body#tinymce ul ul {
+list-style-type: circle;
+}
+body#tinymce ul ul ul {
+list-style-type: square;
+}
+body#tinymce ul ul ul ul {
+list-style-type: "- ";
+}
+
+/* Ordered Lists */
+body#tinymce ol {
+list-style-type: decimal;
+}
+body#tinymce ol ol {
+list-style-type: lower-alpha;
+}
+body#tinymce ol ol ol {
+list-style-type: lower-roman;
+}
+body#tinymce ol ol ol ol {
+list-style-type: upper-alpha;
+}
+
+Edit Log time Watch Copy 
