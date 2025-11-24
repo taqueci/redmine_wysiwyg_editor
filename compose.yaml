@@ -14,7 +14,7 @@ services:
       REDMINE_DB_PASSWORD: password
 
   db:
-    image: postgres
+    image: postgres:14-alpine
     volumes:
       - ./_data/db:/var/lib/postgresql/data
     environment:
