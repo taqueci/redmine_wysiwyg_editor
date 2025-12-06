@@ -31,7 +31,7 @@ Project.all.each { |p| p.enable_module!(:visual_editor) }
 ## Installation
 
 1. Clone or copy files into the Redmine plugins directory
-2. Restart Redmine
+2. Restart Redmine and execute `bundle exec rake assets:precompile`
 3. Enable "Visual editor" in project module settings
 
 ## FAQ / Errors

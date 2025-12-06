@@ -11,9 +11,9 @@ if (typeof exports === 'object') {
       });
       global.window = window;
       global.document = window.document;
-      var tinymce = require('../../assets/javascripts/tinymce/tinymce.min');
+      var tinymce = require('../../node_modules/tinymce/tinymce.min');
       global.tinymce = window.tinymce = tinymce;
-      global.RedmineWysiwygEditor = require('../../assets/javascripts/redmine_wysiwyg_editor');
+      global.RedmineWysiwygEditor = require('../../assets/javascripts/RedmineWysiwygEditor');
 
       require('../../assets/javascripts/RedmineFormatPlugin');
     },

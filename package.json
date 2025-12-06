@@ -17,6 +17,7 @@
     "jquery": "3.5.1",
     "rwe-to-textile": "0.10.1",
     "rwe-turndown-plugin-gfm": "0.2.2",
+    "tinymce": "7.9.1",
     "turndown": "7.1.1"
   },
   "devDependencies": {
