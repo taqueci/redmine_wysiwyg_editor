@@ -89,10 +89,10 @@ function initRedmineWysiwygEditor(element) {
     var attachments = <%= raw attachments.to_json %>;
 
     $('.attachments_fields span, #attachments_fields span').each(function() {
-      var token = $(element).find('input.token').val();
+      var token = $(this).find('input.token').val();
 
       if (token) {
-        var name = $(element).find('input.filename').val();
+        var name = $(this).find('input.filename').val();
         var m = token.match(/^(\d+)\./);
 
         attachments.push({id: parseInt(m[1]), name: name});
