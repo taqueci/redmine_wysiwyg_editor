@@ -5,21 +5,33 @@
 
 This plugin adds WYSIWYG editor mode to Redmine.
 
-This plugin works with Redmine 3.3.0 or later.
+This plugin works with Redmine 6.0.0 or later.
 
 ![](doc/img/screenshot.png)
 
 The plugin is powered by:
 * [TinyMCE](https://www.tinymce.com/)
+* [tinymce-rails](https://github.com/spohlenz/tinymce-rails)
 * [to-textile](https://github.com/cmroanirgo/to-textile)
 * [Turndown](https://github.com/domchristie/turndown)
 
 ## Warnings
 
-**This plugin is under development.**
+> [!IMPORTANT]
+> Since version 0.100.0, TinyMCE was upgraded from version 4 to 7.
+> Consequently, some features were lost because several TinyMCE plugins
+> became paid subscriptions.
+
+### Development status
+
+***This repository will soon be archived.***
+
+### Incomplete data conversion
 
 Irreversible conversion may be caused between Textile/Markdown mode and
 WYSIWYG editor mode.
+
+### Default settings
 
 Since version 0.21.0, the visual editor is disabled as default.
 If you have many existing projects,
@@ -43,7 +55,7 @@ with Redmine 4.1.0+ by enabling:
 * Text formatting
 * Full width layout
 
-### you get a 404 on plugin_assets folder
+### You get a 404 on plugin_assets folder
 
 e.g. under ubuntu the plugin_assets is not automatically provided in the apache passenger config. So you need to add this directory too
 
@@ -57,7 +69,6 @@ e.g. under ubuntu the plugin_assets is not automatically provided in the apache 
     Require all granted
  </Directory>
 ```
-
 
 ## License
 
