@@ -2,6 +2,7 @@
   "extends": ["eslint:recommended"],
   "plugins": [],
   "parserOptions": {
+    "ecmaVersion": 6
   },
   "env": {
     "browser": true

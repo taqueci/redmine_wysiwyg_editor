@@ -5,8 +5,6 @@
   ];
 
   tinymce.PluginManager.add('redmineformat', function (editor) {
-    var $ = editor.$;
-
     function replaceBrWithNl(node) {
       $(node).find('br').each(function (index, node) {
         node.parentNode.replaceChild(document.createTextNode('\n'), node);
