@@ -4,16 +4,30 @@
 if (typeof exports === 'object') {
   exports.mochaHooks = {
     beforeAll() {
-      global.chai = require('chai');
       var { JSDOM } = require('jsdom');
-      var { window } = new JSDOM('<html><head></head><body></body></html>', {
+      var { window } = new JSDOM(
+        '<!doctype html><html><head></head><body></body></html>', {
         url: 'https://example.org/',
       });
+
+      global.chai = require('chai');
+
       global.window = window;
       global.document = window.document;
-      var tinymce = require('../../node_modules/tinymce/tinymce.min');
+
+      global.MutationObserver = window.MutationObserver;
+
+      window.matchMedia = () => ({
+        matches: false,
+        addListener: () => {},
+        removeListener: () => {}
+      });
+
+      var tinymce = require('tinymce');
       global.tinymce = window.tinymce = tinymce;
-      global.RedmineWysiwygEditor = require('../../assets/javascripts/RedmineWysiwygEditor');
+
+      global.RedmineWysiwygEditor =
+        require('../../assets/javascripts/RedmineWysiwygEditor');
 
       require('../../assets/javascripts/RedmineFormatPlugin');
     },
@@ -22,6 +36,8 @@ if (typeof exports === 'object') {
       delete global.window;
       delete global.document;
       delete global.tinymce;
+      delete global.MutationObserver;
+      delete global.RedmineWysiwygEditor;
     },
   };
 }
