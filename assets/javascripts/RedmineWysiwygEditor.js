@@ -586,7 +586,7 @@ RedmineWysiwygEditor._fileClone = function(file, name, option) {
   // Note File constructor is unavailable in Edge and IE.
   try {
     clone = new File([file], name, option);
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 
@@ -625,7 +625,7 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
     // Note DataTransferItem is unavailable in Safari and IE.
     try {
       file = dataTransferItem.getAsFile();
-    } catch (e) {
+    } catch (_e) {
       return;
     }
 

@@ -35,5 +35,9 @@ export default defineConfig([{
 
     rules: {
         semi: "error",
+        "no-unused-vars": ["error", {
+            argsIgnorePattern: "^_",
+            caughtErrorsIgnorePattern: "^_",
+        }],
     },
 }]);
