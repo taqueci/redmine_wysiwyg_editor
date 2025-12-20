@@ -4,7 +4,7 @@ if content_for(:header_tags).present? &&
     (@project.nil? || @project.identifier.blank? ||
      User.current.allowed_to?(:use_visual_editor, @project))
   content_for :header_tags do %>
-    <%= javascript_include_tag('tinymce/tinymce.min.js', plugin: 'redmine_wysiwyg_editor') %>
+    <%= tinymce_assets %>
     <%
     formatting = Setting.text_formatting
     if formatting == 'textile' %>
@@ -14,7 +14,7 @@ if content_for(:header_tags).present? &&
       <%= javascript_include_tag('turndown-plugin-gfm.js', plugin: 'redmine_wysiwyg_editor') %>
     <% end %>
     <%= javascript_include_tag('RedmineFormatPlugin.js', plugin: 'redmine_wysiwyg_editor') %>
-    <%= javascript_include_tag('redmine_wysiwyg_editor.js', plugin: 'redmine_wysiwyg_editor') %>
+    <%= javascript_include_tag('RedmineWysiwygEditor.js', plugin: 'redmine_wysiwyg_editor') %>
     <%= stylesheet_link_tag('redmine_wysiwyg_editor.css', plugin: 'redmine_wysiwyg_editor') %>
     <%
     t = @issue || @page || @news || @document || @topic || nil
@@ -89,10 +89,10 @@ function initRedmineWysiwygEditor(element) {
     var attachments = <%= raw attachments.to_json %>;
 
     $('.attachments_fields span, #attachments_fields span').each(function() {
-      var token = $(element).find('input.token').val();
+      var token = $(this).find('input.token').val();
 
       if (token) {
-        var name = $(element).find('input.filename').val();
+        var name = $(this).find('input.filename').val();
         var m = token.match(/^(\d+)\./);
 
         attachments.push({id: parseInt(m[1]), name: name});

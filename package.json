@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Redmine WYSIWYG Editor plugin",
   "scripts": {
-    "eslint": "eslint assets/javascripts/redmine_wysiwyg_editor.js assets/javascripts/RedmineFormatPlugin.js",
+    "eslint": "eslint assets/javascripts/RedmineWysiwygEditor.js assets/javascripts/RedmineFormatPlugin.js",
     "test": "mocha test/*.js"
   },
   "author": "Takeshi Nakamura",
@@ -14,15 +14,16 @@
     "url": "https://github.com/taqueci/redmine_wysiwyg_editor.git"
   },
   "dependencies": {
-    "jquery": "3.5.1",
+    "jquery": "3.7.1",
     "rwe-to-textile": "0.10.1",
     "rwe-turndown-plugin-gfm": "0.2.2",
+    "tinymce": "7.9.1",
     "turndown": "7.1.1"
   },
   "devDependencies": {
-    "chai": "^4.3.0",
-    "eslint": "^8.27.0",
-    "jsdom": "^20.0.0",
-    "mocha": "^10.1.0"
+    "chai": "^6.2.1",
+    "eslint": "^9.39.2",
+    "jsdom": "^27.3.0",
+    "mocha": "^11.7.5"
   }
 }

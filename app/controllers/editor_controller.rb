@@ -11,7 +11,7 @@ class EditorController < ApplicationController
 
     raise unless authorized?(proj)
 
-    is_public = (proj.is_public && (term.length >= TERM_LEN_PUB_PROJ_MIN))
+    is_public = proj.is_public && (term.length >= TERM_LEN_PUB_PROJ_MIN)
     scope = is_public ? User.all : proj.users
 
     users = scope.active.visible.sorted.like(term)

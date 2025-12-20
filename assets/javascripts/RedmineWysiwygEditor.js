@@ -105,8 +105,6 @@ RedmineWysiwygEditor.prototype.setAttachments = function(files) {
   });
 
   self._attachment = attachment;
-
-  if (self._editor) self._updateAttachmentButtonMenu();
 };
 
 RedmineWysiwygEditor.prototype.setAttachmentUploader = function(handler) {
@@ -308,8 +306,6 @@ RedmineWysiwygEditor.prototype.updateVisualEditor = function() {
 
   if (!self._editor) return false;
 
-  self._updateAttachmentButtonMenu();
-
   if (self._mode === 'visual') {
     self._setTextContent();
     self._setVisualContent();
@@ -347,18 +343,10 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 
   var toolbarControls = function() {
     var button = {};
-    var toolbar = self._editor.theme.panel.rootControl.controlIdLookup;
+    var container = self._editor.editorContainer;
 
-    Object.keys(toolbar).forEach(function(key) {
-      var setting = toolbar[key].settings;
-      var name = setting.icon;
-
-      if (name) {
-        // Note index is not control ID but icon name.
-        button[name] = toolbar[key];
-      } else if (setting.values && (setting.values[0].text === 'Paragraph')) {
-        button['format'] = toolbar[key];
-      }
+    $('button.tox-tbtn', container).each((index, element) => {
+      button[element.dataset.mceName] = element;
     });
 
     return button;
@@ -373,7 +361,6 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     }).on('focusout', function() {
       if (self._iOS) self._editor.fire('blur');
     }).on('focus', function() {
-      self._updateAttachmentButtonMenu();
       self._enableUpdatingToolbar(true);
     }).on('paste', function(e) {
       self._pasteEventHandler(e);
@@ -395,42 +382,36 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var setup = function(editor) {
     self._editor = editor;
 
-    var menu = self._attachmentButtonMenu = self._attachmentButtonMenuItems();
-
-    editor.addButton('wiki', {
-      type: 'button',
-      icon: 'anchor',
+    editor.ui.registry.addButton('wiki', {
+      icon: 'new-document',
       tooltip: self._i18n.insertWikiLink,
-      onclick: function() {
+      onAction: () => {
         self._wikiLinkDialog();
       }
     });
 
-    editor.addButton('attachment', {
-      type: 'menubutton',
-      icon: 'newdocument',
-      menu: menu,
-      onPostRender: function() {
-        self._attachmentButton = this;
-        this.disabled(menu.length === 0);
+    editor.ui.registry.addMenuButton('attachment', {
+      icon: 'browse',
+      fetch: (callback) => {
+        const items = self._attachmentButtonMenuItems();
+        callback(items);
       }
     });
 
-    editor.addButton('code', {
-      type: 'button',
-      icon: 'code',
+    editor.ui.registry.addToggleButton('code', {
+      icon: 'sourcecode',
       tooltip: 'Code',
-      onclick: function() {
+      onAction: () => {
         editor.execCommand('mceToggleFormat', false, 'code');
       }
     });
   };
 
   var toolbar = (self._format === 'textile') ?
-      'formatselect | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
+      'styles | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
       self._htmlTagAllowed ?
-      'formatselect | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
-      'formatselect | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
+      'styles | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
+      'styles | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
 
   var autocompleteSetting = self._autocomplete ? {
     delimiter: ['#', '@'],
@@ -470,14 +451,17 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 
   tinymce.init($.extend({
     // Configurable parameters
+    license_key: 'gpl',
     language: self._language,
     content_style: style,
-    height: Math.max(self._jstEditorTextArea.height(), 200),
+    height: Math.max(self._jstEditorTextArea.height() + 42, 280),
     branding: false,
-    plugins: 'redmineformat link image lists hr table textcolor codesample paste mention fullscreen',
+    plugins: [
+      'redmineformat', 'link', 'image', 'lists', 'table', 'codesample',
+      'fullscreen'
+    ],
     menubar: false,
     toolbar: toolbar,
-    toolbar_items_size: 'small',
     browser_spellcheck: true,
     convert_urls: false,
     invalid_styles: {
@@ -498,11 +482,13 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     target: self._visualEditor.find('div')[0],
     init_instance_callback: callback,
     setup: setup,
+    toolbar_mode: 'wrap',
     indentation : '1em',
     protect: [/<notextile>/g, /<\/notextile>/g],
     invalid_elements: 'fieldset,colgroup',
     object_resizing: isObjectResizable,
     image_dimensions: isObjectResizable,
+    paste_data_images: false,
     mentions: autocompleteSetting
   }));
 };
@@ -520,22 +506,21 @@ RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
     return RedmineWysiwygEditor._isImageFile(name);
   }).map(function(name) {
     return {
+      type: 'menuitem',
       icon: 'image',
       text: name,
-      onclick: function() {
+      onAction: () => {
         self._insertImage(name, self._attachment[name]);
       }
     };
   });
 
-  // Separator
-  if (item.length > 0) item.push({text: '|'});
-
   attachment.forEach(function(name) {
     item.push({
+      type: 'menuitem',
       icon: 'link',
       text: name,
-      onclick: function() {
+      onAction: () => {
         self._insertAttachment(name);
       }
     });
@@ -549,7 +534,7 @@ RedmineWysiwygEditor.prototype._updateToolbar = function() {
 
   // FIXME: Table insertion should also be disabled.
   var TARGETS =
-      ['format', 'codesample', 'numlist', 'bullist', 'blockquote', 'hr'];
+      ['styles', 'codesample', 'numlist', 'bullist', 'blockquote', 'hr'];
 
   var isInTable = function(node) {
     while (node && (node.nodeName !== 'BODY')) {
@@ -564,7 +549,7 @@ RedmineWysiwygEditor.prototype._updateToolbar = function() {
   var ctrl = self._control;
   var disabled = isInTable(self._editor.selection.getNode());
 
-  TARGETS.forEach(function(x) { ctrl[x].disabled(disabled); });
+  TARGETS.forEach((x) => { ctrl[x].disabled = disabled; });
 };
 
 RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
@@ -578,26 +563,6 @@ RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
     self._toolbarIntervalId =
       setInterval(function() { self._updateToolbar(); }, INTERVAL);
   }
-};
-
-RedmineWysiwygEditor.prototype._updateAttachmentButtonMenu = function() {
-  var self = this;
-  var button = self._attachmentButton;
-
-  var menu = self._attachmentButtonMenuItems();
-
-  self._attachmentButtonMenu.length = 0;
-  menu.forEach(function(file) {
-    self._attachmentButtonMenu.push(file);
-  });
-
-  // Note this is unofficial solution.
-  if (button.menu) {
-    button.menu.remove();
-    button.menu = null;
-  }
-
-  button.disabled(menu.length === 0);
 };
 
 RedmineWysiwygEditor._instantImageFileName = function() {
@@ -621,7 +586,7 @@ RedmineWysiwygEditor._fileClone = function(file, name, option) {
   // Note File constructor is unavailable in Edge and IE.
   try {
     clone = new File([file], name, option);
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 
@@ -660,7 +625,7 @@ RedmineWysiwygEditor.prototype._pasteEventHandler = function(e) {
     // Note DataTransferItem is unavailable in Safari and IE.
     try {
       file = dataTransferItem.getAsFile();
-    } catch (e) {
+    } catch (_e) {
       return;
     }
 
@@ -1528,10 +1493,10 @@ RedmineWysiwygEditor.prototype._attachmentCallback = function(name, id) {
 RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
   var self = this;
 
-  var insertLink = function(e) {
-    var proj = e.data.project;
-    var page = e.data.page;
-    var text = e.data.text || ((page !== '?') ? page : proj);
+  var insertLink = (data) => {
+    var proj = data.project;
+    var page = data.page;
+    var text = data.text || ((page !== '?') ? page : proj);
 
     var h = ['projects', proj, 'wiki'];
 
@@ -1544,33 +1509,54 @@ RedmineWysiwygEditor.prototype._wikiLinkDialog = function() {
     self._editor.insertContent(c);
   };
 
-  var refreshDialog = function(e) {
-    // TODO: Update just only page list
-    self._editor.windowManager.close();
-    createDialog(e.target.value());
-  };
-
   var openDialog = function(key) {
     var arg = {
       title: self._i18n.insertWikiLink,
-      body: [{
-        type: 'listbox',
-        name: 'project',
-        label: self._i18n.project,
-        values: self._cache.wiki.project,
-        value: key,
-        onselect: refreshDialog
-      }, {
-        type: 'listbox',
-        name: 'page',
-        label: self._i18n.page,
-        values : self._cache.wiki.page[key]
-      }, {
-        type: 'textbox',
-        name: 'text',
-        label: self._i18n.text,
-      }],
-      onsubmit: insertLink
+      body: {
+        type: 'panel',
+        items: [
+          {
+            type: 'listbox',
+            name: 'project',
+            label: self._i18n.project,
+            items: self._cache.wiki.project
+          }, {
+            type: 'listbox',
+            name: 'page',
+            label: self._i18n.page,
+            items: self._cache.wiki.page[key]
+          }, {
+            type: 'input',
+            name: 'text',
+            label: self._i18n.text,
+          }
+        ]
+      },
+      buttons: [
+        {
+          type: 'cancel',
+          name: 'closeButton',
+          text: 'Cancel'
+        }, {
+          type: 'submit',
+          name: 'submitButton',
+          text: 'OK',
+          buttonType: 'primary'
+        }
+      ],
+      initialData: {
+        project: key
+      },
+      onChange: (api, detail) => {
+        if (detail.name == 'project') {
+          createDialog(api.getData().project);
+          api.close();
+        }
+      },
+      onSubmit: (api) => {
+        insertLink(api.getData());
+        api.close();
+      }
     };
 
     self._editor.windowManager.open(arg);
