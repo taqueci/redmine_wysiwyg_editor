@@ -4,7 +4,9 @@ if content_for(:header_tags).present? &&
     (@project.nil? || @project.identifier.blank? ||
      User.current.allowed_to?(:use_visual_editor, @project))
   content_for :header_tags do %>
-    <%= tinymce_assets %>
+    <%= tinymce_preinit %>
+    <%= javascript_include_tag('tinymce/tinymce') %>
+    <%= javascript_include_tag('tinymce/rails') %>
     <%
     formatting = Setting.text_formatting
     if formatting == 'textile' %>
