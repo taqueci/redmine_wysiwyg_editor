@@ -63,29 +63,52 @@ RedmineWysiwygEditor.prototype.setFormat = function(format) {
 
 RedmineWysiwygEditor.prototype.setLanguage = function(lang) {
   var LANG_RM2TINY = {
+    'ar': 'ar',
+    'az': 'az',
     'bg': 'bg_BG',
-    'en-GB': 'en_GB',
-    'es-PA': 'es',
-    'fa': 'fa_IR',
+    'ca': 'ca',
+    'cs': 'cs',
+    'da': 'da',
+    'de': 'de',
+    'el': 'el',
+    'es': 'es',
+    'es-PA': 'ex_MX',
+    'et': 'et',
+    'eu': 'eu',
+    'fa': 'fa',
+    'fi': 'fi',
+    'fr': 'fr_FR',
+    'gl': 'gl',
     'he': 'he_IL',
+    'hr': 'hr',
     'hu': 'hu_HU',
+    'id': 'id',
+    'it': 'it',
+    'ja': 'ja',
     'ko': 'ko_KR',
-    'pt-BR': 'pt_BR',
+    'lt': 'lt',
+    'lv': 'lv',
+    'nl': 'nl',
+    'pl': 'pl',
     'pt': 'pt_PT',
+    'pt-BR': 'pt_BR',
+    'ro': 'ro',
+    'ru': 'ru',
+    'sk': 'sk',
     'sl': 'sl_SI',
-    'sr-YU': 'sr',
+    'sq': 'sq',
+    'sr': 'sr',
     'sv': 'sv_SE',
+    'ta-IN': 'ta',
     'th': 'th_TH',
-    'vi': 'vi_VN',
-    'zh-TW': 'zh_TW',
-    'zh': 'zh_CN'
+    'tr': 'tr',
+    'uk': 'uk',
+    'vi': 'vi',
+    'zh': 'zh_CN',
+    'zh-TW': 'zh_TW'
   };
 
-  var option = ['af_ZA', 'ar', 'be', 'bg_BG', 'bn_BD', 'ca', 'cs', 'cs_CZ', 'cy', 'da', 'de', 'de_AT', 'dv', 'el', 'en_CA', 'en_GB', 'es', 'es_MX', 'et', 'eu', 'fa_IR', 'fi', 'fr_FR', 'ga', 'gl', 'he_IL', 'hr', 'hu_HU', 'id', 'it', 'ja', 'ka_GE', 'kab', 'kk', 'km_KH', 'ko_KR', 'lt', 'lv', 'nb_NO', 'nl', 'pl', 'pt_BR', 'pt_PT', 'ro', 'ru', 'sk', 'sl_SI', 'sr', 'sv_SE', 'ta', 'ta_IN', 'th_TH', 'tr', 'tr_TR', 'ug', 'uk', 'uk_UA', 'uz', 'vi_VN', 'zh_CN', 'zh_TW'];
-
-  var language = (lang in LANG_RM2TINY) ? LANG_RM2TINY[lang] : lang;
-
-  this._language = (option.indexOf(language) >= 0) ? language : 'en';
+  this._language = (lang in LANG_RM2TINY) ? LANG_RM2TINY[lang] : 'en';
 };
 
 RedmineWysiwygEditor.prototype.setI18n = function(data) {
