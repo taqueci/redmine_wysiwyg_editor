@@ -2,3 +2,5 @@ fr:
   label_visual_editor: "Editeur visuel"
   label_insert_wiki_link: "Insérer wiki lien"
   project_module_visual_editor: "Editeur visuel"
+  option_visual_editor_dark_mode: "Activer le mode sombre"
+  option_visual_editor_mode_switch_tab: "Utiliser les onglets pour basculer le mode"

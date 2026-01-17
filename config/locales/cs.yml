@@ -2,3 +2,5 @@ cs:
   label_visual_editor: Vizuální editor 
   label_insert_wiki_link: Vložit Wiki odkaz 
   project_module_visual_editor: Vizuální editor
+  option_visual_editor_dark_mode: "Povolit tmavý režim"
+  option_visual_editor_mode_switch_tab: "Použít karty pro přepínání režimu"

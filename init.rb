@@ -11,7 +11,8 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
                public: true, require: :member
   end
 
-  settings default: { settings_visual_editor_mode_switch_tab: '' },
+  settings default: { settings_visual_editor_mode_switch_tab: '',
+                      settings_visual_editor_dark_mode: '' },
            partial: 'redmine_wysiwyg_editor/setting'
 end
 
