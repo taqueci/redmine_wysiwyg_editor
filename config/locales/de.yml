@@ -2,3 +2,5 @@ de:
   label_visual_editor: "Visueller Editor"
   label_insert_wiki_link: "Wiki-Link einfügen"
   project_module_visual_editor: "Visueller Editor"
+  option_visual_editor_dark_mode: "Dunkelmodus aktivieren"
+  option_visual_editor_mode_switch_tab: "Tabs zur modusumschaltung verwenden"

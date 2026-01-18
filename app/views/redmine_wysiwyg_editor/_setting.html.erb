@@ -3,3 +3,8 @@
   <%= hidden_field_tag 'settings[visual_editor_mode_switch_tab]', '0' %>
   <%= check_box_tag 'settings[visual_editor_mode_switch_tab]', '1', @settings[:visual_editor_mode_switch_tab] == '1' %>
 </p>
+<p>
+  <label for="settings_visual_editor_dark_mode"><%= l(:option_visual_editor_dark_mode) %></label>
+  <%= hidden_field_tag 'settings[visual_editor_dark_mode]', '0' %>
+  <%= check_box_tag 'settings[visual_editor_dark_mode]', '1', @settings[:visual_editor_dark_mode] == '1' %>
+</p>

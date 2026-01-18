@@ -2,7 +2,7 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
   name 'Redmine WYSIWYG Editor plugin'
   author 'Takeshi Nakamura'
   description 'Redmine WYSIWYG text editor'
-  version '0.100.2'
+  version '0.101.0'
   url 'https://github.com/taqueci/redmine_wysiwyg_editor'
   author_url 'https://github.com/taqueci'
 
@@ -11,7 +11,8 @@ Redmine::Plugin.register :redmine_wysiwyg_editor do
                public: true, require: :member
   end
 
-  settings default: { settings_visual_editor_mode_switch_tab: '' },
+  settings default: { settings_visual_editor_mode_switch_tab: '',
+                      settings_visual_editor_dark_mode: '' },
            partial: 'redmine_wysiwyg_editor/setting'
 end
 

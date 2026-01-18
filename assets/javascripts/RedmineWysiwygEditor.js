@@ -150,6 +150,10 @@ RedmineWysiwygEditor.prototype.setTabModeSwitch = function(isTab) {
   this._tabModeSwitch = isTab;
 };
 
+RedmineWysiwygEditor.prototype.setDarkMode = function(isDarkMode) {
+  this._darkMode = isDarkMode;
+};
+
 RedmineWysiwygEditor.prototype.init = function(editorSetting) {
   var self = this;
 
@@ -472,6 +476,11 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
 
   var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
 
+  var darkModeSetting = self._darkMode ? {
+    content_css: 'dark',
+    skin: 'oxide-dark'
+  } : {};
+
   tinymce.init($.extend({
     // Configurable parameters
     license_key: 'gpl',
@@ -500,7 +509,7 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     table_default_styles: {},
     codesample_dialog_height: $(window).height() * 0.85,
     codesample_languages: self._codeLanguages()
-  }, setting, {
+  }, darkModeSetting, setting, {
     // Mandatory parameters
     target: self._visualEditor.find('div')[0],
     init_instance_callback: callback,
