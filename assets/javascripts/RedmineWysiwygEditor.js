@@ -368,19 +368,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'span#autocomplete-delimiter { background-color: #ddd; }' +
       '.rte-autocomplete img.gravatar { margin-right: 5px; }';
 
-  var toolbarControls = function() {
-    var button = {};
-    var container = self._editor.editorContainer;
-
-    $('button.tox-tbtn', container).each((index, element) => {
-      button[element.dataset.mceName] = element;
-    });
-
-    return button;
-  };
-
   var callback = function(editor) {
-    self._control = toolbarControls();
+    self._control = self._toolbarControls();
 
     editor.on('blur', function() {
       self._setTextContent();
@@ -529,6 +518,19 @@ RedmineWysiwygEditor._isImageFile = function(name) {
   return /\.(jpeg|jpg|png|gif|bmp)$/i.test(name);
 };
 
+RedmineWysiwygEditor.prototype._toolbarControls = function() {
+  var self = this;
+
+  var button = {};
+  var container = self._editor.editorContainer;
+
+  $('button.tox-tbtn', container).each((index, element) => {
+    button[element.dataset.mceName] = element;
+  });
+
+  return button;
+};
+
 RedmineWysiwygEditor.prototype._attachmentButtonMenuItems = function() {
   var self = this;
 
@@ -581,7 +583,20 @@ RedmineWysiwygEditor.prototype._updateToolbar = function() {
   var ctrl = self._control;
   var disabled = isInTable(self._editor.selection.getNode());
 
-  TARGETS.forEach((x) => { ctrl[x].disabled = disabled; });
+  TARGETS.forEach((x) => {
+    if (!ctrl[x]) {
+      // Workaround for:
+      // https://github.com/taqueci/redmine_wysiwyg_editor/issues/199
+      self._control = self._toolbarControls();
+      ctrl = self._control;
+    }
+
+    if (ctrl[x]) {
+      ctrl[x].disabled = disabled;
+    } else {
+      console.error(`Toolbar control not found for key: ${x}`);
+    }
+  });
 };
 
 RedmineWysiwygEditor.prototype._enableUpdatingToolbar = function(enabled) {
