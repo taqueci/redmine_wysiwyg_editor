@@ -54,7 +54,7 @@ RedmineWysiwygEditor.prototype.setPostInitCallback = function(func) {
 };
 
 RedmineWysiwygEditor.prototype.setPrefixPath = function(path) {
-  this._prefix = path;
+  this._prefix = path + (path.endsWith('/') ? '' : '/');
 };
 
 RedmineWysiwygEditor.prototype.setFormat = function(format) {
