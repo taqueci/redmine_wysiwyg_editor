@@ -371,15 +371,6 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   var callback = function(editor) {
     self._control = self._toolbarControls();
 
-    var form = self._jstEditorTextArea.closest('form');
-
-    form.off('submit.redmineWysiwygTableWidths');
-    form.on('submit.redmineWysiwygTableWidths', function() {
-      if (self._editor && self._mode === 'visual') {
-        self._setTextContent();
-      }
-    });
-
     editor.on('blur', function() {
       self._setTextContent();
       self._enableUpdatingToolbar(false);
@@ -479,20 +470,6 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     skin: 'oxide-dark'
   } : {};
 
-  var invalidStyles = (self._format === 'textile')
-    ? {
-        'table': 'height',
-        'tr': 'width height',
-        'th': 'height',
-        'td': 'height'
-      }
-    : {
-        'table': 'width height',
-        'tr': 'width height',
-        'th': 'width height',
-        'td': 'width height'
-      };
-
   tinymce.init($.extend({
     // Configurable parameters
     license_key: 'gpl',
@@ -508,7 +485,12 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     toolbar: toolbar,
     browser_spellcheck: true,
     convert_urls: false,
-    invalid_styles: invalidStyles,
+    invalid_styles: {
+      'table': 'width height',
+      'tr': 'width height',
+      'th': 'width height',
+      'td': 'width height'
+    },
     table_appearance_options: false,
     table_advtab: false,
     table_cell_advtab: false,
@@ -868,10 +850,10 @@ RedmineWysiwygEditor.prototype._setTextContent = function() {
 
   var html = self._editor.getContent();
 
-  if (html) {
-    var text = (self._format === 'textile')
-      ? self._toTextTextile(html)
-      : self._toTextMarkdown(html);
+  if(html) {
+    var text = (self._format === 'textile') ?
+        self._toTextTextile(html) :
+        self._toTextMarkdown(html);
 
     self._jstEditorTextArea.val(text);
   }
@@ -1013,44 +995,25 @@ RedmineWysiwygEditor.prototype._toTextTextile = function(content) {
       });
   };
 
-var styles = function(node) {
-  var attr = {};
+  var styles = function(node) {
+    var attr = {};
 
-  //Use only rounded values that are whole numbers
-  var STYLES_RE = /^(color|width|height|border|background|padding|margin|font|float)(-[a-z]+)*:\s*((\d+(?:\.\d+)?(?:%|px|em)?|#[0-9a-f]+|[a-z]+)\s*)+$/i;
+    // Defined in redcloth3.rb
+    var STYLES_RE = /^(color|width|height|border|background|padding|margin|font|float)(-[a-z]+)*:\s*((\d+%?|\d+px|\d+(\.\d+)?em|#[0-9a-f]+|[a-z]+)\s*)+$/i;
 
-var normalizeDimension = function(property, value) {
-  if (
-    (property !== 'width' && property !== 'height') ||
-    !/^-?\d+(?:\.\d+)?%$/.test(value)
-  ) {
-    return value;
-  }
+    // FIXME: Property cssText depends on the browser.
+    colorRgbToHex(node.style.cssText)
+      .split(/\s*;\s*/)
+      .filter(function(value) {
+        return STYLES_RE.test(value);
+      }).forEach(function(str) {
+        var val = str.split(/\s*:\s*/);
 
-  var number = parseFloat(value);
+        attr[val[0]] = val[1];
+      });
 
-  if (!isFinite(number)) {
-    return value;
-  }
-
-  return Math.round(number) + '%';
-};
-
-  colorRgbToHex(node.style.cssText)
-    .split(/\s*;\s*/)
-    .filter(function(value) {
-      return value && STYLES_RE.test(value);
-    })
-    .forEach(function(str) {
-      var val = str.split(/\s*:\s*/);
-      var property = val[0].toLowerCase();
-      var value = normalizeDimension(property, val[1]);
-
-      attr[property] = value;
-    });
-
-  return attr;
-};
+    return attr;
+  };
 
   var styleAttr = function(node) {
     var attr = styles(node);
@@ -1081,113 +1044,28 @@ var normalizeDimension = function(property, value) {
     return '!' + styleAttr(node) + self._imageUrl(node.src) + alt + '!';
   };
 
+  var tableCellOption = function(node) {
+    var attr = [];
 
-var tableCellOption = function(node) {
-  var attr = [];
+    if ((node.nodeName === 'TH') ||
+        (node.parentNode.parentNode.nodeName === 'THEAD')) attr.push('_');
 
-  if (
-    (node.nodeName === 'TH') ||
-    (node.parentNode &&
-      node.parentNode.parentNode &&
-      node.parentNode.parentNode.nodeName === 'THEAD')
-  ) {
-    attr.push('_.');
-  }
+    if (node.colSpan > 1) attr.push('\\' + node.colSpan);
+    if (node.rowSpan > 1) attr.push('/' + node.rowSpan);
 
-  if (node.colSpan > 1) {
-    attr.push('\\' + node.colSpan);
-  }
+    if (node.style.textAlign === 'center') attr.push('=');
+    else if (node.style.textAlign === 'right') attr.push('>');
+    else if (node.style.textAlign === 'left') attr.push('<');
 
-  if (node.rowSpan > 1) {
-    attr.push('/' + node.rowSpan);
-  }
+    if (node.style.verticalAlign === 'top') attr.push('^');
+    else if (node.style.verticalAlign === 'bottom') attr.push('~');
 
-  if (node.style.textAlign === 'center') {
-    attr.push('=');
-  } else if (node.style.textAlign === 'right') {
-    attr.push('>');
-  } else if (node.style.textAlign === 'left') {
-    attr.push('<');
-  }
+    var style = styleAttr(node);
 
-  if (node.style.verticalAlign === 'top') {
-    attr.push('^');
-  } else if (node.style.verticalAlign === 'bottom') {
-    attr.push('~');
-  }
+    if (style.length > 0) attr.push(style);
 
-  var logicalColumnIndex = function(cell) {
-    var index = 0;
-    var sibling = cell.previousElementSibling;
-
-    while (sibling) {
-      index += parseInt(
-        sibling.getAttribute('colspan') || '1',
-        10
-      );
-
-      sibling = sibling.previousElementSibling;
-    }
-
-    return index;
+    return (attr.length > 0) ? attr.join('') + '.' : '';
   };
-
-  var cellForColumn = function(row, columnIndex) {
-    var currentColumn = 0;
-
-    for (var i = 0; i < row.cells.length; i++) {
-      var cell = row.cells[i];
-      var colspan = parseInt(
-        cell.getAttribute('colspan') || '1',
-        10
-      );
-
-      if (
-        columnIndex >= currentColumn &&
-        columnIndex < currentColumn + colspan
-      ) {
-        return cell;
-      }
-
-      currentColumn += colspan;
-    }
-
-    return null;
-  };
-
-  var cellStyles = styles(node);
-  var table = node.closest ? node.closest('table') : null;
-
-  //Set the width for all columns so that the PDF export is well-formatted.
-  if (table && table.rows && table.rows.length > 0) {
-    var firstRow = table.rows[0];
-    var columnIndex = logicalColumnIndex(node);
-    var referenceCell = cellForColumn(firstRow, columnIndex);
-
-    if (referenceCell) {
-      var referenceStyles = styles(referenceCell);
-
-      if (referenceStyles.width) {
-        cellStyles.width = referenceStyles.width;
-      }
-    }
-  }
-
-  var style = Object.keys(cellStyles)
-    .sort()
-    .map(function(key) {
-      return key + ': ' + cellStyles[key] + ';';
-    })
-    .join(' ');
-
-  if (style.length > 0) {
-    attr.push('{' + style + '}');
-  }
-
-  return (attr.length > 0)
-    ? attr.join('') + '. '
-    : '';
-};
 
   var NT = '<notextile></notextile>';
 
