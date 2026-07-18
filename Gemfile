@@ -1,2 +1,2 @@
-gem 'tinymce-rails', '7.9.2'
-gem 'tinymce-rails-langs', '~> 7.20240507'
+gem 'tinymce-rails', '8.8.0'
+gem 'tinymce-rails-langs', '~> 8.20260708'
