@@ -736,7 +736,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
         .replace(/&#([1-9][0-9]*);/g, '&$$#$1;')
         .replace(/<code>\n?/g, '<code>')
         .replace(/<notextile>/g, '<$$notextile><notextile>')
-        .replace(/<\/notextile>/g, '</notextile></$$notextile>')
+        .replace(/<\/notextile>/g, '</notextile><$$/notextile>')
         .replace(/\[(\d+)\]/g, '[$$$1]')
         .replace(/^fn(\d+)\.\s/mg, 'fn$$$1. ');
     };
@@ -768,6 +768,8 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
   var htmlContent = function(data) {
     // FIXME: Lost if exists in PRE.
     return data
+      // Markers are HTML-escaped by Redmine >= 7.0
+      .replace(/&lt;(\$\/?notextile)&gt;/g, '<$1>')
       .replace(/\$(.)/g, '$1')
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
