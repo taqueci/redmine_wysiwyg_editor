@@ -11,6 +11,38 @@ suite('Redmine WYSIWYG Editor', function() {
         {name: '!&()+[].png', id: 4}]);
     });
 
+    var previewRoundTrip = function(response) {
+      var $ = require('jquery');
+      var ajax = $.ajax;
+      var result = {};
+
+      $.ajax = function(options) {
+        result.request = decodeURIComponent(options.data);
+        options.success(response);
+      };
+
+      rwe._jstEditorTextArea =
+        $('<textarea>').val('"link":http://example.com<notextile></notextile> #1');
+      rwe._editor = {setContent: function(html) { result.html = html; }};
+
+      try { rwe._setVisualContent(); } finally { $.ajax = ajax; }
+
+      return result;
+    };
+
+    test('Notextile markers in preview (raw)', function() {
+      var result = previewRoundTrip('<p><a href="http://example.com">link</a><$notextile><$/notextile> #1</p>');
+
+      assert.include(result.request, '<$notextile><notextile></notextile><$/notextile>');
+      assert.equal(result.html, '<p><a href="http://example.com">link</a><notextile></notextile> #1</p>');
+    });
+
+    test('Notextile markers in preview (HTML-escaped)', function() {
+      var result = previewRoundTrip('<p><a href="http://example.com">link</a>&lt;$notextile&gt;&lt;$/notextile&gt; #1</p>');
+
+      assert.equal(result.html, '<p><a href="http://example.com">link</a><notextile></notextile> #1</p>');
+    });
+
     test('Underline', function() {
       var content = '<span style="text-decoration: underline">Hello, world</span>';
       var expected = '+Hello, world+';

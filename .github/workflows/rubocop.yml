@@ -1,6 +1,12 @@
 name: Run RuboCop
 
-on: [push]
+on:
+  push:
+    paths:
+      - '**.rb'
+  pull_request:
+    paths:
+      - '**.rb'
 
 permissions:
   contents: read
