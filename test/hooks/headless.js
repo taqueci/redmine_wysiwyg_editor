@@ -14,6 +14,7 @@ if (typeof exports === 'object') {
 
       global.window = window;
       global.document = window.document;
+      global.DOMParser = window.DOMParser;
 
       global.MutationObserver = window.MutationObserver;
 
@@ -35,6 +36,7 @@ if (typeof exports === 'object') {
       delete global.chai;
       delete global.window;
       delete global.document;
+      delete global.DOMParser;
       delete global.tinymce;
       delete global.MutationObserver;
       delete global.RedmineWysiwygEditor;
