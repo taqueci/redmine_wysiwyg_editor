@@ -142,8 +142,8 @@ RedmineWysiwygEditor.prototype.setProject = function(id, key) {
   this._project = {id: id, key: key};
 };
 
-RedmineWysiwygEditor.prototype.setAutocomplete = function(issue, user) {
-  this._autocomplete = {issue: issue, user: user};
+RedmineWysiwygEditor.prototype.setAutocomplete = function(enabled) {
+  this._autocomplete = enabled;
 };
 
 RedmineWysiwygEditor.prototype.setTabModeSwitch = function(isTab) {
@@ -358,15 +358,12 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       'code { padding: .1em .2em; background-color: rgba(0,0,0,0.04); border-radius: 3px; }' +
       'pre code { padding: 0; background: none; }' +
       'blockquote { color: #6c757d; margin: .5em 0; padding: 0 1em; border-left: 2px solid rgba(0,0,0,0.15); }' +
-      'a.issue, a.version, a.attachment, a.changeset, a.source, a.project, a.user { padding: .1em .2em; background-color: rgba(0,0,0,0.6); border-radius: 3px; color: white; text-decoration: none; font-size: 80%; }' +
+      'a.issue, a.version, a.attachment, a.changeset, a.source, a.project, a.user, a.mention { padding: .1em .2em; background-color: rgba(0,0,0,0.6); border-radius: 3px; color: white; text-decoration: none; font-size: 80%; }' +
       'a.version::before { content: "version:"; }' +
       'a.attachment::before { content: "attachment:"; }' +
       'a.project::before { content: "project:"; }' +
       'a.user::before { content: "@"; }' +
-      'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }' +
-      'span#autocomplete { background-color: #eee; }' +
-      'span#autocomplete-delimiter { background-color: #ddd; }' +
-      '.rte-autocomplete img.gravatar { margin-right: 5px; }';
+      'a.wiki-page { padding: .1em .4em; background-color: rgba(0,0,0,0.05); border-radius: 3px; text-decoration: none; font-size: 95%; }';
 
   var callback = function(editor) {
     self._control = self._toolbarControls();
@@ -396,6 +393,8 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
   };
 
   var setup = function(editor) {
+    if (self._autocomplete) self._addAutocompleters(editor);
+
     self._editor = editor;
 
     editor.ui.registry.addButton('wiki', {
@@ -428,40 +427,6 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
       self._htmlTagAllowed ?
       'styles | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
       'styles | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
-
-  var autocompleteSetting = self._autocomplete ? {
-    delimiter: ['#', '@'],
-    source: function(query, process, delimiter) {
-      if (query.length === 0) return [];
-
-      if (delimiter === '#') {
-        $.getJSON(self._autocomplete.issue, {q: query}).done(process);
-      } else {
-        $.getJSON(self._autocomplete.user, {project: self._project.id, q: query})
-          .done(process);
-      }
-    },
-    queryBy: 'label',
-    renderDropdown: function() {
-      return '<ul class="rte-autocomplete mce-panel mce-floatpanel mce-menu mc-animate mce-menu-align mce-in" style="display: none"></ul>';
-    },
-    render: function(item) {
-      if (this.options.delimiter === '#') {
-        return '<li class="mce-menu-item mce-menu-item-normal">' + item.label + '</li>';
-      } else {
-        return '<li class="mce-menu-item mce-menu-item-normal">' +
-          item.avatar + ' ' + item.label + '</li>';
-      }
-    },
-    insert: function(item) {
-      if (this.options.delimiter === '#') {
-        return '<a class="issue">#' + item.id + '</a>&nbsp;';
-      } else {
-        return '<a class="user" href="/' + item.id + '" contenteditable="false">' +
-          item.label + '</a>&nbsp;';
-      }
-    }
-  } : {};
 
   var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
 
@@ -509,9 +474,94 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
     invalid_elements: 'fieldset,colgroup',
     object_resizing: isObjectResizable,
     image_dimensions: isObjectResizable,
-    paste_data_images: false,
-    mentions: autocompleteSetting
+    paste_data_images: false
   }));
+};
+
+// Same data sources and syntax as Redmine's own textarea autocomplete
+// (inlineAutoComplete in application-legacy.js).
+RedmineWysiwygEditor.prototype._addAutocompleters = function(editor) {
+  var dataSource = function(entity) {
+    var rm = window.rm;
+
+    return rm && rm.AutoComplete && rm.AutoComplete.dataSources &&
+      rm.AutoComplete.dataSources[entity];
+  };
+
+  var fetcher = function(entity, toItem) {
+    return function(pattern) {
+      var url = dataSource(entity);
+
+      if (!url) return Promise.resolve([]);
+
+      return new Promise(function(resolve) {
+        $.getJSON(url + encodeURIComponent(pattern))
+          .done(function(data) { resolve(data.map(toItem)); })
+          .fail(function() { resolve([]); });
+      });
+    };
+  };
+
+  var inserter = function(html) {
+    return function(api, rng, value) {
+      editor.selection.setRng(rng);
+      editor.insertContent(html(value) + '&nbsp;');
+      api.hide();
+    };
+  };
+
+  var issueItem = function(issue) {
+    return {type: 'autocompleteitem', value: issue.id.toString(),
+      text: issue.label};
+  };
+
+  var issueLink = function(hashes) {
+    return function(id) {
+      return '<a class="issue">' + hashes + id + '</a>';
+    };
+  };
+
+  // '##' must be registered first: TinyMCE tries triggers in registration
+  // order, and '#' alone does not fire for '##' (not at start of a word).
+  editor.ui.registry.addAutocompleter('redmine-issue-with-title', {
+    trigger: '##',
+    minChars: 1,
+    columns: 1,
+    fetch: fetcher('issues', issueItem),
+    onAction: inserter(issueLink('##'))
+  });
+
+  editor.ui.registry.addAutocompleter('redmine-issue', {
+    trigger: '#',
+    minChars: 1,
+    columns: 1,
+    fetch: fetcher('issues', issueItem),
+    onAction: inserter(issueLink('#'))
+  });
+
+  editor.ui.registry.addAutocompleter('redmine-user', {
+    trigger: '@',
+    minChars: 1,
+    columns: 1,
+    fetch: fetcher('users', function(user) {
+      return {type: 'autocompleteitem', value: user.login, text: user.name};
+    }),
+    onAction: inserter(RedmineWysiwygEditor._mentionHtml)
+  });
+};
+
+// Redmine renders '##123' as 'Tracker #123: Subject'; returns '##123' for
+// such a link text, null otherwise.
+RedmineWysiwygEditor._issueWithTitleRef = function(text) {
+  var m = /^#/.test(text) ? null : text.match(/^.*? (#\d+\S*?): /);
+
+  return m ? '#' + m[1] : null;
+};
+
+// Logins are limited to [a-z0-9_\-@.] by Redmine, so no escaping is needed.
+RedmineWysiwygEditor._mentionHtml = function(login) {
+  return '<a class="mention" data-login="' + login +
+    '" contenteditable="false">@' + login + '</a>';
 };
 
 RedmineWysiwygEditor._isImageFile = function(name) {
@@ -758,6 +808,7 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
       .replace(/forum:/g, 'forum$$:')
       .replace(/message:/g, 'message$$:')
       .replace(/news:/g, 'news$$:')
+      .replace(/(^|[\s([])@(?=[A-Za-z0-9_])/gm, '$1@$$')
       + '\n\n&nbsp;'; // Append NBSP to suppress 'Nothing to preview'
 
     params.push($.param(data));
@@ -770,6 +821,9 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     return data
       // Markers are HTML-escaped by Redmine >= 7.0
       .replace(/&lt;(\$\/?notextile)&gt;/g, '<$1>')
+      .replace(/@\$([A-Za-z0-9_\-@.]*[A-Za-z0-9_])/g, function(m, login) {
+        return RedmineWysiwygEditor._mentionHtml(login);
+      })
       .replace(/\$(.)/g, '$1')
       .replace(/<legend>.+<\/legend>/g, '')
       .replace(/<a name=.+?><\/a>/g, '')
@@ -781,7 +835,16 @@ RedmineWysiwygEditor.prototype._setVisualContent = function() {
     url: self._previewUrl,
     data: previewData(self._jstEditorTextArea),
     success: function(data) {
-      self._editor.setContent(htmlContent(data));
+      var doc = new DOMParser().parseFromString(htmlContent(data), 'text/html');
+
+      // Keep '##123' as typed instead of 'Tracker #123: Subject'
+      $(doc.body).find('a.issue').each(function() {
+        var ref = RedmineWysiwygEditor._issueWithTitleRef(this.textContent);
+
+        if (ref) this.textContent = ref;
+      });
+
+      self._editor.setContent(doc.body.innerHTML);
     }
   });
 };
@@ -834,13 +897,17 @@ RedmineWysiwygEditor.prototype._gluableContent = function(content, node, glue) {
   var p = node.previousSibling;
   var n = node.nextSibling;
 
-  if (p && (((p.nodeType === TEXT_NODE) && /[\S\u00a0]$/.test(p.nodeValue)) ||
+  // No glue where Redmine's link syntax allows it (parse_redmine_links):
+  // after '(', ',', '-', '[' or '>', and before punctuation that is not
+  // followed by a word character, e.g. '(#123), #123.'
+  if (p && (((p.nodeType === TEXT_NODE) && /[^\s(,\-[>]$|\u00a0$/.test(p.nodeValue)) ||
             ((p.nodeType === ELEMENT_NODE) && (p.nodeName !== 'BR'))))
     c.push(glue);
 
   c.push(content);
 
-  if (n && (((n.nodeType === TEXT_NODE) && /^[\S\u00a0]/.test(n.nodeValue)) ||
+  if (n && (((n.nodeType === TEXT_NODE) && /^[\S\u00a0]/.test(n.nodeValue) &&
+             !/^[!-/:-@[-`{-~](?![A-Za-z0-9_/])/.test(n.nodeValue)) ||
             ((n.nodeType === ELEMENT_NODE) && (n.nodeName !== 'BR'))))
       c.push(glue);
 
@@ -873,7 +940,9 @@ RedmineWysiwygEditor._resorceLinkRule = [
       return (node.nodeName === 'A') && node.classList.contains('issue');
     },
     replacement: function(content, node) {
-      return gluableContent(content, node, ' ');
+      var ref = RedmineWysiwygEditor._issueWithTitleRef(content);
+
+      return gluableContent(ref || content, node, ' ');
     }
   }, {
     key: 'version',
@@ -934,6 +1003,14 @@ RedmineWysiwygEditor._resorceLinkRule = [
       var m = node.getAttribute('href').match(/\/(\d+)$/);
 
       return gluableContent('user#' + m[1], node, ' ');
+    }
+  }, {
+    key: 'mention',
+    filter: function(node) {
+      return (node.nodeName === 'A') && node.classList.contains('mention');
+    },
+    replacement: function(content, node) {
+      return gluableContent('@' + node.getAttribute('data-login'), node, ' ');
     }
   }, {
     key: 'note',
