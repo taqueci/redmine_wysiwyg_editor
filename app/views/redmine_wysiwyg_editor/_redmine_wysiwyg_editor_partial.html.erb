@@ -131,21 +131,21 @@ function initRedmineWysiwygEditor(element) {
     var replace = ISSUE_TEMPLATE.prototype.replaceTemplateValue;
 
     ISSUE_TEMPLATE.prototype.replaceTemplateValue = function(obj) {
-      replace.call(element, obj);
+      replace.call(this, obj);
       rwe.updateVisualContent();
     };
 
     var erase = ISSUE_TEMPLATE.prototype.eraseSubjectAndDescription;
 
     ISSUE_TEMPLATE.prototype.eraseSubjectAndDescription = function() {
-      erase.call(element);
+      erase.call(this);
       rwe.updateVisualContent();
     };
 
     var revert = ISSUE_TEMPLATE.prototype.revertAppliedTemplate;
 
     ISSUE_TEMPLATE.prototype.revertAppliedTemplate = function() {
-      revert.call(element);
+      revert.call(this);
       rwe.updateVisualContent();
     };
   };
