@@ -573,4 +573,44 @@ suite('Redmine WYSIWYG Editor', function() {
       assert.equal(rwe._toTextMarkdown(content), expected);
     });
   });
+
+  suite('Extensions', function() {
+    teardown(function() {
+      delete window.RedmineWysiwygEditorExtensions;
+    });
+
+    test('No extension', function() {
+      assert.deepEqual(RedmineWysiwygEditor._extensions(), []);
+      assert.equal(RedmineWysiwygEditor._extendToolbar('bold | link', []), 'bold | link');
+    });
+
+    test('Toolbar items of extensions', function() {
+      window.RedmineWysiwygEditorExtensions = [
+        {toolbar: 'foo bar'}, {toolbar: ' '}, {setup: function() {}}, {toolbar: 'baz'}
+      ];
+      var extensions = RedmineWysiwygEditor._extensions();
+
+      assert.equal(RedmineWysiwygEditor._extendToolbar('bold | link', extensions),
+                   'bold | link | foo bar | baz');
+    });
+
+    test('Setup of extensions', function() {
+      var editor = {};
+      var called = [];
+      var error = console.error;
+      console.error = function() {};
+
+      try {
+        RedmineWysiwygEditor._setupExtensions(editor, [
+          {setup: function() { throw new Error('broken'); }},
+          {toolbar: 'foo'},
+          {setup: function(e) { called.push(e); }}
+        ]);
+      } finally {
+        console.error = error;
+      }
+
+      assert.deepEqual(called, [editor]);
+    });
+  });
 });

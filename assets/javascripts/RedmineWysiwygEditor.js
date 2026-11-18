@@ -420,13 +420,19 @@ RedmineWysiwygEditor.prototype._initTinymce = function(setting) {
         editor.execCommand('mceToggleFormat', false, 'code');
       }
     });
+
+    RedmineWysiwygEditor._setupExtensions(editor, extensions);
   };
+
+  var extensions = RedmineWysiwygEditor._extensions();
 
   var toolbar = (self._format === 'textile') ?
       'styles | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | indent outdent | hr | table | undo redo | fullscreen' :
       self._htmlTagAllowed ?
       'styles | bold italic underline strikethrough code forecolor backcolor removeformat | link image codesample wiki attachment | bullist numlist blockquote | alignleft aligncenter alignright | hr | table | undo redo | fullscreen' :
       'styles | bold italic underline strikethrough code removeformat | link image codesample wiki attachment | bullist numlist blockquote | hr | table | undo redo | fullscreen';
+
+  toolbar = RedmineWysiwygEditor._extendToolbar(toolbar, extensions);
 
   var isObjectResizable = (self._format === 'textile') || self._htmlTagAllowed;
 
@@ -562,6 +568,42 @@ RedmineWysiwygEditor._issueWithTitleRef = function(text) {
 RedmineWysiwygEditor._mentionHtml = function(login) {
   return '<a class="mention" data-login="' + login +
     '" contenteditable="false">@' + login + '</a>';
+};
+
+// Other plugins add toolbar buttons by pushing an extension to this list,
+// whether their script is loaded before or after this one:
+//
+//   (window.RedmineWysiwygEditorExtensions =
+//     window.RedmineWysiwygEditorExtensions || []).push({
+//     toolbar: 'my_button',
+//     setup: function(editor) { editor.ui.registry.addButton('my_button', {...}); }
+//   });
+RedmineWysiwygEditor._extensions = function() {
+  var list = (typeof window !== 'undefined') ?
+      window.RedmineWysiwygEditorExtensions : null;
+
+  return Array.isArray(list) ? list : [];
+};
+
+RedmineWysiwygEditor._extendToolbar = function(toolbar, extensions) {
+  var items = extensions.map(function(ext) {
+    return (typeof ext.toolbar === 'string') ? ext.toolbar.trim() : '';
+  }).filter(function(item) { return item !== ''; });
+
+  return items.length ? toolbar + ' | ' + items.join(' | ') : toolbar;
+};
+
+// A failing extension must not prevent the editor from starting.
+RedmineWysiwygEditor._setupExtensions = function(editor, extensions) {
+  extensions.forEach(function(ext) {
+    if (typeof ext.setup !== 'function') return;
+
+    try {
+      ext.setup(editor);
+    } catch (e) {
+      console.error('redmine_wysiwyg_editor: extension setup failed', e);
+    }
+  });
 };
 
 RedmineWysiwygEditor._isImageFile = function(name) {
