@@ -70,6 +70,27 @@ e.g. under ubuntu the plugin_assets is not automatically provided in the apache 
  </Directory>
 ```
 
+## Adding toolbar buttons from another plugin
+
+Push an extension to `window.RedmineWysiwygEditorExtensions`,
+before or after this plugin's script is loaded:
+
+```js
+(window.RedmineWysiwygEditorExtensions =
+  window.RedmineWysiwygEditorExtensions || []).push({
+  toolbar: 'my_button',
+  setup: function(editor) {
+    editor.ui.registry.addButton('my_button', {
+      text: 'My button',
+      onAction: function() { editor.insertContent('Hello'); }
+    });
+  }
+});
+```
+
+`toolbar` is appended to the toolbar as a new group,
+and `setup` receives the TinyMCE editor before it is rendered.
+
 ## License
 
 This plugin is released under the terms of GNU General Public License,
